@@ -31,3 +31,8 @@ Thumbs.db
 
 # Konfigurasi preview lokal (path Laragon per mesin)
 /.claude/launch.json
+
+# Dari .gitignore awal repo GitHub
+npm-debug.log
+yarn-error.log
+/.vagrant
