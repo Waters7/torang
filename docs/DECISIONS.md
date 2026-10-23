@@ -189,3 +189,48 @@ fase terkait.
 - `staff.employee_id` (opsional, unik) menghubungkan petugas ke pegawai; tenaga non-PNS tetap bisa
   dicatat sebagai petugas tanpa data pegawai.
 - Penanda tangan laporan UKOM (Fase 6) akan memakai master pegawai yang sama.
+
+## Fase 3 — Mesin Monitoring (23 Oktober 2026)
+
+### Status & insiden
+- Gagal di bawah batas gagal berturut-turut dicatat sebagai **Lambat** (status cek dan status monitor),
+  dengan keterangan "Gagal n/N: …", agar gangguan sesaat tidak langsung merah di bar riwayat & uptime.
+  Offline baru ditetapkan setelah N gagal; selama sudah Offline, gagal berikutnya tetap Offline.
+- Insiden dimulai dari waktu cek gagal pertama pada rangkaian itu, bukan saat ambang tercapai.
+- Uptime = (Online + Lambat) / total cek.
+- Monitor nonaktif otomatis "Dijeda"; saat diaktifkan lagi mulai dari "Tidak diketahui".
+- `monitor_incidents` ditambah `down_notified_at`/`up_notified_at` (tidak ada di §12) untuk cooldown:
+  notifikasi Offline ditahan bila notifikasi Offline monitor yang sama terkirim dalam masa cooldown,
+  dan notifikasi pulih hanya dikirim bila notifikasi Offline insiden tersebut terkirim.
+- `monitors` ditambah `last_error` dan `degraded_notified_at` (notifikasi Lambat sekali per periode Lambat).
+
+### Pengecekan
+- Ambang Lambat global berbeda per grup: jaringan `monitoring.latency_warning_ms` (150 ms),
+  aplikasi `monitoring.response_warning_ms` (2000 ms); `latency_warning_ms` per monitor menimpa keduanya.
+- HTTP tidak mengikuti redirect agar 301/302 dinilai sesuai daftar kode normal (default 200, 301, 302).
+- Host divalidasi `MonitorHost` (IP via FILTER_VALIDATE_IP atau regex hostname; menolak spasi, karakter shell,
+  awalan "-") di form dan diulang di checker sebelum `ping` dijalankan.
+- `CheckMonitorJob` unik per monitor (ShouldBeUnique, 5 menit) supaya tidak menumpuk saat queue lambat.
+- Peringatan SSL: satu kali per ambang per tanggal kedaluwarsa (`reminder_logs` key `ssl:{tanggal}:{ambang}`),
+  sehingga perpanjangan sertifikat otomatis memulai siklus baru.
+- Grafik 24 jam memakai rata-rata per jam dari `monitor_checks`; 7/30 hari dari `monitor_daily_stats`.
+- Widget grafik dan riwayat insiden di halaman detail tidak lazy-load (isi utama halaman).
+
+### Notifikasi
+- Email monitoring ke PIC monitor; bila PIC kosong, ke semua pengguna aktif dengan `monitors.manage`.
+- Kanal ditentukan `NotificationChannels`: aktif di Pengaturan **dan** kredensial ada di `.env`.
+  Email ke pemohon pengajuan tetap selalu dikirim.
+- Kanal WhatsApp: custom channel `whatsapp`, gateway HTTP generik (POST JSON `target` + `message`,
+  header `Authorization: <token>`), nomor dinormalkan ke 62…; driver `log` untuk lokal. Dipakai untuk pemohon
+  pengajuan dan petugas jaga. Format bisa disesuaikan bila gateway tertentu (Fonnte, Wablas, dll.) dipilih.
+- Pengingat jadwal jaga sekarang tercatat sekali per petugas per tanggal (channel `all`), apa pun kanalnya.
+
+### Akses
+- Monitor: lihat `monitors.view` (kepala unit, petugas IT); kelola & cek sekarang `monitors.manage` (petugas IT).
+- Insiden: hanya catatan yang bisa diubah; dibuat/ditutup oleh mesin.
+- Pengaturan monitoring: `monitoring.settings` (super admin).
+
+### Lingkungan lokal
+- `composer run dev` menjalankan `queue:listen --queue=monitoring,default` dan `schedule:work`.
+  Monitor contoh memakai IP dokumentasi/URL example.ac.id, jadi bila scheduler jalan semuanya akan menjadi
+  Offline dalam beberapa menit — wajar untuk lokal.

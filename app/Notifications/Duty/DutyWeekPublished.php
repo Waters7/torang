@@ -14,14 +14,17 @@ class DutyWeekPublished extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public DutyWeek $week, public bool $isRevision = false) {}
+    /**
+     * @param  list<string>  $channels  Ditentukan DutyNotifier (telegram dan/atau whatsapp).
+     */
+    public function __construct(public DutyWeek $week, public bool $isRevision = false, public array $channels = ['telegram']) {}
 
     /**
      * @return list<string>
      */
     public function via(object $notifiable): array
     {
-        return ['telegram'];
+        return $this->channels;
     }
 
     /**
@@ -29,26 +32,49 @@ class DutyWeekPublished extends Notification implements ShouldQueue
      */
     public function toTelegram(object $notifiable): TelegramMessage
     {
+        $message = TelegramMessage::create()->line('*'.$this->title().'*');
+
+        foreach ($this->lines($notifiable) as $line) {
+            $message->escapedLine($line);
+        }
+
+        return $message;
+    }
+
+    /**
+     * @param  Staff  $notifiable
+     */
+    public function toWhatsApp(object $notifiable): string
+    {
+        return $this->title()."\n".implode("\n", $this->lines($notifiable));
+    }
+
+    private function title(): string
+    {
+        return $this->isRevision ? 'Revisi jadwal jaga CBT Center' : 'Jadwal jaga CBT Center terbit';
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function lines(Staff $staff): array
+    {
         $assignments = $this->week->assignments()
             ->with(['shift', 'lab'])
-            ->where('staff_id', $notifiable->id)
+            ->where('staff_id', $staff->id)
             ->orderBy('date')
             ->get()
             ->sortBy(fn (DutyAssignment $assignment): string => $assignment->date->toDateString().$assignment->shift->start_time);
 
-        $message = TelegramMessage::create()
-            ->line($this->isRevision ? '*Revisi jadwal jaga CBT Center*' : '*Jadwal jaga CBT Center terbit*')
-            ->escapedLine("Minggu {$this->week->label()} — tugas {$notifiable->name}:");
-
-        foreach ($assignments as $assignment) {
-            $message->escapedLine(sprintf(
+        return [
+            "Minggu {$this->week->label()} — tugas {$staff->name}:",
+            ...$assignments->map(fn (DutyAssignment $assignment): string => sprintf(
                 '• %s · %s · %s',
                 $assignment->date->locale('id')->translatedFormat('D, j M'),
                 $assignment->shift->label(),
                 $assignment->coverageLabel(),
-            ));
-        }
-
-        return $message->escapedLine('Lihat juga menu "Jadwal Saya" di panel TORANG.');
+            ))->values()->all(),
+            'Lihat juga menu "Jadwal Saya" di panel TORANG.',
+        ];
     }
 }

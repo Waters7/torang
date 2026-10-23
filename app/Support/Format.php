@@ -22,6 +22,12 @@ final class Format
         return self::carbon($date)->translatedFormat('l, j F Y');
     }
 
+    /** "Oktober 2026" */
+    public static function monthYear(CarbonInterface|string $date): string
+    {
+        return self::carbon($date)->translatedFormat('F Y');
+    }
+
     /** "08:00–10:00 WITA" */
     public static function timeRange(string $start, string $end): string
     {

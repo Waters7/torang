@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             $this->call([
                 SampleBookingSeeder::class,
                 SampleDutySeeder::class,
+                SampleMonitorSeeder::class,
             ]);
         }
     }

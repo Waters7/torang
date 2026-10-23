@@ -14,3 +14,9 @@ Schedule::command('bookings:send-reminders')->dailyAt('16:00')->withoutOverlappi
 
 // Jadwal petugas
 Schedule::command('duty:send-reminders')->dailyAt('16:00')->withoutOverlapping();
+
+// Monitoring jaringan & aplikasi
+Schedule::command('monitors:dispatch')->everyMinute()->withoutOverlapping();
+Schedule::command('monitors:check-ssl')->dailyAt('07:00')->withoutOverlapping();
+Schedule::command('monitors:aggregate')->dailyAt('00:10')->withoutOverlapping();
+Schedule::command('model:prune')->dailyAt('01:00')->withoutOverlapping();

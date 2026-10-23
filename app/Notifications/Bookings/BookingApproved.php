@@ -3,6 +3,7 @@
 namespace App\Notifications\Bookings;
 
 use App\Models\Booking;
+use App\Notifications\Concerns\ViaOnDemandRoutes;
 use App\Support\Format;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,17 +12,9 @@ use Illuminate\Notifications\Notification;
 
 class BookingApproved extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ViaOnDemandRoutes;
 
     public function __construct(public Booking $booking) {}
-
-    /**
-     * @return list<string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail'];
-    }
 
     public function toMail(object $notifiable): MailMessage
     {
@@ -35,5 +28,14 @@ class BookingApproved extends Notification implements ShouldQueue
             ->line('Petugas IT akan mendampingi sesuai jadwal jaga. Mohon hadir 30 menit sebelum kegiatan untuk persiapan.')
             ->action('Lihat status pengajuan', route('bookings.status', ['kode' => $booking->code]))
             ->salutation('Salam, UPT TIK');
+    }
+
+    public function toWhatsApp(object $notifiable): string
+    {
+        $booking = $this->booking->loadMissing('lab');
+
+        return "Pengajuan {$booking->code} DISETUJUI.\n{$booking->lab->name} · \"{$booking->activity_name}\"\n"
+            .Format::dayDate($booking->date).', '.Format::timeRange($booking->start_time, $booking->end_time)
+            ."\nMohon hadir 30 menit sebelum kegiatan.\n— UPT TIK";
     }
 }

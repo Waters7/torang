@@ -44,7 +44,9 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    // Kanal WhatsApp hanya aktif bila "whatsapp" dicentang di Pengaturan notifikasi.
     'whatsapp' => [
+        'driver' => env('WHATSAPP_DRIVER', 'http'), // http | log
         'url' => env('WHATSAPP_GATEWAY_URL'),
         'token' => env('WHATSAPP_GATEWAY_TOKEN'),
     ],

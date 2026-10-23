@@ -15,14 +15,17 @@ class DutyReminder extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public string $date) {}
+    /**
+     * @param  list<string>  $channels  Ditentukan DutyNotifier (telegram dan/atau whatsapp).
+     */
+    public function __construct(public string $date, public array $channels = ['telegram']) {}
 
     /**
      * @return list<string>
      */
     public function via(object $notifiable): array
     {
-        return ['telegram'];
+        return $this->channels;
     }
 
     /**
@@ -30,21 +33,38 @@ class DutyReminder extends Notification implements ShouldQueue
      */
     public function toTelegram(object $notifiable): TelegramMessage
     {
-        $assignments = $notifiable->assignments()
+        $message = TelegramMessage::create()->line('*Pengingat tugas jaga besok*');
+
+        foreach ($this->lines($notifiable) as $line) {
+            $message->escapedLine($line);
+        }
+
+        return $message;
+    }
+
+    /**
+     * @param  Staff  $notifiable
+     */
+    public function toWhatsApp(object $notifiable): string
+    {
+        return "Pengingat tugas jaga besok\n".implode("\n", $this->lines($notifiable));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function lines(Staff $staff): array
+    {
+        $assignments = $staff->assignments()
             ->with(['shift', 'lab'])
             ->whereDate('date', $this->date)
             ->whereHas('week', fn (Builder $query) => $query->published())
             ->get()
             ->sortBy(fn (DutyAssignment $assignment): string => $assignment->shift->start_time);
 
-        $message = TelegramMessage::create()
-            ->line('*Pengingat tugas jaga besok*')
-            ->escapedLine(Format::dayDate($this->date).':');
-
-        foreach ($assignments as $assignment) {
-            $message->escapedLine("• {$assignment->shift->label()} · {$assignment->coverageLabel()}");
-        }
-
-        return $message;
+        return [
+            Format::dayDate($this->date).':',
+            ...$assignments->map(fn (DutyAssignment $assignment): string => "• {$assignment->shift->label()} · {$assignment->coverageLabel()}")->values()->all(),
+        ];
     }
 }

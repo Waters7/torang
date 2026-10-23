@@ -3,7 +3,7 @@
 - [x] Fase 0 — Fondasi (Laravel, Filament, Inertia + React + TS, brand, role)
 - [x] Fase 1 — Lab CBT & Pengajuan
 - [x] Fase 2 — Jadwal Petugas
-- [ ] Fase 3 — Mesin Monitoring
+- [x] Fase 3 — Mesin Monitoring
 - [ ] Fase 4 — Beranda & Status Publik (React)
 - [ ] Fase 5 — WiFi & Pengingat Hosting
 - [ ] Fase 6 — Laporan UKOM (SPTJM)
@@ -65,3 +65,21 @@
   pemohon dari pegawai. Form publik tidak memakai data pegawai.
 - Verifikasi: `php artisan test` 172 lulus · DUK Agustus 2026 asli diimpor ke database lokal
   (195 pegawai, 194 aktif, 1 pensiun) — file dan data asli tidak masuk repo.
+
+### Fase 3 — selesai 23 Oktober 2026
+- Monitor jaringan (ICMP/TCP) dan aplikasi (HTTP + SSL) dengan pengaturan per monitor atau global.
+- Mesin: `monitors:dispatch` tiap menit → `CheckMonitorJob` di queue `monitoring`; checker ICMP
+  (Symfony Process, argumen array, Linux/Windows), TCP, HTTP (kode normal, kata kunci, tanpa ikut redirect),
+  SSL harian (peringatan H-30/14/7).
+- State machine: gagal di bawah batas = Lambat ("Gagal 1/3"), Offline setelah N gagal → insiden dibuka;
+  pulih → insiden ditutup + durasi. Notifikasi hanya saat transisi (grup Telegram + email PIC/petugas),
+  cooldown, notifikasi Lambat > N menit opsional.
+- `monitors:aggregate` (00:10) → statistik harian permanen; `model:prune` (01:00) → retensi detail cek.
+- Panel Monitoring: Jaringan, Aplikasi (detail: cek sekarang, grafik 24 jam/7/30 hari, insiden, uptime bulanan),
+  Insiden (catatan), Pengaturan (monitoring & kanal notifikasi).
+- Kanal WhatsApp (gateway HTTP generik / driver log) untuk pemohon pengajuan dan petugas jaga; nonaktif default.
+- `composer run dev` kini menjalankan worker `monitoring,default` dan `schedule:work`.
+- Seeder contoh: 10 router jurusan/unit (IP dokumentasi) + 7 aplikasi, riwayat sintetis 7 hari.
+- Verifikasi: `php artisan test` 234 lulus · `pint --test` bersih · ping sungguhan di Windows
+  (127.0.0.1 Online, IP dokumentasi & host tak dikenal Offline) · jalur queue end-to-end · halaman admin dicek di browser.
+- Ditunda: ekspor uptime bulanan untuk SLA ISP (Excel/PDF) → Fase 7.

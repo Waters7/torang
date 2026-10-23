@@ -8,7 +8,8 @@ use App\Services\Duty\DutyNotifier;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Pengingat H-1 ke petugas yang bertugas besok (jadwal terbit). Tercatat di reminder_logs agar tidak ganda.
+ * Pengingat H-1 ke petugas yang bertugas besok (jadwal terbit), lewat Telegram dan/atau WhatsApp.
+ * Tercatat di reminder_logs agar tidak ganda.
  */
 class SendDutyReminders
 {
@@ -16,7 +17,7 @@ class SendDutyReminders
 
     public function handle(): int
     {
-        if (! $this->notifier->telegramEnabled()) {
+        if (! $this->notifier->anyChannelEnabled()) {
             return 0;
         }
 
@@ -34,14 +35,15 @@ class SendDutyReminders
         Staff::query()
             ->whereKey($staffIds)
             ->active()
-            ->whereNotNull('telegram_chat_id')
-            ->whereDoesntHave('reminderLogs', fn (Builder $query) => $query->where('reminder_key', $key)->where('channel', 'telegram'))
+            ->whereDoesntHave('reminderLogs', fn (Builder $query) => $query->where('reminder_key', $key))
             ->each(function (Staff $staff) use ($tomorrow, $key, &$sent): void {
-                $this->notifier->reminder($staff, $tomorrow);
+                if (! $this->notifier->reminder($staff, $tomorrow)) {
+                    return;
+                }
 
                 $staff->reminderLogs()->create([
                     'reminder_key' => $key,
-                    'channel' => 'telegram',
+                    'channel' => 'all',
                     'sent_at' => now(),
                 ]);
 

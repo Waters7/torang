@@ -81,6 +81,11 @@ class Staff extends Model
         return $this->telegram_chat_id ?: null;
     }
 
+    public function routeNotificationForWhatsapp(): ?string
+    {
+        return $this->phone ?: null;
+    }
+
     /**
      * @param  Builder<Staff>  $query
      */

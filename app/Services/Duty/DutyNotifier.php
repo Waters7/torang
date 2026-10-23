@@ -6,20 +6,19 @@ use App\Models\DutyWeek;
 use App\Models\Staff;
 use App\Notifications\Duty\DutyReminder;
 use App\Notifications\Duty\DutyWeekPublished;
-use App\Services\SettingsService;
+use App\Services\Notifications\NotificationChannels;
 
 /**
- * Notifikasi jadwal jaga ke petugas lewat Telegram (kanal WhatsApp menyusul).
- * Petugas tanpa Telegram chat ID dilewati.
+ * Notifikasi jadwal jaga ke petugas lewat Telegram (chat ID) dan/atau WhatsApp (nomor WA),
+ * sesuai kanal yang aktif. Petugas tanpa keduanya dilewati.
  */
 class DutyNotifier
 {
-    public function __construct(private readonly SettingsService $settings) {}
+    public function __construct(private readonly NotificationChannels $channels) {}
 
-    public function telegramEnabled(): bool
+    public function anyChannelEnabled(): bool
     {
-        return filled(config('services.telegram-bot-api.token'))
-            && in_array('telegram', (array) $this->settings->get('notifications.channels', []), true);
+        return $this->channels->enabled(NotificationChannels::TELEGRAM) || $this->channels->enabled(NotificationChannels::WHATSAPP);
     }
 
     /**
@@ -27,24 +26,37 @@ class DutyNotifier
      */
     public function published(DutyWeek $week, bool $isRevision): int
     {
-        if (! $this->telegramEnabled()) {
-            return 0;
-        }
+        $notified = 0;
 
-        $staff = Staff::query()
+        Staff::query()
             ->whereHas('assignments', fn ($query) => $query->where('duty_week_id', $week->id))
-            ->whereNotNull('telegram_chat_id')
-            ->get();
+            ->get()
+            ->each(function (Staff $staff) use ($week, $isRevision, &$notified): void {
+                if ($channels = $this->channelsFor($staff)) {
+                    $staff->notify(new DutyWeekPublished($week, $isRevision, $channels));
+                    $notified++;
+                }
+            });
 
-        foreach ($staff as $member) {
-            $member->notify(new DutyWeekPublished($week, $isRevision));
-        }
-
-        return $staff->count();
+        return $notified;
     }
 
-    public function reminder(Staff $staff, string $date): void
+    public function reminder(Staff $staff, string $date): bool
     {
-        $staff->notify(new DutyReminder($date));
+        if (! $channels = $this->channelsFor($staff)) {
+            return false;
+        }
+
+        $staff->notify(new DutyReminder($date, $channels));
+
+        return true;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function channelsFor(Staff $staff): array
+    {
+        return $this->channels->personalChannels($staff->telegram_chat_id, $staff->phone);
     }
 }
