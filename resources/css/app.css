@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/* Token brand TORANG — SPEC §11 */
+@theme {
+    --font-sans: 'Sora', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Palet logo */
+    --color-teal: #04b6a3;
+    --color-lime: #d4e022;
+    --color-cyan: #1bbbcb;
+    --color-green: #42b97c;
+    --color-teal-text: #08796c;
+    --color-ink: #0f2e2b;
+    --color-ink-dark: #0b1f1d;
+    --color-muted: #3f5a56;
+    --color-muted-soft: #5a6e6c;
+    --color-surface: #f4f8f7;
+    --color-border: #dcedea;
+    --color-faint: #e3f5f2;
+
+    /* Status: titik, latar pill, teks pill */
+    --color-online: #42b97c;
+    --color-online-bg: #e8f7f3;
+    --color-online-text: #1e6b45;
+    --color-slow: #e9a23b;
+    --color-slow-bg: #fff4e0;
+    --color-slow-text: #8a5a00;
+    --color-offline: #d64545;
+    --color-offline-bg: #fdecec;
+    --color-offline-text: #b42318;
+    --color-available: #1bbbcb;
+    --color-available-bg: #e4f6f9;
+    --color-available-text: #0b5c66;
+    --color-nodata: #c9d6d4;
+    --color-nodata-bg: #eef3f2;
+    --color-nodata-text: #4f6764;
+
+    /* Sudut */
+    --radius-card: 16px;
+    --radius-control: 10px;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-color: var(--color-surface);
+        color: var(--color-ink);
+        font-family: var(--font-sans);
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-teal);
+        outline-offset: 2px;
+    }
+}
+
+/* Label kecil mono kapital, mis. "MONITORING · PING TIAP 1 MENIT" */
+@utility eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-teal-text);
+}

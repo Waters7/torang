@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="TORANG">
+  <rect width="128" height="128" rx="30" fill="#0B1F1D"/>
+  <g transform="translate(22 22) scale(0.875)">
+    <rect x="0"  y="0"  width="26" height="26" rx="8" fill="#1BBBCB"/>
+    <rect x="35" y="0"  width="26" height="26" rx="8" fill="#04B6A3"/>
+    <circle cx="83" cy="13" r="13" fill="#D4E022"/>
+    <rect x="35" y="35" width="26" height="26" rx="8" fill="#04B6A3"/>
+    <rect x="35" y="70" width="26" height="26" rx="8" fill="#42B97C"/>
+  </g>
+</svg>
