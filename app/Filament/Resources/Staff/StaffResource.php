@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Staff;
 
 use App\Filament\NavigationGroup;
 use App\Filament\Resources\Staff\Pages\ManageStaff;
+use App\Models\Employee;
 use App\Models\Staff;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
@@ -12,12 +13,14 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class StaffResource extends Resource
@@ -44,6 +47,22 @@ class StaffResource extends Resource
     {
         return $schema
             ->components([
+                Select::make('employee_id')
+                    ->label('Pegawai (dari DUK)')
+                    ->helperText('Opsional. Mengisi nama, NIP, dan jabatan otomatis. Kosongkan untuk tenaga non-PNS.')
+                    ->relationship('employee', 'name', fn (Builder $query) => $query->active())
+                    ->getOptionLabelFromRecordUsing(fn (Employee $record): string => $record->optionLabel())
+                    ->searchable(['name', 'nip'])
+                    ->unique(ignoreRecord: true)
+                    ->live()
+                    ->afterStateUpdated(function (?string $state, Set $set): void {
+                        if ($employee = Employee::find($state)) {
+                            $set('name', $employee->name);
+                            $set('nip', $employee->nip);
+                            $set('position', $employee->position);
+                        }
+                    })
+                    ->columnSpanFull(),
                 TextInput::make('name')
                     ->label('Nama')
                     ->required()

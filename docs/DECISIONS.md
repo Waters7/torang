@@ -167,3 +167,25 @@ fase terkait.
 ### Hak akses
 - Grid & jadwal: `duty.manage`; terbit/kembalikan ke draf: `duty.publish`; master petugas & shift:
   `staff.manage`; Jadwal Saya: `duty.view-own` (kepala unit, petugas IT, pengelola CBT).
+
+## Tambahan — Master Pegawai dari DUK (23 Oktober 2026)
+
+- Fitur di luar SPEC, disetujui pengguna sebelum Fase 3.
+- Tabel `employees` menyimpan **minimal**: NIP (unik, 18 digit), nama, golongan, jabatan, jabatan
+  struktural, penempatan + `department_id`, email Kemenkes, status aktif, periode DUK terakhir.
+  NIK, tempat/tanggal lahir, telepon, dan email pribadi sengaja tidak disimpan (tidak dibutuhkan TORANG).
+- `DukImporter` membaca hanya sheet "LAPORAN DUK" dengan pembaca Xlsx eksplisit. Kolom dikenali dari teks
+  header dua baris ("Nama", "NIP Baru", sub-header "Golongan", "Jabatan", "Jabatan Struktural…",
+  "Penempatan…", sub-header "e-mail Kemenkes"), bukan posisi kolom.
+- Penempatan DUK dipetakan ke departemen dengan mencocokkan nama/nama singkat (tanpa awalan "Jurusan",
+  "Direktorat / Unit" → Direktorat). Penempatan "Pensiun" → nonaktif.
+- Impor ulang: upsert berdasarkan NIP; pegawai aktif yang tidak ada di file terbaru dinonaktifkan
+  (tidak dihapus). Baris dengan NIP tidak 18 digit atau ganda dilewati dan dilaporkan.
+- Master pegawai hanya baca di panel (permission baru `employees.manage`: super_admin, kepala_unit);
+  perubahan data lewat impor DUK berikutnya.
+- File unggahan disimpan sementara di disk privat lalu dihapus setelah diproses (berhasil maupun gagal).
+- Repo GitHub publik: file DUK dan data pegawai asli tidak pernah di-commit atau di-seed. `*.xlsx`/`*.xls`
+  ditambahkan ke `.gitignore`; test memakai file DUK sintetis (`tests/Support/DukFile.php`).
+- `staff.employee_id` (opsional, unik) menghubungkan petugas ke pegawai; tenaga non-PNS tetap bisa
+  dicatat sebagai petugas tanpa data pegawai.
+- Penanda tangan laporan UKOM (Fase 6) akan memakai master pegawai yang sama.

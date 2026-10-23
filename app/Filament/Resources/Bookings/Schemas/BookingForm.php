@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Bookings\Schemas;
 
 use App\Enums\ActivityType;
 use App\Enums\LabStatus;
+use App\Models\Employee;
 use App\Models\Lab;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -89,6 +91,38 @@ class BookingForm
                 Section::make('Pemohon')
                     ->columns(2)
                     ->schema([
+                        Select::make('employee_lookup')
+                            ->label('Cari pegawai (nama/NIP)')
+                            ->helperText('Opsional. Mengisi data pemohon dari master pegawai (DUK).')
+                            ->dehydrated(false)
+                            ->searchable()
+                            ->getSearchResultsUsing(fn (string $search): array => Employee::query()
+                                ->active()
+                                ->search($search)
+                                ->orderBy('name')
+                                ->limit(20)
+                                ->get()
+                                ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->optionLabel()])
+                                ->all())
+                            ->getOptionLabelUsing(fn ($value): ?string => Employee::find($value)?->optionLabel())
+                            ->live()
+                            ->afterStateUpdated(function ($state, Set $set): void {
+                                if (! $employee = Employee::find($state)) {
+                                    return;
+                                }
+
+                                $set('applicant_name', $employee->name);
+                                $set('applicant_identity_number', $employee->nip);
+
+                                if ($employee->office_email) {
+                                    $set('applicant_email', $employee->office_email);
+                                }
+
+                                if ($employee->department_id) {
+                                    $set('department_id', $employee->department_id);
+                                }
+                            })
+                            ->columnSpanFull(),
                         TextInput::make('applicant_name')
                             ->label('Nama pemohon')
                             ->default(fn (): ?string => auth()->user()?->name)

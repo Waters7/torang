@@ -11,6 +11,7 @@ enum Permission: string
     case AuditView = 'audit.view';
     case BackupsManage = 'backups.manage';
     case DepartmentsManage = 'departments.manage';
+    case EmployeesManage = 'employees.manage';
 
     // Lab CBT & pengajuan
     case LabsView = 'labs.view';

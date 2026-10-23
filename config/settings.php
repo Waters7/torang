@@ -19,6 +19,8 @@ return [
         'identity.unit_name' => 'UPT TIK',
         'identity.head_name' => '',
         'identity.head_nip' => '',
+        // Jabatan struktural di DUK yang menjadi Kepala Unit; nama & NIP di atas diisi otomatis saat impor DUK.
+        'identity.head_structural_position' => 'Kepala Unit Teknologi Informasi',
         'identity.helpdesk_whatsapp' => '',
         'identity.helpdesk_email' => '',
         'identity.service_hours' => 'Senin–Jumat, 07.30–16.00 WITA',

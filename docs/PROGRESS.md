@@ -53,3 +53,15 @@
   `npm run build` sukses · grid, Jadwal Saya, rekap, dan PDF dicek manual di browser.
 - Catatan: nama & NIP Kepala Unit (`identity.head_name`/`head_nip`) belum punya halaman Pengaturan;
   sementara diisi lewat database/tinker.
+
+### Tambahan (di luar SPEC, disetujui 23 Oktober 2026) — Master Pegawai dari DUK
+- Menu Sistem › Pegawai (hanya baca) dengan tombol **Impor DUK** (.xlsx, sheet "LAPORAN DUK"):
+  upsert berdasarkan NIP, pegawai yang hilang dari DUK/pensiun dinonaktifkan, file dihapus setelah diproses.
+- Disimpan hanya nama, NIP, golongan, jabatan, jabatan struktural, unit/penempatan, email Kemenkes.
+  NIK, tempat/tanggal lahir, telepon, dan email pribadi tidak disimpan.
+- Nama & NIP Kepala Unit di Pengaturan diisi otomatis dari jabatan struktural
+  `identity.head_structural_position` (default "Kepala Unit Teknologi Informasi").
+- Form Petugas bisa memilih pegawai (nama/NIP/jabatan terisi); form pengajuan admin bisa mencari
+  pemohon dari pegawai. Form publik tidak memakai data pegawai.
+- Verifikasi: `php artisan test` 172 lulus · DUK Agustus 2026 asli diimpor ke database lokal
+  (195 pegawai, 194 aktif, 1 pensiun) — file dan data asli tidak masuk repo.

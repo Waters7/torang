@@ -36,3 +36,7 @@ Thumbs.db
 npm-debug.log
 yarn-error.log
 /.vagrant
+
+# Data pegawai (DUK) dan spreadsheet lain tidak boleh masuk repo publik
+*.xlsx
+*.xls

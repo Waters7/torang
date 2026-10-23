@@ -48,6 +48,7 @@ enum Role: string
             self::SuperAdmin => Permission::values(),
             self::HeadOfUnit => [
                 Permission::DepartmentsManage->value,
+                Permission::EmployeesManage->value,
                 Permission::LabsView->value,
                 Permission::BookingsView->value,
                 Permission::BookingsManage->value,

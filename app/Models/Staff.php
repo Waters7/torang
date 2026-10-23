@@ -15,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 /**
  * Petugas jaga CBT Center. Tidak wajib punya akun (user_id opsional).
  */
-#[Fillable(['user_id', 'name', 'nip', 'position', 'phone', 'telegram_chat_id', 'is_active'])]
+#[Fillable(['user_id', 'employee_id', 'name', 'nip', 'position', 'phone', 'telegram_chat_id', 'is_active'])]
 class Staff extends Model
 {
     /** @use HasFactory<StaffFactory> */
@@ -48,6 +48,16 @@ class Staff extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Data pegawai dari DUK (opsional; tenaga non-PNS tidak ada di DUK).
+     *
+     * @return BelongsTo<Employee, $this>
+     */
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     /**
