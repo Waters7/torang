@@ -133,3 +133,37 @@ fase terkait.
 - `php.ini` PHP 8.4 di Laragon belum menyetel `curl.cainfo`, sehingga verifikasi Turnstile gagal
   dengan "cURL error 60". Perbaikannya: isi `curl.cainfo` dan `openssl.cafile` dengan
   `C:\laragon\etc\ssl\cacert.pem` (seperti `php.ini` PHP 8.3). Di VPS Ubuntu tidak perlu.
+
+## Fase 2 — Jadwal Petugas (23 Oktober 2026)
+
+### Data
+- `duty_assignments.lab_id` kosong = seluruh CBT Center. Karena NULL tidak dianggap sama di index unik,
+  keunikan tanggal × shift × cakupan × petugas memakai kolom turunan `scope_key = COALESCE(lab_id, 0)`.
+  MySQL tidak mengizinkan cascade/set null pada FK yang dipakai kolom turunan, jadi FK `lab_id`
+  memakai restrict; `LabPolicy` juga menolak hapus lab yang punya penugasan jaga.
+- Kolom jam (`Booking`, `Shift`) memakai trait bersama `HasTimeColumns` (disimpan H:i:s, dibaca H:i).
+- Hari jadwal tetap Senin–Sabtu (SPEC §4); setting `bookings.show_sunday` hanya untuk tampilan publik.
+- Petugas/shift yang sudah punya riwayat tugas tidak bisa dihapus — dinonaktifkan saja.
+
+### Grid & penerbitan
+- Grid disimpan utuh per minggu (semua cakupan sekaligus, isi lama diganti) lewat `SaveDutyGrid`.
+  Tab cakupan berisi Seluruh CBT Center dan semua lab (termasuk yang maintenance) agar penugasan
+  lab tidak hilang saat disimpan.
+- "Salin dari minggu lalu" mengganti isi draf, menggeser tanggal +7 hari, dan melewati petugas/shift nonaktif.
+- Jadwal terbit dikunci; "Kembalikan ke draf" mempertahankan `published_at` sehingga penerbitan
+  berikutnya dikirim sebagai revisi ke semua petugas yang bertugas.
+- Peringatan slot kosong hanya untuk pengajuan berstatus disetujui; petugas "seluruh CBT Center"
+  dianggap menutup semua lab. Kegiatan di luar jam semua shift juga diperingatkan. Tidak memblokir terbit.
+- Rekap bulanan dan Jadwal Saya hanya menghitung jadwal yang sudah terbit. Rekap dibuka dari tombol di
+  Jadwal Mingguan (tidak menambah menu, menu Petugas tetap sesuai SPEC §10).
+
+### Notifikasi & PDF
+- Notifikasi jadwal hanya lewat Telegram (petugas tanpa chat ID dilewati); tanpa cadangan email,
+  sesuai keputusan saat persetujuan rencana. WhatsApp menyusul di Fase 3.
+- Pengingat H-1 tercatat di `reminder_logs` per petugas (`duty:{tanggal}`).
+- PDF dibuat `DutyWeekPdf` (DomPDF) dengan font subsetting aktif (±24 KB, bukan ±880 KB);
+  draf diberi tanda "DRAF — BELUM DITERBITKAN".
+
+### Hak akses
+- Grid & jadwal: `duty.manage`; terbit/kembalikan ke draf: `duty.publish`; master petugas & shift:
+  `staff.manage`; Jadwal Saya: `duty.view-own` (kepala unit, petugas IT, pengelola CBT).

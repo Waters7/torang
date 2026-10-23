@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DownloadBookingAttachmentController;
+use App\Http\Controllers\Admin\DownloadDutyWeekPdfController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\BookingStatusController;
@@ -24,4 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/lampiran/pengajuan/{booking}', DownloadBookingAttachmentController::class)
         ->withTrashed()
         ->name('admin.bookings.attachment');
+
+    Route::get('/admin/unduh/jadwal-petugas/{dutyWeek}', DownloadDutyWeekPdfController::class)
+        ->name('admin.duty-weeks.pdf');
 });

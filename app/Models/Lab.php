@@ -48,6 +48,14 @@ class Lab extends Model
     }
 
     /**
+     * @return HasMany<DutyAssignment, $this>
+     */
+    public function dutyAssignments(): HasMany
+    {
+        return $this->hasMany(DutyAssignment::class);
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function pic(): BelongsTo

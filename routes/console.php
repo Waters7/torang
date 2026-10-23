@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 // Lab CBT (SPEC §15)
 Schedule::command('bookings:mark-completed')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('bookings:send-reminders')->dailyAt('16:00')->withoutOverlapping();
+
+// Jadwal petugas
+Schedule::command('duty:send-reminders')->dailyAt('16:00')->withoutOverlapping();

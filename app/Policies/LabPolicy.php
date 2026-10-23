@@ -29,10 +29,12 @@ class LabPolicy
     }
 
     /**
-     * Lab yang sudah punya riwayat pengajuan tidak dihapus; ubah statusnya menjadi nonaktif.
+     * Lab yang sudah punya riwayat pengajuan atau jadwal jaga tidak dihapus; ubah statusnya menjadi nonaktif.
      */
     public function delete(User $user, Lab $lab): bool
     {
-        return $user->can(Permission::LabsManage->value) && ! $lab->bookings()->withTrashed()->exists();
+        return $user->can(Permission::LabsManage->value)
+            && ! $lab->bookings()->withTrashed()->exists()
+            && ! $lab->dutyAssignments()->exists();
     }
 }

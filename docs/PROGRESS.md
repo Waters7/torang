@@ -2,7 +2,7 @@
 
 - [x] Fase 0 — Fondasi (Laravel, Filament, Inertia + React + TS, brand, role)
 - [x] Fase 1 — Lab CBT & Pengajuan
-- [ ] Fase 2 — Jadwal Petugas
+- [x] Fase 2 — Jadwal Petugas
 - [ ] Fase 3 — Mesin Monitoring
 - [ ] Fase 4 — Beranda & Status Publik (React)
 - [ ] Fase 5 — WiFi & Pengingat Hosting
@@ -40,3 +40,16 @@
   (termasuk verifikasi Turnstile sungguhan dengan kunci uji Cloudflare).
 - Ditunda: tombol "Buat tiket" dari log pemakaian (Fase 7), rekap & utilisasi lab (Fase 7),
   kalender publik `/jadwal` (Fase 4), kanal WhatsApp (bersama infrastruktur notifikasi Fase 3).
+
+### Fase 2 — selesai 23 Oktober 2026
+- Master Petugas (akun opsional, Telegram chat ID) dan Shift (default Pagi 07:30–12:00, Siang 12:00–16:00).
+- Jadwal Mingguan: grid hari (Sen–Sab) × shift dengan tab cakupan (seluruh CBT Center / tiap lab),
+  salin dari minggu lalu, peringatan kegiatan disetujui tanpa petugas, terbitkan / kembalikan ke draf
+  (penerbitan ulang = revisi), unduh PDF A4 bertanda tangan Kepala Unit, rekap tugas & jam per bulan.
+- Jadwal Saya untuk akun yang terhubung ke data petugas (jadwal terbit saja, dengan rekan jaga).
+- Notifikasi Telegram ke petugas saat terbit dan pengingat H-1 (`duty:send-reminders` 16:00).
+- `DutyRoster::onDuty()` siap dipakai kartu "Sedang berlangsung" di beranda (Fase 4).
+- Verifikasi: `php artisan test` 156 lulus · `pint --test` bersih · `npx tsc --noEmit` bersih ·
+  `npm run build` sukses · grid, Jadwal Saya, rekap, dan PDF dicek manual di browser.
+- Catatan: nama & NIP Kepala Unit (`identity.head_name`/`head_nip`) belum punya halaman Pengaturan;
+  sementara diisi lewat database/tinker.

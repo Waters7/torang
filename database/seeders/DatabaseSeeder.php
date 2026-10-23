@@ -20,10 +20,14 @@ class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
             DepartmentSeeder::class,
             LabSeeder::class,
+            ShiftSeeder::class,
         ]);
 
         if (! app()->isProduction()) {
-            $this->call(SampleBookingSeeder::class);
+            $this->call([
+                SampleBookingSeeder::class,
+                SampleDutySeeder::class,
+            ]);
         }
     }
 }

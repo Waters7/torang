@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ActivityType;
 use App\Enums\BookingSource;
 use App\Enums\BookingStatus;
+use App\Models\Concerns\HasTimeColumns;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\BookingFactory;
@@ -28,7 +29,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Booking extends Model
 {
     /** @use HasFactory<BookingFactory> */
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, HasTimeColumns, LogsActivity, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.
@@ -47,9 +48,6 @@ class Booking extends Model
         ];
     }
 
-    /**
-     * Jam disimpan H:i:s supaya perbandingan string konsisten di MySQL & SQLite, dibaca sebagai H:i.
-     */
     protected function startTime(): Attribute
     {
         return self::timeAttribute();
@@ -58,19 +56,6 @@ class Booking extends Model
     protected function endTime(): Attribute
     {
         return self::timeAttribute();
-    }
-
-    public static function normalizeTime(string $time): string
-    {
-        return strlen($time) === 5 ? "{$time}:00" : $time;
-    }
-
-    private static function timeAttribute(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value): ?string => $value === null ? null : substr($value, 0, 5),
-            set: fn (?string $value): ?string => $value === null ? null : self::normalizeTime($value),
-        );
     }
 
     public function getActivitylogOptions(): LogOptions
