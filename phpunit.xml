@@ -32,5 +32,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="TURNSTILE_SITE_KEY" value="test-site-key"/>
+        <env name="TURNSTILE_SECRET_KEY" value="test-secret-key"/>
+        <env name="TELEGRAM_BOT_TOKEN" value=""/>
     </php>
 </phpunit>

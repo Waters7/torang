@@ -10,6 +10,7 @@ enum Permission: string
     case SettingsManage = 'settings.manage';
     case AuditView = 'audit.view';
     case BackupsManage = 'backups.manage';
+    case DepartmentsManage = 'departments.manage';
 
     // Lab CBT & pengajuan
     case LabsView = 'labs.view';

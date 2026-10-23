@@ -18,6 +18,12 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             AdminUserSeeder::class,
             SettingsSeeder::class,
+            DepartmentSeeder::class,
+            LabSeeder::class,
         ]);
+
+        if (! app()->isProduction()) {
+            $this->call(SampleBookingSeeder::class);
+        }
     }
 }

@@ -1,7 +1,7 @@
 # Progres Pengerjaan TORANG
 
 - [x] Fase 0 — Fondasi (Laravel, Filament, Inertia + React + TS, brand, role)
-- [ ] Fase 1 — Lab CBT & Pengajuan
+- [x] Fase 1 — Lab CBT & Pengajuan
 - [ ] Fase 2 — Jadwal Petugas
 - [ ] Fase 3 — Mesin Monitoring
 - [ ] Fase 4 — Beranda & Status Publik (React)
@@ -22,3 +22,21 @@
   `npm run build` sukses · login admin dicek manual di browser.
 - Keputusan teknis: lihat `docs/DECISIONS.md`.
 - Belum ada di lokal: LibreOffice (`soffice`) untuk konversi PDF laporan UKOM (dibutuhkan Fase 6).
+
+### Fase 1 — selesai 23 Oktober 2026
+- Master departemen/unit, lab + jumlah perangkat per jenis (`Lab::readyPcCount()`).
+- Pengajuan publik `/ajukan` (React): 4 kartu bernomor, cek ketersediaan lab live
+  (`/api/public/availability`), upload PDF ke disk privat, honeypot, Cloudflare Turnstile,
+  `throttle:5,1`; halaman `/ajukan/terkirim/{code}` dan `/cek-status` tanpa data pribadi.
+- Aturan di `BookingRules`: bentrok (pending/approved), kapasitas PC siap pakai, lab aktif,
+  H-3 (publik), jam operasional — dipakai form publik, panel admin, dan saat approve.
+- Panel: Lab, Pengajuan (filter, approve/tolak/batal, aksi massal, unduh lampiran,
+  log pemakaian), Kalender (FullCalendar, warna per lab), Log Pemakaian, Departemen/Unit.
+- Notifikasi email pemohon (diterima/disetujui/ditolak/pengingat H-1) + Telegram grup
+  (pengajuan baru, bila dikonfigurasi). Scheduler `bookings:mark-completed` (5 menit)
+  dan `bookings:send-reminders` (16:00).
+- Verifikasi: `php artisan test` 116 lulus · `pint --test` bersih · `npx tsc --noEmit` bersih ·
+  `npm run build` sukses · alur pengajuan publik → admin dicek manual di browser
+  (termasuk verifikasi Turnstile sungguhan dengan kunci uji Cloudflare).
+- Ditunda: tombol "Buat tiket" dari log pemakaian (Fase 7), rekap & utilisasi lab (Fase 7),
+  kalender publik `/jadwal` (Fase 4), kanal WhatsApp (bersama infrastruktur notifikasi Fase 3).

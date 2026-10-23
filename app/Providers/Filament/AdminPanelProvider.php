@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\NavigationGroup;
 use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -18,6 +19,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -42,6 +44,14 @@ class AdminPanelProvider extends PanelProvider
                 'danger' => Color::hex('#D64545'),
                 'info' => Color::hex('#1BBBCB'),
             ])
+            ->navigationGroups(NavigationGroup::class)
+            ->plugin(
+                FilamentFullCalendarPlugin::make()
+                    ->timezone(config('app.timezone'))
+                    ->locale('id')
+                    ->selectable(false)
+                    ->editable(false)
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

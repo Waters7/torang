@@ -47,6 +47,7 @@ enum Role: string
         return match ($this) {
             self::SuperAdmin => Permission::values(),
             self::HeadOfUnit => [
+                Permission::DepartmentsManage->value,
                 Permission::LabsView->value,
                 Permission::BookingsView->value,
                 Permission::BookingsManage->value,

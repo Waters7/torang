@@ -84,3 +84,52 @@ fase terkait.
 ### Test
 - Pest memakai SQLite in-memory (`phpunit.xml`); MySQL untuk lokal & produksi.
 - `Tests\TestCase` memanggil `withoutVite()` supaya test tidak bergantung pada `npm run build`.
+
+## Fase 1 — Lab CBT & Pengajuan (23 Oktober 2026)
+
+### Paket
+- Kalender admin memakai `saade/filament-fullcalendar` **v4.0.1** (versi stabil yang mendukung
+  Filament 5 dan Laravel 13; seri 5.x masih beta). Widget kalender tidak lazy-load dan tidak
+  tampil di dashboard (`isDiscovered()` = `false`). Klik event membuka detail pengajuan.
+  Pengajuan menunggu tampil berlatar putih dengan garis warna lab; yang ditolak/dibatalkan tidak tampil.
+- Captcha: **Cloudflare Turnstile**, diverifikasi di server lewat HTTP client tanpa paket tambahan
+  (`TurnstileVerifier`). Tanpa secret key verifikasi selalu gagal (fail closed). `.env` lokal memakai
+  kunci uji resmi Cloudflare; test memalsukan respons HTTP.
+
+### Pengajuan
+- Kode `CBT-YYMM-XXXX`: YYMM = bulan pengajuan dibuat, XXXX acak dari 32 karakter tanpa I/O/0/1
+  (bukan nomor urut) agar kode orang lain tidak bisa ditebak di `/cek-status`.
+- Jam disimpan `H:i:s` dan dibaca `H:i`; query tanggal memakai `whereDate` agar sama di MySQL & SQLite.
+- Cek bentrok dijalankan di dalam transaksi dengan `lockForUpdate` pada baris lab.
+- Pengajuan dari panel admin: bebas aturan H-3, tetap dicek bentrok, jam operasional, dan kapasitas
+  (kecuali jenis maintenance). Bila pembuatnya penyetuju, pengajuan langsung disetujui.
+- Approve mengecek ulang semua aturan (lab bisa saja masuk maintenance setelah pengajuan dibuat).
+- Ubah data hanya untuk pengajuan menunggu/disetujui; hapus (soft delete) hanya untuk yang sudah tidak
+  aktif. Lab yang punya riwayat pengajuan tidak bisa dihapus — ubah statusnya menjadi nonaktif.
+- Log pemakaian baru bisa diisi setelah kegiatan dimulai, dan otomatis menandai pengajuan selesai.
+
+### Akses & data publik
+- Master Departemen/Unit masuk grup **Sistem** dengan permission baru `departments.manage`
+  (super_admin, kepala_unit).
+- Halaman publik (terkirim, cek status) memakai `PublicBookingResource` tanpa nama, NIP/NIM, email,
+  dan nomor WhatsApp pemohon. Alasan penolakan tetap ditampilkan agar pemohon tahu sebabnya.
+- API ketersediaan hanya mengembalikan jam terpakai, tanpa nama kegiatan.
+- `/cek-status` diberi `throttle:30,1` (tidak ada di tabel SPEC §9.1) untuk mencegah tebak kode.
+- Lampiran disimpan di `storage/app/private/bookings/{kode}/surat-permohonan.pdf`, diunduh lewat
+  `/admin/lampiran/pengajuan/{booking}` dengan policy. Tamu diarahkan ke login Filament.
+- Foto lab disimpan di disk `local` (privat, `serve` aktif) sehingga tidak perlu `storage:link`.
+
+### Notifikasi & penjadwal
+- Email ke pemohon selalu dikirim (on-demand, lewat queue). Telegram grup hanya bila token bot,
+  chat ID, dan channel `telegram` di pengaturan aktif. Kanal WhatsApp menyusul di Fase 3.
+- Teks template email Laravel diterjemahkan di `lang/id.json`.
+- Tabel `reminder_logs` dibuat di Fase 1 karena pengingat H-1 pengajuan sudah memakainya.
+
+### Seeder
+- Departemen dan lab di-seed di semua lingkungan (`updateOrCreate`); contoh pengajuan hanya di
+  luar produksi.
+
+### Lingkungan lokal
+- `php.ini` PHP 8.4 di Laragon belum menyetel `curl.cainfo`, sehingga verifikasi Turnstile gagal
+  dengan "cURL error 60". Perbaikannya: isi `curl.cainfo` dan `openssl.cafile` dengan
+  `C:\laragon\etc\ssl\cacert.pem` (seperti `php.ini` PHP 8.3). Di VPS Ubuntu tidak perlu.
