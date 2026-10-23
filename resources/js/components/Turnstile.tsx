@@ -62,6 +62,8 @@ export default function Turnstile({ siteKey, onToken, resetKey }: TurnstileProps
                 widgetId.current = turnstile.render(container.current, {
                     sitekey: siteKey,
                     language: 'id',
+                    // Ukuran normal lebarnya tetap 300px; di ponsel sempit pakai compact (150px) agar tidak melebarkan halaman.
+                    size: container.current.clientWidth < 300 ? 'compact' : 'normal',
                     callback: (token: string) => onTokenRef.current(token),
                     'expired-callback': () => onTokenRef.current(''),
                     'error-callback': () => onTokenRef.current(''),

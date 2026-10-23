@@ -4,7 +4,7 @@
 - [x] Fase 1 — Lab CBT & Pengajuan
 - [x] Fase 2 — Jadwal Petugas
 - [x] Fase 3 — Mesin Monitoring
-- [ ] Fase 4 — Beranda & Status Publik (React)
+- [x] Fase 4 — Beranda & Status Publik (React)
 - [ ] Fase 5 — WiFi & Pengingat Hosting
 - [ ] Fase 6 — Laporan UKOM (SPTJM)
 - [ ] Fase 7 — Helpdesk, Pengumuman, Laporan, Dashboard
@@ -83,3 +83,20 @@
 - Verifikasi: `php artisan test` 234 lulus · `pint --test` bersih · ping sungguhan di Windows
   (127.0.0.1 Online, IP dokumentasi & host tak dikenal Offline) · jalur queue end-to-end · halaman admin dicek di browser.
 - Ditunda: ekspor uptime bulanan untuk SLA ISP (Excel/PDF) → Fase 7.
+
+### Fase 4 — selesai 24 Oktober 2026
+- Beranda `/` (React): hero + kartu ringkasan (jam WITA, jaringan/aplikasi online, lab dipakai),
+  kartu "Sedang berlangsung" per lab (kegiatan, sisa waktu, PC dipakai/siap, kegiatan berikutnya, petugas jaga),
+  tabel jadwal minggu berjalan (hari ini disorot, geser horizontal di ponsel), kartu jaringan per jurusan
+  dengan bar 24 jam, daftar aplikasi dengan bar 30 hari.
+- `/status`: status keseluruhan, bar uptime harian 90 hari + uptime 30/90 hari, insiden 30 hari terakhir.
+- `/jadwal`: kalender bulanan FullCalendar (bahasa Indonesia, warna per lab), tampilan daftar di ponsel,
+  data dari `/api/public/events` (disetujui/selesai saja, rentang maks. 62 hari).
+- `/api/public/summary` (JSON ringkas, `Cache-Control: max-age=30`) untuk mode TV/widget nanti.
+- Semua data publik lewat `PublicStatus` (cache 30 detik); auto-refresh `usePoll` sesuai
+  `public.refresh_seconds` dengan partial reload (jadwal minggu tidak ikut dimuat ulang).
+- Privasi: tanpa IP/host/URL internal, tanpa nama/kontak pemohon — diuji untuk kelima endpoint publik.
+- Verifikasi: `php artisan test` 252 lulus · `pint` bersih · `npx tsc --noEmit` bersih · `npm run build` sukses ·
+  beranda, `/status`, `/jadwal` dicek di browser (desktop dan 360 px, tanpa scroll horizontal halaman).
+- Perbaikan kecil Fase 1 saat uji 360 px: widget Turnstile memakai ukuran compact bila ruang < 300 px.
+- Ditunda: banner pengumuman di beranda → Fase 7 (bersama modul Pengumuman).

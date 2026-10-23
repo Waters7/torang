@@ -234,3 +234,34 @@ fase terkait.
 - `composer run dev` menjalankan `queue:listen --queue=monitoring,default` dan `schedule:work`.
   Monitor contoh memakai IP dokumentasi/URL example.ac.id, jadi bila scheduler jalan semuanya akan menjadi
   Offline dalam beberapa menit — wajar untuk lokal.
+
+## Fase 4 — Beranda & Status Publik (24 Oktober 2026)
+
+### Paket
+- Kalender publik memakai FullCalendar **v7** dalam satu paket `@fullcalendar/react` dengan impor subpath
+  (`/daygrid`, `/list`, `/themes/classic`, `/locales/id`) + `temporal-polyfill`, sesuai README v7.
+  Paket v6 (`@fullcalendar/core`, `daygrid`, `list`) tidak dipakai karena bentrok dengan v7.
+
+### Data
+- Satu service `PublicStatus` menyusun semua data publik; tiap bagian di-cache 30 detik (`public.*`)
+  sehingga polling banyak klien tidak membebani database.
+- Kartu lab: "PC dipakai" = jumlah peserta kegiatan berlangsung / PC siap pakai lab. Lab nonaktif tidak tampil.
+  Maintenance bila status lab Maintenance atau kegiatan berlangsung bertipe maintenance.
+- Jadwal minggu dan kalender hanya memuat pengajuan Disetujui/Selesai; Minggu ikut tampil bila `bookings.show_sunday`.
+- Bar 24 jam: status terburuk per jam dari `monitor_checks` (abu-abu bila tanpa data).
+  Bar 30/90 hari: dari `monitor_daily_stats`, berakhir kemarin (hari ini belum diagregasi);
+  hijau ≥ `public.uptime_good_percent`, kuning ≥ `public.uptime_warning_percent`, merah di bawahnya.
+- Halaman `/status` menampilkan insiden 30 hari terakhir plus insiden yang masih berlangsung (maks. 50).
+- Hanya monitor `is_public` + aktif yang tampil; nama jaringan memakai nama jurusan, bukan host.
+
+### Akses & beban
+- `/api/public/summary` dan `/api/public/events` `throttle:60,1`; `/api/public/events` menolak rentang > 62 hari.
+- Halaman Inertia `/`, `/status`, `/jadwal` tidak diberi rate limit per IP: pengunjung kampus umumnya
+  berbagi satu IP NAT sehingga limit per IP berisiko memblokir banyak orang sekaligus; beban ditahan cache 30 detik.
+
+### Tampilan
+- Auto-refresh memakai `usePoll` dengan partial reload (`only`), interval dari `public.refresh_seconds` (min. 15 detik).
+- Di ponsel: tabel jadwal minggu digeser horizontal di dalam kontainernya, kalender berganti ke tampilan daftar,
+  pill bertulisan panjang boleh turun baris (`wrap`), celah bar riwayat 1 px agar 90 bar muat.
+- Widget Turnstile memakai ukuran `compact` bila lebar kontainernya < 300 px.
+- Banner pengumuman di beranda (SPEC §9.2) dikerjakan bersama modul Pengumuman di Fase 7.
