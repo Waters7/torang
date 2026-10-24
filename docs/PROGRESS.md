@@ -6,7 +6,7 @@
 - [x] Fase 3 — Mesin Monitoring
 - [x] Fase 4 — Beranda & Status Publik (React)
 - [x] Fase 5 — WiFi & Pengingat Hosting
-- [ ] Fase 6 — Laporan UKOM (SPTJM)
+- [x] Fase 6 — Laporan UKOM (SPTJM)
 - [ ] Fase 7 — Helpdesk, Pengumuman, Laporan, Dashboard
 - [ ] Fase 8 — Finalisasi & Deployment VPS
 
@@ -120,3 +120,20 @@
 - Seeder contoh: 4 SSID, 6 layanan dengan jatuh tempo bervariasi.
 - Verifikasi: `php artisan test` 306 lulus · `pint` bersih · migrasi di MySQL lokal · alur lihat/salin password,
   log akses, halaman hosting dicek di browser · kartu QR & PDF anggaran dicek visual.
+
+### Fase 6 — selesai 24 Oktober 2026
+- Lab CBT › Penyelenggara/Kolegium (Kolegium TPD otomatis tersedia) dan Pengaturan UKOM (penanda tangan default,
+  pola nomor surat, tempat surat, versi template Word).
+- Lab CBT › Laporan UKOM: wizard 5 langkah (Kegiatan, Surat, Rincian biaya, Penanda tangan, Ringkasan) dengan
+  nama kegiatan/hal/tujuan/teks rincian otomatis yang tetap bisa diedit, preset sewa CBT & konsumsi dari tarif kolegium,
+  total langsung, ambil data dari pengajuan Lab CBT atau data petugas.
+- Nomor surat otomatis per tahun (dipesan saat draf disimpan, tidak ganda, nomor manual yang mengikuti pola ikut
+  dihitung); Finalkan mengunci isi & nomor; Duplikat; Unggah scan bertanda tangan; Arsipkan/Pulihkan.
+- Dokumen: DOCX dari template (blok rincian di-clone, placeholder wajib terisi) di disk privat; PDF lewat LibreOffice
+  di queue `default` dengan pratinjau iframe; tanpa LibreOffice hanya DOCX. Unduhan lewat route ber-otorisasi.
+- Ganti template (Super Admin): validasi semua placeholder, disimpan sebagai versi baru; laporan mencatat versinya.
+- Rekap Excel: daftar laporan per tahun surat + total biaya per tahun.
+- Seeder contoh: 1 laporan final sesuai dokumen asli (2 rincian, total Rp 280.000,00), penanda tangan dari Pengaturan.
+- Verifikasi: `php artisan test` 350 lulus · `pint` bersih · migrasi di MySQL lokal · wizard (isian otomatis, preset,
+  total), halaman detail, pengaturan, dan kolegium dicek di browser · isi DOCX dicek otomatis oleh test.
+- Belum bisa dicek di lokal: konversi PDF sungguhan (LibreOffice belum terpasang) — diuji dengan proses tiruan.

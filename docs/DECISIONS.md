@@ -308,3 +308,42 @@ fase terkait.
 - Unggahan sementara Livewire dalam test dibersihkan bila waktu dimajukan (`travelTo`), jadi test unggah bukti
   bayar memakai tanggal nyata.
 - Pengaturan siklus WiFi & hari pengingat hosting masih memakai nilai default; halaman Pengaturan di Fase 7.
+
+## Fase 6 — Laporan UKOM (24 Oktober 2026)
+
+### Data & nomor surat
+- Nomor urut dipesan saat draf pertama kali disimpan (agar nomor tampil di dokumen draf), dihitung dari nomor
+  terbesar tahun surat termasuk laporan yang diarsipkan, dengan `lockForUpdate` + indeks unik (letter_year,
+  letter_sequence) dan satu kali coba ulang bila bentrok. Draf yang diarsipkan tetap memegang nomornya.
+- Nomor yang diketik manual tetap dicek unik; bila mengikuti pola (mis. `.../023/2026`), nomor urutnya dicatat
+  sehingga nomor otomatis berikutnya melanjutkan (024). Token pola: `{seq}`/`{seq:N}`, `{year}`, `{month}`, `{roman}`.
+- Tahun nomor = tahun tanggal surat; mengganti tahun pada draf memesan nomor baru di tahun itu.
+- "Arsipkan" = soft delete; laporan tidak pernah dihapus permanen.
+- Kolegium & penanda tangan disalin ke laporan (snapshot). Kolegium yang sudah dipakai tidak bisa dihapus.
+- Kolegium TPD di-seed di semua lingkungan (data master, seperti provider hosting); laporan contoh hanya non-produksi.
+
+### Wizard
+- Teks turunan (nama kegiatan, hal, Kepada Yth., teks baris rincian) diperbarui otomatis selama isinya masih sama
+  dengan hasil otomatis sebelumnya; begitu diedit manual tidak ditimpa lagi.
+- Teks rincian otomatis mengikuti dokumen asli: tanpa volume 2 → `Uraian 2 unit (Rp 40.000/unit)`; dengan volume 2 →
+  `Uraian 2 orang untuk 2 hari (ket) Rp 50.000,00/org` (satuan "orang" disingkat "org").
+- Langkah 5 berisi ringkasan; pratinjau PDF ada di halaman detail setelah disimpan (PDF perlu laporan tersimpan
+  dan diproses queue).
+- Penanda tangan bisa diambil dari data petugas (nama + NIP dari data petugas/DUK); NIP wajib 18 digit.
+
+### Dokumen
+- `UkomReportDocumentService` mengikuti contoh referensi (escape aktif, clone blok `rincian`, cek `getVariables()`).
+  Kegagalan membuat DOCX tidak membatalkan penyimpanan draf; pesannya tampil di halaman detail.
+- DOCX dibuat ulang setiap simpan/finalkan; PDF lama dibuang lalu konversi baru diantrekan.
+- LibreOffice: perintah `LIBREOFFICE_BINARY` (default `soffice`) lewat Process facade dengan argumen array,
+  timeout 60 detik, HOME = `storage/app/libreoffice`. Bila perintah tidak ditemukan, tombol PDF nonaktif.
+- Template versi 1 dibuat otomatis dari `resources/templates/` ke `storage/app/private/templates/ukom_report/`.
+  Template baru wajib memuat tepat placeholder SPEC §8A.5 (kurang atau ada yang tidak dikenal → ditolak).
+- Ganti template hanya Super Admin (izin `settings.manage`); pengaturan penanda tangan & pola nomor untuk pemegang
+  izin Laporan UKOM. Halaman Pengaturan UKOM ada di grup Lab CBT (bukan menunggu halaman Pengaturan Fase 7).
+- Format: `Rupiah::format()` = `Rp 280.000,00`; `Terbilang::id()` sampai triliun; tanggal surat `j F Y`,
+  tanggal kegiatan `d F Y`.
+
+### Lokal
+- Muatan pertama halaman Filament setelah perubahan bisa > 30 detik di `artisan serve` drive X: (kompilasi view);
+  muat ulang setelah selesai.

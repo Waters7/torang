@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             LabSeeder::class,
             ShiftSeeder::class,
             ProviderSeeder::class,
+            ExamOrganizerSeeder::class,
         ]);
 
         if (! app()->isProduction()) {
@@ -31,6 +32,7 @@ class DatabaseSeeder extends Seeder
                 SampleMonitorSeeder::class,
                 SampleWifiSeeder::class,
                 SampleHostingSeeder::class,
+                SampleUkomReportSeeder::class,
             ]);
         }
     }

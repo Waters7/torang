@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DownloadBookingAttachmentController;
 use App\Http\Controllers\Admin\DownloadDutyWeekPdfController;
 use App\Http\Controllers\Admin\DownloadPaymentProofController;
+use App\Http\Controllers\Admin\DownloadUkomReportFileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\BookingStatusController;
@@ -40,4 +41,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/unduh/bukti-bayar/{servicePayment}', DownloadPaymentProofController::class)
         ->name('admin.service-payments.proof');
+
+    Route::get('/admin/unduh/laporan-ukom/{ukomReport}/{type}', DownloadUkomReportFileController::class)
+        ->whereIn('type', ['docx', 'pdf', 'scan'])
+        ->withTrashed()
+        ->name('admin.ukom-reports.file');
 });

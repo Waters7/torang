@@ -18,4 +18,18 @@ return [
         'password' => env('ADMIN_PASSWORD'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | LibreOffice (konversi laporan UKOM ke PDF)
+    |--------------------------------------------------------------------------
+    |
+    | Nama perintah di PATH atau path lengkap ke soffice. Bila tidak ditemukan,
+    | laporan UKOM hanya tersedia dalam format Word (.docx).
+    |
+    */
+
+    'libreoffice' => [
+        'binary' => env('LIBREOFFICE_BINARY', 'soffice'),
+    ],
+
 ];
