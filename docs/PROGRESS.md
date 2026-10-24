@@ -5,7 +5,7 @@
 - [x] Fase 2 — Jadwal Petugas
 - [x] Fase 3 — Mesin Monitoring
 - [x] Fase 4 — Beranda & Status Publik (React)
-- [ ] Fase 5 — WiFi & Pengingat Hosting
+- [x] Fase 5 — WiFi & Pengingat Hosting
 - [ ] Fase 6 — Laporan UKOM (SPTJM)
 - [ ] Fase 7 — Helpdesk, Pengumuman, Laporan, Dashboard
 - [ ] Fase 8 — Finalisasi & Deployment VPS
@@ -100,3 +100,23 @@
   beranda, `/status`, `/jadwal` dicek di browser (desktop dan 360 px, tanpa scroll horizontal halaman).
 - Perbaikan kecil Fase 1 saat uji 360 px: widget Turnstile memakai ukuran compact bila ruang < 300 px.
 - Ditunda: banner pengumuman di beranda → Fase 7 (bersama modul Pengumuman).
+
+### Fase 5 — selesai 24 Oktober 2026
+- Infrastruktur › WiFi: SSID, lokasi, jurusan, AP, peruntukan, keamanan, VLAN, siklus ganti password.
+  Password terenkripsi (`encrypted`), tidak pernah tampil di tabel/form/log; form edit tidak memuat password lama.
+- "Lihat password" & "Kartu QR": konfirmasi password akun (berlaku 5 menit, maks. 5 percobaan salah/menit),
+  modal password dengan tombol Salin; lihat/salin/cetak/ganti tercatat di activity log beserta IP & user agent
+  (tab Log akses di halaman detail).
+- Riwayat password: password lama tersimpan terenkripsi saat diganti, bisa dilihat dengan konfirmasi yang sama.
+- Kartu QR WiFi PDF A6 (`WIFI:T:…;S:…;P:…;;`), memakai `chillerlan/php-qrcode`.
+- `wifi:rotation-reminders` (Senin 08:00): ringkasan SSID yang jatuh tempo ≤ 7 hari/lewat ke grup Telegram
+  dan email pengelola WiFi, tanpa password, sekali per minggu.
+- Infrastruktur › Hosting & Domain + Provider (seed: Domainesia, Jagoanhosting, Hostinger): status turunan
+  Aktif/Segera berakhir/Kedaluwarsa/Dihentikan, "Catat pembayaran" (bukti PDF privat, unduh ber-otorisasi),
+  riwayat pembayaran, ringkasan (jumlah per status, segera jatuh tempo, estimasi biaya per tahun per provider).
+- Ekspor Excel (Layanan, Anggaran per provider, Pembayaran per tahun) dan PDF rekap anggaran A4 lanskap.
+- `services:send-reminders` (harian 08:00): H-30/14/7/3/1/0 ke grup Telegram, email PIC/pengelola hosting,
+  Telegram/WhatsApp pribadi PIC; tanpa kirim ganda, mengejar ambang terlewat, siklus baru setelah perpanjangan.
+- Seeder contoh: 4 SSID, 6 layanan dengan jatuh tempo bervariasi.
+- Verifikasi: `php artisan test` 306 lulus · `pint` bersih · migrasi di MySQL lokal · alur lihat/salin password,
+  log akses, halaman hosting dicek di browser · kartu QR & PDF anggaran dicek visual.

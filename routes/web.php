@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DownloadBookingAttachmentController;
 use App\Http\Controllers\Admin\DownloadDutyWeekPdfController;
+use App\Http\Controllers\Admin\DownloadPaymentProofController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Public\BookingStatusController;
@@ -36,4 +37,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/unduh/jadwal-petugas/{dutyWeek}', DownloadDutyWeekPdfController::class)
         ->name('admin.duty-weeks.pdf');
+
+    Route::get('/admin/unduh/bukti-bayar/{servicePayment}', DownloadPaymentProofController::class)
+        ->name('admin.service-payments.proof');
 });

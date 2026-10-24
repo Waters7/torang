@@ -34,6 +34,12 @@ final class Format
         return substr($start, 0, 5).'–'.substr($end, 0, 5).' WITA';
     }
 
+    /** "Rp1.250.000" (dokumen laporan UKOM memakai format sendiri, lihat SPEC §8A). */
+    public static function rupiah(float|int|string|null $amount): string
+    {
+        return 'Rp'.number_format(round((float) $amount), 0, ',', '.');
+    }
+
     private static function carbon(CarbonInterface|string $date): CarbonInterface
     {
         return ($date instanceof CarbonInterface ? $date : CarbonImmutable::parse($date))->locale(config('app.locale'));

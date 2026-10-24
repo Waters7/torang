@@ -20,3 +20,7 @@ Schedule::command('monitors:dispatch')->everyMinute()->withoutOverlapping();
 Schedule::command('monitors:check-ssl')->dailyAt('07:00')->withoutOverlapping();
 Schedule::command('monitors:aggregate')->dailyAt('00:10')->withoutOverlapping();
 Schedule::command('model:prune')->dailyAt('01:00')->withoutOverlapping();
+
+// Infrastruktur: hosting/domain & WiFi
+Schedule::command('services:send-reminders')->dailyAt('08:00')->withoutOverlapping();
+Schedule::command('wifi:rotation-reminders')->weeklyOn(1, '08:00')->withoutOverlapping();

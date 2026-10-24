@@ -265,3 +265,46 @@ fase terkait.
   pill bertulisan panjang boleh turun baris (`wrap`), celah bar riwayat 1 px agar 90 bar muat.
 - Widget Turnstile memakai ukuran `compact` bila lebar kontainernya < 300 px.
 - Banner pengumuman di beranda (SPEC §9.2) dikerjakan bersama modul Pengumuman di Fase 7.
+
+## Fase 5 — WiFi & Pengingat Hosting (24 Oktober 2026)
+
+### WiFi
+- Konfirmasi password memakai penanda session bawaan Laravel (`auth.password_confirmed_at`, sama dengan
+  middleware `password.confirm`) dan `auth.password_timeout` yang diubah default-nya menjadi 300 detik (5 menit).
+  Konfirmasi dilakukan di modal Filament, bukan halaman terpisah; salah password dibatasi 5×/menit per pengguna.
+- Alur aksi: "Lihat password"/"Kartu QR" meminta password akun bila belum terkonfirmasi, lalu diganti aksi
+  `showWifiPassword` (hanya bisa dibuka bila sudah terkonfirmasi & punya izin). Isi password baru dikirim ke browser
+  saat modal itu dibuka.
+- "Salin" menyalin di browser lalu memanggil server untuk dicatat (penyalinan clipboard tidak bisa diverifikasi server).
+- Activity log WiFi (`log_name` = wifi) memakai event `password_revealed`, `password_copied`, `qr_printed`,
+  `password_changed`; perubahan data biasa tercatat tanpa kolom password. Semua dengan IP & user agent.
+- Jadwal ganti: password_changed_at + siklus per SSID (atau `wifi.rotation_days`); "Segera ganti" bila ≤ 7 hari.
+  Jaringan Open tidak menyimpan password; mengubah ke Open memindahkan password lama ke riwayat.
+- Data WiFi tidak diekspor (berisi password). Kartu QR memuat password (dicetak untuk ditempel), jadi aksi ini
+  butuh izin lihat password + konfirmasi dan tercatat.
+- `chillerlan/php-qrcode` (sudah terpasang sebagai dependensi Filament) dijadikan dependensi langsung; QR dibuat
+  PNG (butuh ekstensi gd, sudah ada di daftar ekstensi server SPEC §15).
+
+### Hosting
+- Status turunan dihitung dari `status` + `expires_at` (tidak disimpan); "Segera berakhir" = sisa 0–30 hari.
+- Estimasi biaya per tahun = biaya per siklus × 12 ÷ bulan siklus, hanya layanan aktif. Siklus tersedia:
+  bulanan, 3 bulan, 6 bulan, tahunan, 2 tahun, 3 tahun.
+- Catat pembayaran: periode default mulai dari tanggal berakhir saat ini (atau hari ini bila sudah lewat > 1 bulan),
+  selesai = mulai + 1 siklus. `expires_at`/`last_paid_at` hanya maju, tidak mundur, saat mencatat pembayaran lama.
+  Menghapus pembayaran tidak mengubah tanggal layanan (koreksi lewat form layanan).
+- Bukti bayar hanya PDF ≤ 2 MB (aturan upload CLAUDE.md), disk privat `hosting/payments`, unduh lewat
+  `/admin/unduh/bukti-bayar/{id}` dengan izin `hosting.view`.
+- Provider yang masih punya layanan, dan layanan yang sudah punya pembayaran, tidak bisa dihapus.
+- Pengingat: kunci `expiry:{tanggal berakhir}:{ambang}`; ambang terlewat dikirim sekali; layanan yang sudah
+  kedaluwarsa tapi masih Aktif diingatkan sekali (ambang 0); layanan Dihentikan tidak diingatkan; layanan dengan
+  perpanjangan otomatis tetap diingatkan dengan keterangan. Email akun hosting tidak dimuat di pesan.
+- Penerima email: PIC layanan; bila kosong, pengguna aktif ber-izin `hosting.manage`. PIC juga menerima
+  Telegram/WhatsApp pribadi bila kanal aktif dan `telegram_chat_id`/`phone` diisi di akunnya
+  (`User` kini punya rute notifikasi Telegram & WhatsApp).
+- Ekspor Excel: 3 sheet (Layanan termasuk yang dihentikan, Anggaran per provider, Pembayaran tahun terpilih),
+  tanggal sebagai tanggal Excel dan nominal angka berformat Rupiah.
+
+### Lingkungan lokal / test
+- Unggahan sementara Livewire dalam test dibersihkan bila waktu dimajukan (`travelTo`), jadi test unggah bukti
+  bayar memakai tanggal nyata.
+- Pengaturan siklus WiFi & hari pengingat hosting masih memakai nilai default; halaman Pengaturan di Fase 7.

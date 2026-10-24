@@ -46,4 +46,14 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->is_active && $this->hasAnyRole(Role::values());
     }
+
+    public function routeNotificationForTelegram(): ?string
+    {
+        return $this->telegram_chat_id ?: null;
+    }
+
+    public function routeNotificationForWhatsapp(): ?string
+    {
+        return $this->phone ?: null;
+    }
 }
