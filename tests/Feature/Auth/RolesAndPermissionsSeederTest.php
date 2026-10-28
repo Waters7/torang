@@ -59,3 +59,9 @@ it('aman dijalankan berulang tanpa duplikasi', function () {
     expect(RoleModel::count())->toBe(count(Role::cases()))
         ->and(PermissionModel::count())->toBe(count(Permission::cases()));
 });
+
+it('mempertahankan izin role yang disesuaikan melalui panel', function () {
+    role(Role::ItStaff)->syncPermissions(['tickets.view']);
+    $this->seed(RolesAndPermissionsSeeder::class);
+    expect(role(Role::ItStaff)->permissions->pluck('name')->all())->toBe(['tickets.view']);
+});

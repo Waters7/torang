@@ -347,3 +347,69 @@ fase terkait.
 ### Lokal
 - Muatan pertama halaman Filament setelah perubahan bisa > 30 detik di `artisan serve` drive X: (kompilasi view);
   muat ulang setelah selesai.
+
+## Fase 7 — Helpdesk, Pengumuman, Laporan & Dashboard (27–28 Oktober 2026)
+
+### Helpdesk dan pengumuman
+- Tiket dimulai pada status Baru dengan prioritas Normal. Prioritas diubah petugas setelah laporan diterima.
+  Kode `TIK-YYMM-` diikuti 12 digit heksadesimal acak; indeks unik di database.
+- Laporan dari log pemakaian memakai izin memperbarui log tersebut, mengunci baris saat pembuatan,
+  dan mempunyai indeks unik `usage_log_id` agar satu kendala tidak menghasilkan tiket ganda.
+- Dikerjakan wajib mempunyai petugas aktif. Selesai dapat dibuka kembali ke Dikerjakan;
+  Ditutup hanya dari Selesai dan tidak dibuka kembali. Waktu penyelesaian dikosongkan saat dibuka kembali.
+- `/cek-tiket` hanya menampilkan kode, kategori, status, dan waktu. Nama/kontak pelapor, uraian,
+  lampiran, serta komentar internal tidak dikirim ke endpoint publik tersebut.
+- Tautan pribadi menggunakan token acak 64 karakter; database hanya menyimpan hash SHA-256.
+  Tautan ditampilkan sekali setelah pembuatan tiket (publik maupun internal) untuk disimpan/disampaikan
+  kepada pelapor. Tanggapan non-internal dan penilaian hanya tersedia melalui tautan tersebut.
+  Penilaian 1–5 hanya sekali pada status Selesai/Ditutup, dengan Turnstile dan honeypot.
+- Halaman bertoken memakai `no-store` dan `no-referrer`. PDF lampiran maksimal 2 MB disimpan
+  privat dan hanya dapat diunduh pemegang izin melihat tiket. Activity log memakai daftar kolom aman;
+  token, isi komentar, dan kontak pelapor tidak dicatat dalam perubahan tiket.
+- Pengumuman berupa teks biasa yang di-escape saat ditampilkan, tanpa HTML bebas. Banner aktif bila
+  `is_public`, waktu mulai sudah lewat, dan waktu akhir belum lewat/tidak diisi; ikut polling beranda.
+  Tipe Maintenance adalah pemberitahuan dan tidak otomatis menjeda monitor.
+- FAQ opsional belum ditambahkan; notifikasi keluar khusus helpdesk tidak ditambahkan di luar cakupan SPEC.
+
+### Laporan operasional
+- Periode bebas maksimal 366 hari mencakup kebutuhan bulanan/semester. Filter lab dan penyelenggara
+  untuk CBT; filter jurusan untuk SLA. Excel/PDF selalu dihitung kembali dari filter tervalidasi.
+- CBT menghitung pengajuan Disetujui/Selesai yang jam akhirnya sudah lewat; Maintenance dikecualikan.
+  Peserta terdaftar dipisahkan dari kehadiran aktual; bila belum ada log, kehadiran ditulis Tidak ada data.
+  Pengajuan yang belum berakhir ditampilkan terpisah sebagai Masih terjadwal.
+- Utilisasi memakai menit kegiatan dalam jam/hari operasional sampai sekarang dibagi menit operasional
+  tersedia sampai sekarang. Hari operasional default Senin–Sabtu dan dapat diatur. Pengaturan yang berlaku
+  adalah saat laporan dibuat, belum ada kalender hari libur maupun riwayat perubahan jam operasional.
+  Filter penyelenggara memperlihatkan kontribusinya terhadap keseluruhan kapasitas lab.
+- SLA memakai agregasi harian permanen: `(Online + Lambat) / jumlah cek`, tertimbang berdasarkan cek,
+  bukan rata-rata persentase harian. Tanpa cek ditulis Tidak ada data; hari berjalan masuk setelah agregasi.
+  Durasi insiden yang bersinggungan dipotong pada batas periode dan waktu saat ini.
+- Excel mempertahankan nilai angka dan menetralkan awalan formula pada teks dari master data.
+  PDF A4 lanskap dibuat langsung lewat DomPDF; tidak membutuhkan LibreOffice.
+
+### Dashboard dan sistem
+- Widget hanya memuat kelompok data sesuai permission pengguna aktif. Ringkasan monitor menyertakan
+  jumlah status dan tanggal/jam cek terakhir; grafik uptime meliputi tujuh hari selesai, celah berarti tanpa data.
+- Mode TV `/admin/tv` tetap memerlukan login dan `monitors.view`, menyaring data melalui layanan dashboard
+  yang sama, dengan layar penuh dan pembaruan 60 detik. Tidak ada akses TV anonim/token pada fase ini.
+- Pengaturan umum melengkapi identitas, booking, pengingat, WiFi, dan tampilan publik. Monitoring/notifikasi
+  dan UKOM memakai halaman pengaturan yang sudah ada; rahasia tetap di `.env`.
+- Empat role bawaan tetap digunakan, permission-nya dapat diatur; Super Admin selalu lengkap. Seeder
+  hanya mengisi default untuk role baru dan menjaga Super Admin, tanpa menimpa penyesuaian role lain.
+- Pengelolaan akun memerlukan `users.manage` dan `roles.manage` karena mencakup pemberian role.
+  Password edit kosong mempertahankan password lama, tidak memuat hash ke form. Pengguna tidak bisa
+  menonaktifkan dirinya sendiri atau mencabut Super Admin dirinya; admin aktif terakhir dilindungi.
+- Audit log hanya baca: waktu, pelaku, modul, deskripsi, referensi objek, dan IP jika tersedia;
+  properti mentah tidak ditampilkan.
+
+### Backup
+- Backup berisi database saja, disimpan pada disk privat `backups` di `storage/app/private/backups`.
+  Lampiran dan berkas dokumen berada di luar cakupan arsip database ini. Unduhan memerlukan
+  `backups.manage`, nama file tervalidasi, dan pencocokan dengan daftar arsip yang tersedia.
+- Job unik di queue `default` pukul 02.00 WITA; cleanup pukul 02.30 WITA. Retensi 14 hari memakai
+  strategi bawaan Spatie, yang tetap mempertahankan backup terbaru bila belum ada penggantinya.
+  Hasil terakhir dicatat sebagai Berjalan/Berhasil/Gagal. Notifikasi eksternal paket dinonaktifkan.
+- Program dump dapat ditentukan melalui `DB_DUMP_BINARY_PATH`; path Laragon tidak di-hardcode.
+  `BACKUP_ARCHIVE_PASSWORD` opsional untuk enkripsi ZIP. Verifikasi integritas arsip diaktifkan.
+- Verifikasi lokal menjalankan job dengan MySQL sungguhan, membuka ZIP, dan memeriksa dump SQL
+  tidak kosong. Akun QA sementara dihapus sebelum dump; tidak ada reset/restore database pengguna.

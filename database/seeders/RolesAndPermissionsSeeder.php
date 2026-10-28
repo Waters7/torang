@@ -23,7 +23,11 @@ class RolesAndPermissionsSeeder extends Seeder
         $registrar->forgetCachedPermissions();
 
         foreach (Role::cases() as $role) {
-            RoleModel::findOrCreate($role->value, 'web')->syncPermissions($role->permissions());
+            $model = RoleModel::firstOrCreate(['name' => $role->value, 'guard_name' => 'web']);
+            // Pengaturan izin dari panel tidak ditimpa saat seeder dijalankan ulang.
+            if ($model->wasRecentlyCreated || $role === Role::SuperAdmin) {
+                $model->syncPermissions($role->permissions());
+            }
         }
 
         $registrar->forgetCachedPermissions();

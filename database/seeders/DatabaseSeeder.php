@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
                 SampleWifiSeeder::class,
                 SampleHostingSeeder::class,
                 SampleUkomReportSeeder::class,
+                SampleHelpdeskSeeder::class,
             ]);
         }
     }

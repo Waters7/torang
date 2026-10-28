@@ -31,6 +31,7 @@ return [
         'bookings.close_time' => '17:00',
         'bookings.approver_roles' => ['kepala_unit', 'super_admin'],
         'bookings.show_sunday' => false,
+        'reports.cbt.operating_days' => [1, 2, 3, 4, 5, 6],
 
         // Monitoring (null pada monitor = pakai nilai ini)
         'monitoring.interval_minutes' => 1,

@@ -7,7 +7,7 @@
 - [x] Fase 4 — Beranda & Status Publik (React)
 - [x] Fase 5 — WiFi & Pengingat Hosting
 - [x] Fase 6 — Laporan UKOM (SPTJM)
-- [ ] Fase 7 — Helpdesk, Pengumuman, Laporan, Dashboard
+- [x] Fase 7 — Helpdesk, Pengumuman, Laporan, Dashboard
 - [ ] Fase 8 — Finalisasi & Deployment VPS
 
 ## Catatan
@@ -137,3 +137,23 @@
 - Verifikasi: `php artisan test` 350 lulus · `pint` bersih · migrasi di MySQL lokal · wizard (isian otomatis, preset,
   total), halaman detail, pengaturan, dan kolegium dicek di browser · isi DOCX dicek otomatis oleh test.
 - Belum bisa dicek di lokal: konversi PDF sungguhan (LibreOffice belum terpasang) — diuji dengan proses tiruan.
+
+### Fase 7 — selesai 28 Oktober 2026
+- Helpdesk: form publik `/lapor` dengan Turnstile, honeypot, rate limit, dan PDF privat maksimal 2 MB;
+  kode tiket untuk `/cek-tiket`, tautan pribadi untuk tanggapan petugas dan penilaian 1–5 setelah selesai.
+- Panel Tiket: laporan internal, lampiran, prioritas, penugasan petugas, transisi status, komentar internal/pelapor,
+  dan penilaian. Tombol **Buat tiket** di Log Pemakaian mencegah tiket ganda dari log yang sama.
+- Pengumuman: info/maintenance/insiden, rentang aktif, publik/internal; banner beranda diperbarui otomatis.
+- Laporan CBT & SLA: filter periode/lab/penyelenggara, Excel dan PDF A4 lanskap; jumlah kegiatan, jam,
+  peserta terdaftar/hadir, utilisasi, uptime tertimbang, dan insiden. Data kosong dinyatakan secara eksplisit.
+- Dashboard operasional sesuai hak akses, ringkasan status monitor, insiden/hosting/tiket, grafik uptime 7 hari,
+  serta `/admin/tv` berautentikasi dengan layar penuh dan pembaruan otomatis.
+- Sistem: Pengguna, Role & hak akses, Pengaturan umum, Audit log, Backup database privat.
+  Perlindungan admin terakhir/akun sendiri dan seeder yang mempertahankan perubahan izin role.
+- Backup database di queue `default` pukul 02.00 WITA, pembersihan 02.30 WITA, retensi 14 hari;
+  tersedia aksi backup manual dan unduhan berizin. `DB_DUMP_BINARY_PATH` mendukung lokasi program dump khusus.
+- Verifikasi: `php artisan test` **374 lulus** · `pint` bersih · TypeScript bersih · build sukses.
+  Dashboard, mode TV, tiket, laporan, banner, dan halaman publik diperiksa di browser; halaman publik muat
+  pada viewport 360 px. Ekspor Excel berhasil dibuka; PDF CBT/SLA diperiksa visual.
+- Backup MySQL sungguhan berhasil: ZIP privat berisi dump SQL, verifikasi arsip aktif. Akun uji sementara
+  dibersihkan sebelum backup; data pegawai dan arsip backup tetap di lokal, tidak masuk repo.

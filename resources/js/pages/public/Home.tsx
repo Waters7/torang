@@ -11,6 +11,7 @@ import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Head, Link, usePage, usePoll } from '@inertiajs/react';
 
 interface Props {
+    announcements: { id: number; title: string; body: string; type: string; label: string; endsAt: string | null }[];
     summary: PublicSummary;
     labsNow: LabNow[];
     week: WeekSchedule;
@@ -19,16 +20,17 @@ interface Props {
     display: DisplaySettings;
 }
 
-export default function Home({ summary, labsNow, week, networks, apps, display }: Props) {
+export default function Home({ summary, labsNow, week, networks, apps, display, announcements }: Props) {
     const { site } = usePage().props;
     const now = useNow(30_000);
 
     // Partial reload berkala: hanya bagian status, jadwal minggu tidak ikut dimuat ulang.
-    usePoll(display.refreshSeconds * 1000, { only: ['summary', 'labsNow', 'networks', 'apps'] });
+    usePoll(display.refreshSeconds * 1000, { only: ['summary', 'labsNow', 'networks', 'apps', 'announcements'] });
 
     return (
         <PublicLayout>
             <Head title="Beranda" />
+            {announcements.length > 0 && <section aria-label="Pengumuman layanan" className="mx-auto max-w-6xl space-y-3 px-4 pt-6">{announcements.map(a => <article key={a.id} className={`rounded-card border p-5 ${a.type === 'incident' ? 'border-red-200 bg-red-50' : a.type === 'maintenance' ? 'border-amber-200 bg-amber-50' : 'border-border bg-faint'}`}><p className="eyebrow">{a.label}</p><h2 className="mt-1 font-semibold">{a.title}</h2><p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed">{a.body}</p>{a.endsAt && <p className="mt-2 text-xs text-muted">Hingga {new Date(a.endsAt).toLocaleString('id-ID', { timeZone: 'Asia/Makassar' })} WITA</p>}</article>)}</section>}
 
             {/* Hero */}
             <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:py-14 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center">

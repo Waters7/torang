@@ -15,6 +15,7 @@ const quickLinks = [
     { label: 'Cek Status Pengajuan', href: '/cek-status' },
     { label: 'Status Layanan', href: '/status' },
     { label: 'Lapor Gangguan', href: '/lapor' },
+    { label: 'Cek Status Tiket', href: '/cek-tiket' },
 ];
 
 /** Nomor lokal 08xx menjadi tautan wa.me/628xx. */
@@ -52,7 +53,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                         </ul>
                     </nav>
 
-                    <div className="flex w-full gap-2 sm:w-auto">
+                    <div className="flex w-full flex-col gap-2 min-[340px]:flex-row sm:w-auto">
                         <Link
                             href="/ajukan"
                             className="inline-flex min-h-11 flex-1 items-center justify-center rounded-control bg-teal-text px-3 text-sm font-semibold whitespace-nowrap text-white hover:bg-ink sm:flex-none sm:px-4"

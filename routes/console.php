@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\RunDatabaseBackup;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -24,3 +25,7 @@ Schedule::command('model:prune')->dailyAt('01:00')->withoutOverlapping();
 // Infrastruktur: hosting/domain & WiFi
 Schedule::command('services:send-reminders')->dailyAt('08:00')->withoutOverlapping();
 Schedule::command('wifi:rotation-reminders')->weeklyOn(1, '08:00')->withoutOverlapping();
+
+// Backup database privat, retensi 14 hari.
+Schedule::job(new RunDatabaseBackup, 'default')->dailyAt('02:00')->withoutOverlapping();
+Schedule::command('backup:clean --disable-notifications')->dailyAt('02:30')->withoutOverlapping();
