@@ -1,0 +1,124 @@
+@import './neumorphism.css';
+
+.torang-public {
+    background: var(--neo-surface);
+}
+
+.torang-public > header {
+    background: var(--neo-surface);
+    border-color: var(--neo-outline);
+    box-shadow: 0 4px 16px #c9d5d255;
+}
+
+.torang-public :where(.rounded-card.bg-white, .rounded-control.bg-white, .rounded-full.bg-white, .torang-calendar) {
+    background: var(--neo-surface);
+    border-color: var(--neo-outline);
+    box-shadow: var(--neo-raised);
+}
+
+.torang-public .rounded-card > header.bg-white {
+    background: transparent;
+}
+
+.torang-public .rounded-card.bg-faint {
+    box-shadow: var(--neo-raised);
+}
+
+.torang-public a[aria-label='TORANG — Beranda'] {
+    box-shadow: none;
+    transform: none;
+}
+
+.torang-public :where(.rounded-card.bg-ink-dark, .neo-banner) {
+    box-shadow:
+        var(--neo-raised),
+        inset 1px 1px 1px #ffffff20;
+    border: 1px solid #ffffff25;
+}
+
+.torang-public :where(button, a).rounded-control,
+.torang-public nav a.rounded-full {
+    box-shadow: var(--neo-small);
+    transition:
+        transform var(--neo-duration),
+        box-shadow var(--neo-duration),
+        background-color var(--neo-duration);
+}
+
+.torang-public :where(input:not([type='checkbox'], [type='radio'], [type='file'], [type='hidden']), textarea, select) {
+    background-color: var(--neo-surface);
+    border-color: #9cafa9;
+    box-shadow: var(--neo-inset);
+    transition:
+        border-color var(--neo-duration),
+        box-shadow var(--neo-duration);
+}
+
+.torang-public :where(input, textarea, select):focus-visible {
+    outline: 2px solid #08796c;
+    outline-offset: 3px;
+}
+
+.torang-public :where(input, textarea, select)[aria-invalid='true'] {
+    border-color: #b42318;
+}
+
+.torang-public :where(a.rounded-card, button.rounded-card) {
+    transition:
+        transform var(--neo-duration),
+        box-shadow var(--neo-duration);
+}
+
+/* Kartu gelap mempertahankan bayangan dan sorotan yang sesuai dengan latarnya. */
+.torang-public :where(.bg-ink, .bg-ink-dark) :where(button, a).rounded-control {
+    box-shadow:
+        3px 3px 9px #071d1970,
+        -2px -2px 7px #ffffff12;
+}
+
+.torang-public .neo-banner-slide {
+    animation: torang-slide 320ms ease-out;
+}
+
+.torang-public main {
+    animation: torang-enter 420ms ease-out;
+}
+
+.torang-public main :where(.rounded-card.bg-white, .torang-calendar) {
+    animation: torang-enter 450ms ease-out backwards;
+}
+
+.torang-public main .grid > :nth-child(2) {
+    animation-delay: 45ms;
+}
+.torang-public main .grid > :nth-child(3) {
+    animation-delay: 90ms;
+}
+.torang-public main .grid > :nth-child(4) {
+    animation-delay: 135ms;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .torang-public :where(a.rounded-card, button.rounded-card):hover {
+        transform: translateY(-3px);
+        box-shadow:
+            10px 12px 24px var(--neo-shadow),
+            -8px -8px 20px var(--neo-highlight);
+    }
+    .torang-public :where(button, a).rounded-control:hover,
+    .torang-public nav a.rounded-full:hover {
+        transform: translateY(-1px);
+    }
+}
+
+.torang-public :where(button, a).rounded-control:active,
+.torang-public :where(a.rounded-card, button.rounded-card):active,
+.torang-public nav a.rounded-full:active {
+    transform: translateY(1px);
+    box-shadow: var(--neo-inset);
+}
+
+.torang-public button:disabled {
+    transform: none;
+    box-shadow: none;
+}

@@ -188,7 +188,7 @@ export default function BookingCreate({ labs, departments, activityTypes, rules,
                 </p>
 
                 <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-                    <form onSubmit={submit} className="space-y-6" noValidate>
+                    <form onSubmit={submit} className="min-w-0 space-y-6" noValidate>
                         <FormCard number={1} title="Data pemohon">
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Field id="applicant_name" label="Nama lengkap" error={errors.applicant_name} required>
@@ -361,7 +361,7 @@ export default function BookingCreate({ labs, departments, activityTypes, rules,
                         </FormCard>
                     </form>
 
-                    <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+                    <aside className="min-w-0 space-y-6 lg:sticky lg:top-6 lg:self-start">
                         <div className="rounded-card bg-ink-dark p-6 text-white">
                             <h2 className="font-mono text-xs font-semibold tracking-[0.14em] text-teal uppercase">Ketentuan</h2>
                             <ol className="mt-4 space-y-4 text-sm leading-relaxed text-white/85">

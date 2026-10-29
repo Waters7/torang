@@ -1,7 +1,7 @@
 <x-filament-widgets::widget>
     <div wire:poll.60s>
         <p style="font-size:13px;opacity:.75;margin-bottom:16px">Ringkasan operasional · {{ $updatedAt }}</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px">
+        <div class="torang-operations-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px">
             @foreach ($groups as $group)
                 <x-filament::section :heading="$group['title']">
                     @if (isset($group['summary']))

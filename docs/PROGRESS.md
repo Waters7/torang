@@ -8,9 +8,27 @@
 - [x] Fase 5 — WiFi & Pengingat Hosting
 - [x] Fase 6 — Laporan UKOM (SPTJM)
 - [x] Fase 7 — Helpdesk, Pengumuman, Laporan, Dashboard
+- [x] Penyempurnaan beranda, petugas mingguan, tema Neumorphism & uji LAN
 - [ ] Fase 8 — Finalisasi & Deployment VPS
 
 ## Catatan
+
+### Penyempurnaan UI & akses LAN — selesai 28 Oktober 2026
+- Beranda: banner slider dengan panah, indikator, jeda, navigasi keyboard; kartu akses layanan,
+  pelacakan pengajuan/tiket, ringkasan kondisi, kartu aplikasi, dan menu ponsel yang ringkas.
+- Petugas minggu berjalan: kartu Senin–Sabtu berisi nama, shift, waktu WITA, dan cakupan lab.
+  Hanya jadwal terbit; draf, kontak, NIP, serta catatan internal tidak dikirim ke publik.
+- Neumorphism bersama untuk seluruh halaman publik dan panel/dashboard Filament, termasuk
+  mode terang/gelap, permukaan timbul, input cekung, dan animasi masuk/hover/tekan.
+  Pengaturan reduced motion mematikan animasi tambahan serta putaran otomatis slider.
+- Form pengajuan dan captcha menyesuaikan perubahan lebar layar tanpa melebar horizontal.
+- Skrip Windows untuk server uji LAN dan firewall TCP khusus IP, adapter, aplikasi PHP,
+  serta subnet lokal. Konfigurasi lokal memakai APP_URL LAN dan APP_DEBUG=false.
+  Panduan menjalankan/menghentikan layanan: `docs/LAN_TESTING.md`.
+- Verifikasi: **378 test lulus (1843 assertions)**, Pint, TypeScript, dan build sukses.
+  Beranda, pengajuan, kalender, status, helpdesk, pelacakan, serta dashboard dicek pada 360 px;
+  dashboard dicek dalam mode terang/gelap. Beranda dan login melalui IP LAN merespons HTTP 200;
+  aturan firewall dan listener diverifikasi. Uji dari perangkat fisik lain belum dilakukan.
 
 ### Fase 0 — selesai 23 Oktober 2026
 - Laravel 13 + Filament 5 (`/admin`, tema TORANG) + Inertia 3/React 19/TypeScript untuk halaman publik.

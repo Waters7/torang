@@ -110,6 +110,30 @@ export interface WeekSchedule {
     labs: { id: number; name: string; color: string; blocks: Record<string, (BookingSlot & { state: ScheduleBlockState })[]> }[];
 }
 
+export interface PublicAnnouncement {
+    id: number;
+    title: string;
+    body: string;
+    type: string;
+    label: string;
+    endsAt: string | null;
+}
+
+export interface PublicDutyWeek {
+    published: boolean;
+    start: string;
+    end: string;
+    label: string;
+    staffCount: number;
+    days: {
+        date: string;
+        label: string;
+        shortDate: string;
+        isToday: boolean;
+        slots: { shift: string; start: string; end: string; coverage: string; staff: string[] }[];
+    }[];
+}
+
 export interface HourBar {
     label: string;
     status: MonitorStatusValue | null;

@@ -24,9 +24,28 @@ export function NetworkCard({ monitor, showBars }: { monitor: NetworkStatus; sho
                 <StatusPill tone={monitorStatusTone[monitor.status.value]}>{monitor.status.label}</StatusPill>
             </header>
             {showBars && <UptimeBars hours={monitor.bars} label={`Riwayat 24 jam ${monitor.name}`} className="mt-4" />}
-            <div className="mt-3 flex items-baseline justify-between gap-2 font-mono text-xs text-muted">
+            <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 font-mono text-xs text-muted">
                 <span className={monitor.status.value === 'down' ? 'font-semibold text-offline-text' : ''}>{networkMetric(monitor)}</span>
                 <span>uptime 30 hari {formatPercent(monitor.uptime30d)}</span>
+            </div>
+        </article>
+    );
+}
+
+export function AppStatusCard({ monitor, showBars }: { monitor: AppStatus; showBars: boolean }) {
+    return (
+        <article className="min-w-0 rounded-card border border-border bg-white p-5">
+            <header className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <h3 className="font-semibold [overflow-wrap:anywhere]">{monitor.name}</h3>
+                    {monitor.category && <p className="mt-1 text-xs text-muted-soft">{monitor.category}</p>}
+                </div>
+                <StatusPill tone={monitorStatusTone[monitor.status.value]}>{monitor.status.label}</StatusPill>
+            </header>
+            {showBars && <UptimeBars days={monitor.bars} label={`Riwayat 30 hari ${monitor.name}`} className="mt-4" />}
+            <div className="mt-4 flex flex-wrap justify-between gap-2 border-t border-border pt-3 font-mono text-xs text-muted">
+                <span>Respons {monitor.status.value === 'down' || monitor.latencyMs === null ? '–' : `${monitor.latencyMs} ms`}</span>
+                <span>Uptime {formatPercent(monitor.uptime30d)}</span>
             </div>
         </article>
     );
@@ -48,7 +67,9 @@ export function AppStatusRow({ monitor, showBars }: { monitor: AppStatus; showBa
             {showBars ? <UptimeBars days={monitor.bars} label={`Riwayat 30 hari ${monitor.name}`} /> : <span className="hidden sm:block" />}
             <div className="flex items-center justify-between gap-4 sm:justify-end">
                 <div className="font-mono text-xs text-muted sm:text-right">
-                    <span className="block">{monitor.status.value === 'down' || monitor.latencyMs === null ? '–' : `${monitor.latencyMs} ms`}</span>
+                    <span className="block">
+                        {monitor.status.value === 'down' || monitor.latencyMs === null ? '–' : `${monitor.latencyMs} ms`}
+                    </span>
                     <span className="block">uptime {formatPercent(monitor.uptime30d)}</span>
                 </div>
                 <StatusPill tone={monitorStatusTone[monitor.status.value]} className="hidden min-w-24 justify-center sm:inline-flex">

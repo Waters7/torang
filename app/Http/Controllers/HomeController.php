@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\PublicSite\PublicAnnouncements;
+use App\Services\PublicSite\PublicDutyRoster;
 use App\Services\PublicSite\PublicStatus;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,6 +21,7 @@ class HomeController extends Controller
             'summary' => fn (): array => $status->summary(),
             'labsNow' => fn (): array => $status->labsNow(),
             'week' => fn (): array => $status->weekSchedule(),
+            'dutyWeek' => fn (): array => app(PublicDutyRoster::class)->currentWeek(),
             'networks' => fn (): array => $status->networks(),
             'apps' => fn (): array => $status->apps(),
             'display' => fn (): array => $status->settings(),

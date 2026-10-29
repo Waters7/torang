@@ -3,6 +3,32 @@
 Catatan keputusan yang tidak diatur langsung oleh `docs/SPEC.md`. Tambahkan entri baru di bawah
 fase terkait.
 
+## Penyempurnaan UI & uji LAN (28 Oktober 2026)
+
+- Permintaan pengguna memperbarui susunan beranda SPEC §9.2: banner bergeser, kartu layanan,
+  ringkasan, kondisi lab, jadwal lab, nama petugas minggu berjalan, jaringan, dan kartu aplikasi.
+  Pengumuman tetap tersedia di luar slider; insiden terbuka sejak awal. Slider otomatis setiap
+  delapan detik, berhenti ketika disorot/fokus, dengan kontrol jeda, panah, dan keyboard.
+- Jadwal publik berasal dari minggu Senin berjalan yang berstatus Published, Senin–Sabtu mengikuti
+  modul petugas (bukan pengaturan Minggu opsional untuk booking). Penugasan di luar rentang disaring,
+  nama dikelompokkan berdasarkan shift dan cakupan; tidak menerbitkan draf atau mengisi jadwal otomatis.
+  Resource API melakukan whitelist; cache hanya data tersaring selama 30 detik, dengan kunci per minggu.
+- Polling beranda mencakup jadwal lab dan petugas, sehingga penerbitan/pergantian minggu ikut terlihat.
+  Waktu pemeriksaan monitor ditampilkan lengkap dengan tanggal; data lama tidak diberi kesan baru diperiksa.
+- Neumorphism memakai token CSS bersama, tanpa pustaka animasi tambahan. Tema publik dibatasi pada
+  PublicLayout; tema Filament resmi dimuat melalui viteTheme. Animasi tambahan memakai opacity/transform,
+  mendukung prefers-reduced-motion, dan bayangan dihilangkan pada cetakan. Warna status dan outline fokus
+  tetap membedakan keadaan/kontrol. Mode gelap dashboard mempertahankan preferensi pengguna/perangkat.
+- ResizeObserver pada wadah Turnstile mengganti ukuran normal/compact saat melewati 300 px. Token
+  sebelumnya dikosongkan ketika widget dibuat ulang; validasi captcha di server tetap berlaku.
+- Pengujian LAN memakai proses PHP terpisah yang hanya bind ke IPv4 adapter terpilih, sehingga server
+  loopback yang sudah berjalan tetap tersedia. Firewall Windows mengizinkan executable PHP dan TCP 8001
+  hanya pada IP/adapter tersebut, dari prefix subnet yang dihitung dari konfigurasi adapter.
+  Profil jaringan dan firewall global tidak diubah; aturan mencakup profil aktif termasuk Wi-Fi Public.
+  Tidak ada port forwarding, pembukaan MySQL, maupun auto-start layanan setelah reboot.
+- APP_URL LAN dan APP_DEBUG=false hanya diterapkan pada konfigurasi lokal; rahasia .env tidak masuk Git.
+  Ini sarana UAT di LAN, bukan penyelesaian deployment VPS Fase 8.
+
 ## Fase 0 — Fondasi (23 Oktober 2026)
 
 ### Versi

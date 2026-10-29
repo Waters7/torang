@@ -36,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('2.5rem')
             ->favicon(asset('favicon.svg'))
             ->font('Sora', provider: GoogleFontProvider::class)
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->monoFont('JetBrains Mono', provider: GoogleFontProvider::class)
             ->colors([
                 'primary' => Color::hex('#08796C'),

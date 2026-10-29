@@ -1,0 +1,115 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../neumorphism.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+.fi-body,
+.fi-topbar,
+.fi-sidebar-header,
+.fi-sidebar,
+.fi-main-sidebar {
+    background-color: var(--neo-surface);
+}
+
+.fi-topbar {
+    box-shadow: 0 4px 14px var(--neo-shadow);
+    border-bottom: 1px solid var(--neo-outline);
+}
+
+.fi-section:not(.fi-section-not-contained),
+.fi-wi-stats-overview-stat,
+.fi-ta-ctn,
+.fi-simple-main {
+    background-color: var(--neo-surface);
+    border: 1px solid var(--neo-outline);
+    border-radius: 18px;
+    box-shadow: var(--neo-raised);
+}
+
+.fi-sidebar-item-btn,
+.fi-btn,
+.fi-icon-btn {
+    transition:
+        transform var(--neo-duration),
+        box-shadow var(--neo-duration),
+        background-color var(--neo-duration);
+}
+
+.fi-btn {
+    border-radius: 10px;
+    box-shadow: var(--neo-small);
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background: var(--neo-surface);
+    box-shadow: var(--neo-inset);
+}
+
+.fi-input-wrp {
+    background: var(--neo-surface);
+    border: 1px solid var(--neo-outline);
+    box-shadow: var(--neo-inset);
+}
+
+.fi-input-wrp:focus-within {
+    outline: 2px solid #08796c;
+    outline-offset: 2px;
+}
+
+.fi-input-wrp.fi-invalid {
+    border-color: #d64545;
+}
+
+.fi-body .fi-page {
+    animation: torang-enter 400ms ease-out;
+}
+
+.fi-body .fi-wi {
+    animation: torang-enter 450ms ease-out backwards;
+}
+
+.fi-body .fi-wi:nth-child(2) {
+    animation-delay: 60ms;
+}
+.fi-body .fi-wi:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+.torang-operations-grid > .fi-section {
+    animation: torang-enter 450ms ease-out backwards;
+}
+
+.torang-operations-grid {
+    align-items: start;
+}
+
+.torang-operations-grid > .fi-section:nth-child(2) {
+    animation-delay: 60ms;
+}
+.torang-operations-grid > .fi-section:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .fi-btn:hover,
+    .fi-sidebar-item-btn:hover {
+        transform: translateY(-1px);
+    }
+    a.fi-wi-stats-overview-stat:hover {
+        transform: translateY(-3px);
+    }
+}
+
+.fi-btn:active {
+    transform: translateY(1px);
+    box-shadow: var(--neo-inset);
+}
+.fi-btn:disabled {
+    transform: none;
+    box-shadow: none;
+}
+
+.dark .fi-body .fi-input-wrp:focus-within {
+    outline-color: #57cbbc;
+}

@@ -1,0 +1,61 @@
+/* Satu bahasa visual untuk portal publik dan panel petugas. */
+.torang-public,
+.fi-body {
+    --neo-surface: #eaf0ef;
+    --neo-highlight: #ffffff;
+    --neo-shadow: #c9d5d2;
+    --neo-outline: #d4dfdc;
+    --neo-raised: 8px 8px 20px var(--neo-shadow), -8px -8px 20px var(--neo-highlight);
+    --neo-small: 4px 4px 10px var(--neo-shadow), -4px -4px 10px var(--neo-highlight);
+    --neo-inset: inset 3px 3px 7px var(--neo-shadow), inset -3px -3px 7px var(--neo-highlight);
+    --neo-duration: 180ms;
+}
+
+.dark .fi-body {
+    --neo-surface: #182724;
+    --neo-highlight: #233a35;
+    --neo-shadow: #0d1916;
+    --neo-outline: #304a43;
+}
+
+@keyframes torang-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes torang-slide {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto !important;
+    }
+    .torang-public *,
+    .fi-body * {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@media print {
+    .torang-public *,
+    .fi-body * {
+        box-shadow: none !important;
+        animation: none !important;
+    }
+}

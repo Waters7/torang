@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface TurnstileApi {
     render: (container: HTMLElement, options: Record<string, unknown>) => string;
@@ -47,8 +47,18 @@ interface TurnstileProps {
 export default function Turnstile({ siteKey, onToken, resetKey }: TurnstileProps) {
     const container = useRef<HTMLDivElement>(null);
     const widgetId = useRef<string | null>(null);
+    const [compact, setCompact] = useState(true);
     const onTokenRef = useRef(onToken);
     onTokenRef.current = onToken;
+
+    useEffect(() => {
+        if (!container.current) return;
+
+        const observer = new ResizeObserver(([entry]) => setCompact(entry.contentRect.width < 300));
+        observer.observe(container.current);
+
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -63,7 +73,7 @@ export default function Turnstile({ siteKey, onToken, resetKey }: TurnstileProps
                     sitekey: siteKey,
                     language: 'id',
                     // Ukuran normal lebarnya tetap 300px; di ponsel sempit pakai compact (150px) agar tidak melebarkan halaman.
-                    size: container.current.clientWidth < 300 ? 'compact' : 'normal',
+                    size: compact ? 'compact' : 'normal',
                     callback: (token: string) => onTokenRef.current(token),
                     'expired-callback': () => onTokenRef.current(''),
                     'error-callback': () => onTokenRef.current(''),
@@ -73,13 +83,14 @@ export default function Turnstile({ siteKey, onToken, resetKey }: TurnstileProps
 
         return () => {
             cancelled = true;
+            onTokenRef.current('');
 
             if (widgetId.current && window.turnstile) {
                 window.turnstile.remove(widgetId.current);
                 widgetId.current = null;
             }
         };
-    }, [siteKey]);
+    }, [siteKey, compact]);
 
     useEffect(() => {
         if (resetKey > 0 && widgetId.current && window.turnstile) {
