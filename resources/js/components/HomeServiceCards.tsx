@@ -3,9 +3,11 @@ import {
     CalendarDaysIcon,
     ChatBubbleLeftRightIcon,
     ComputerDesktopIcon,
+    LockClosedIcon,
     MagnifyingGlassIcon,
     SignalIcon,
     Squares2X2Icon,
+    TvIcon,
     UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { Link } from '@inertiajs/react';
@@ -49,7 +51,7 @@ export function ServiceCards() {
                 <h2 id="judul-layanan" className="text-xl font-semibold tracking-tight">
                     Apa yang Anda perlukan?
                 </h2>
-                <p className="text-xs text-muted-soft">Akses layanan tanpa login</p>
+                <p className="text-xs text-muted-soft">Layanan kampus dalam satu tempat</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {services.map(({ icon: Icon, ...service }) => (
@@ -69,6 +71,27 @@ export function ServiceCards() {
                     </Link>
                 ))}
             </div>
+            <a
+                href="/admin/tv"
+                className="group mt-5 flex flex-wrap items-center gap-4 rounded-card border border-border bg-white p-5 hover:border-teal"
+            >
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-control bg-ink text-teal">
+                    <TvIcon className="size-6" aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1 basis-52">
+                    <h3 className="font-semibold">Mode TV / NOC</h3>
+                    <p className="mt-1 text-xs leading-6 text-muted">
+                        Pantau jaringan, aplikasi, kegiatan lab, dan petugas dalam tampilan layar penuh.
+                    </p>
+                    <span className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted-soft">
+                        <LockClosedIcon className="size-3.5" aria-hidden="true" />
+                        Login petugas
+                    </span>
+                </div>
+                <span className="ml-auto inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-teal-text">
+                    Buka Mode TV <ArrowRightIcon className="size-4" aria-hidden="true" />
+                </span>
+            </a>
             <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 rounded-control bg-faint px-4 py-2 text-xs">
                 <span className="inline-flex items-center gap-2 text-muted">
                     <MagnifyingGlassIcon className="size-4" aria-hidden="true" />

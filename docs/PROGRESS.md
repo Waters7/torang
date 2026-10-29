@@ -13,6 +13,12 @@
 
 ## Catatan
 
+### Akses Mode TV dari beranda — 29 Oktober 2026
+- [x] Kartu **Mode TV / NOC** pada bagian layanan beranda, dengan tombol **Buka Mode TV**
+  dan keterangan login petugas. Tautan menuju `/admin/tv`; izin akses yang sudah ada tetap berlaku.
+- Verifikasi: 378 test lulus (1843 assertions), Pint, TypeScript, build, dan navigasi dari
+  kartu beranda ke login petugas diperiksa di browser.
+
 ### Penyempurnaan UI & akses LAN — selesai 28 Oktober 2026
 - Beranda: banner slider dengan panah, indikator, jeda, navigasi keyboard; kartu akses layanan,
   pelacakan pengajuan/tiket, ringkasan kondisi, kartu aplikasi, dan menu ponsel yang ringkas.

@@ -3,6 +3,12 @@
 Catatan keputusan yang tidak diatur langsung oleh `docs/SPEC.md`. Tambahkan entri baru di bawah
 fase terkait.
 
+## Akses Mode TV dari beranda (29 Oktober 2026)
+
+- Permintaan menaruh Mode TV / NOC di halaman depan diterapkan sebagai kartu akses ke `/admin/tv`.
+  Menggunakan navigasi HTML biasa karena tujuannya halaman Filament, bukan respons Inertia.
+  Pengunjung diarahkan ke login jika belum masuk; permission `monitors.view` tetap diperlukan.
+
 ## Penyempurnaan UI & uji LAN (28 Oktober 2026)
 
 - Permintaan pengguna memperbarui susunan beranda SPEC §9.2: banner bergeser, kartu layanan,
