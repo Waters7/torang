@@ -1,0 +1,8 @@
+# Scheduler Laravel untuk TORANG (monitoring tiap menit, pengingat, agregasi, backup).
+# Salin ke /etc/cron.d/torang (pemilik root, mode 0644). Baris terakhir file cron.d wajib diakhiri newline.
+# Pastikan berjalan: php artisan torang:check, baris "Scheduler (cron)" harus berstatus OK.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+* * * * * www-data cd /var/www/torang && php artisan schedule:run >> /dev/null 2>&1

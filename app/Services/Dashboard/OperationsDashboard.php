@@ -3,8 +3,11 @@
 namespace App\Services\Dashboard;
 
 use App\Enums\BookingStatus;
+use App\Enums\HostedServiceState;
+use App\Enums\MonitorGroup;
 use App\Enums\MonitorStatus;
 use App\Enums\Permission;
+use App\Enums\TicketStatus;
 use App\Filament\Resources\Bookings\BookingResource;
 use App\Filament\Resources\DutyWeeks\DutyWeekResource;
 use App\Filament\Resources\HostedServices\HostedServiceResource;
@@ -20,55 +23,218 @@ use App\Models\MonitorDailyStat;
 use App\Models\MonitorIncident;
 use App\Models\Ticket;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Ringkasan dashboard operasional (SPEC §10), dikelompokkan per bagian dan disaring sesuai izin pengguna.
+ * Tiap kelompok: judul, tautan ke halaman terkait, ringkasan opsional, dan daftar butir (label, detail, status).
+ */
 class OperationsDashboard
 {
+    /**
+     * @return array{groups: list<array<string, mixed>>, updatedAt: string}
+     */
     public function data(User $user): array
     {
         abort_unless($user->is_active, 403);
+
         $groups = [];
+
         if ($user->can(Permission::BookingsView->value)) {
-            $bookings = Booking::with('lab')->whereDate('date', today())->whereIn('status', [BookingStatus::Approved, BookingStatus::Completed])->orderBy('start_time')->get();
-            $groups[] = ['title' => 'Kegiatan CBT hari ini', 'url' => BookingResource::getUrl(), 'items' => $bookings->map(fn ($b) => ['label' => $b->lab->name.' · '.$b->activity_name, 'detail' => $b->timeRange().' WITA', 'status' => $b->isOngoing() ? 'Berlangsung' : $b->status->label()])->all()];
-            $pending = Booking::where('status', BookingStatus::Pending)->count();
-            $groups[] = ['title' => 'Pengajuan menunggu', 'url' => BookingResource::getUrl(), 'items' => [['label' => $pending.' pengajuan', 'detail' => 'Menunggu persetujuan', 'status' => '']]];
-            $duty = DutyAssignment::with(['staff', 'shift', 'lab'])->whereDate('date', today())->whereHas('week', fn ($q) => $q->where('status', 'published'))->get();
-            $groups[] = ['title' => 'Petugas hari ini', 'url' => DutyWeekResource::getUrl(), 'items' => $duty->map(fn ($a) => ['label' => $a->staff->name, 'detail' => $a->shift->name.' · '.$a->coverageLabel(), 'status' => ''])->all()];
+            $groups[] = $this->bookingsToday();
+            $groups[] = $this->pendingBookings();
+            $groups[] = $this->dutyToday();
         }
+
         if ($user->can(Permission::MonitorsView->value)) {
-            $monitors = Monitor::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
-            foreach (['network' => 'Jaringan', 'application' => 'Aplikasi'] as $type => $label) {
-                $group = $monitors->filter(fn ($m) => $m->group->value === $type);
-                $groups[] = ['title' => $label, 'url' => $type === 'network' ? NetworkMonitorResource::getUrl() : ApplicationMonitorResource::getUrl(),
-                    'summary' => collect(MonitorStatus::cases())->map(fn ($status) => $group->filter(fn ($m) => $m->current_status === $status)->count().' '.$status->label())->implode(' · '),
-                    'items' => $group->map(fn ($m) => ['label' => $m->name, 'detail' => $m->last_checked_at ? $m->last_checked_at->translatedFormat('d M H:i').' WITA' : 'Belum pernah diperiksa', 'status' => $m->current_status->label()])->values()->all()];
-            }
-            $groups[] = ['title' => 'Insiden terbaru', 'url' => MonitorIncidentResource::getUrl(), 'items' => MonitorIncident::with('monitor')->latest('started_at')->limit(5)->get()->map(fn ($i) => ['label' => $i->monitor->name, 'detail' => $i->started_at->translatedFormat('d M H:i').' WITA · '.$i->durationLabel(), 'status' => $i->resolved_at ? 'Pulih' : 'Offline'])->all()];
+            $monitors = Monitor::query()->active()->orderBy('sort_order')->orderBy('name')->get();
+
+            $groups[] = $this->monitorGroup($monitors, MonitorGroup::Network);
+            $groups[] = $this->monitorGroup($monitors, MonitorGroup::Application);
+            $groups[] = $this->latestIncidents();
         }
+
         if ($user->can(Permission::HostingView->value)) {
-            $groups[] = ['title' => 'Hosting jatuh tempo ≤ 30 hari', 'url' => HostedServiceResource::getUrl(), 'items' => HostedService::where('status', 'active')->whereDate('expires_at', '<=', today()->addDays(30))->orderBy('expires_at')->get()->map(fn ($s) => ['label' => $s->name, 'detail' => $s->expires_at->translatedFormat('d F Y'), 'status' => $s->state()->label()])->all()];
+            $groups[] = $this->dueServices();
         }
+
         if ($user->can(Permission::TicketsView->value)) {
-            $count = Ticket::whereIn('status', ['open', 'in_progress', 'waiting'])->count();
-            $groups[] = ['title' => 'Tiket terbuka · '.$count, 'url' => TicketResource::getUrl(), 'items' => Ticket::whereIn('status', ['open', 'in_progress', 'waiting'])->latest()->limit(5)->get()->map(fn ($t) => ['label' => $t->code.' · '.$t->title, 'detail' => $t->priority->label(), 'status' => $t->status->label()])->all()];
+            $groups[] = $this->openTickets();
         }
 
         return ['groups' => $groups, 'updatedAt' => now()->translatedFormat('d F Y H:i').' WITA'];
     }
 
+    /**
+     * Grafik uptime gabungan 7 hari terakhir (hari ini belum diagregasi).
+     *
+     * @return array{labels: list<string>, datasets: list<array<string, mixed>>}
+     */
     public function uptime(): array
     {
-        $stats = MonitorDailyStat::whereDate('date', '>=', today()->subDays(7))->whereDate('date', '<', today())->get()->groupBy(fn ($s) => $s->date->toDateString());
+        $stats = MonitorDailyStat::query()
+            ->whereDate('date', '>=', today()->subDays(7))
+            ->whereDate('date', '<', today())
+            ->get()
+            ->groupBy(fn (MonitorDailyStat $stat): string => $stat->date->toDateString());
+
         $labels = [];
         $values = [];
+
         foreach (range(7, 1) as $offset) {
             $day = today()->subDays($offset);
             $rows = $stats->get($day->toDateString(), collect());
             $total = $rows->sum('checks_total');
+
             $labels[] = $day->translatedFormat('d M');
             $values[] = $total > 0 ? round(($rows->sum('checks_up') + $rows->sum('checks_degraded')) / $total * 100, 2) : null;
         }
 
-        return ['labels' => $labels, 'datasets' => [['label' => 'Uptime (%)', 'data' => $values, 'borderColor' => '#08796C', 'spanGaps' => false]]];
+        return [
+            'labels' => $labels,
+            'datasets' => [['label' => 'Uptime (%)', 'data' => $values, 'borderColor' => '#08796C', 'spanGaps' => false]],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function bookingsToday(): array
+    {
+        $bookings = Booking::query()
+            ->with('lab')
+            ->whereDate('date', today())
+            ->whereIn('status', [BookingStatus::Approved, BookingStatus::Completed])
+            ->orderBy('start_time')
+            ->get();
+
+        return [
+            'title' => 'Kegiatan CBT hari ini',
+            'url' => BookingResource::getUrl(),
+            'items' => $bookings->map(fn (Booking $booking): array => [
+                'label' => $booking->lab->name.' · '.$booking->activity_name,
+                'detail' => $booking->timeRange().' WITA',
+                'status' => $booking->isOngoing() ? 'Berlangsung' : $booking->status->label(),
+            ])->all(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function pendingBookings(): array
+    {
+        $pending = Booking::query()->where('status', BookingStatus::Pending)->count();
+
+        return [
+            'title' => 'Pengajuan menunggu',
+            'url' => BookingResource::getUrl(),
+            'items' => [['label' => "{$pending} pengajuan", 'detail' => 'Menunggu persetujuan', 'status' => '']],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function dutyToday(): array
+    {
+        $assignments = DutyAssignment::query()
+            ->with(['staff', 'shift', 'lab'])
+            ->whereDate('date', today())
+            ->whereHas('week', fn (Builder $query) => $query->published())
+            ->get();
+
+        return [
+            'title' => 'Petugas hari ini',
+            'url' => DutyWeekResource::getUrl(),
+            'items' => $assignments->map(fn (DutyAssignment $assignment): array => [
+                'label' => $assignment->staff->name,
+                'detail' => $assignment->shift->name.' · '.$assignment->coverageLabel(),
+                'status' => '',
+            ])->all(),
+        ];
+    }
+
+    /**
+     * @param  Collection<int, Monitor>  $monitors
+     * @return array<string, mixed>
+     */
+    private function monitorGroup(Collection $monitors, MonitorGroup $group): array
+    {
+        $members = $monitors->where('group', $group)->values();
+
+        return [
+            'title' => $group === MonitorGroup::Network ? 'Jaringan' : 'Aplikasi',
+            'url' => $group === MonitorGroup::Network ? NetworkMonitorResource::getUrl() : ApplicationMonitorResource::getUrl(),
+            'summary' => collect(MonitorStatus::cases())
+                ->map(fn (MonitorStatus $status): string => $members->where('current_status', $status)->count().' '.$status->label())
+                ->implode(' · '),
+            'items' => $members->map(fn (Monitor $monitor): array => [
+                'label' => $monitor->name,
+                'detail' => $monitor->last_checked_at
+                    ? $monitor->last_checked_at->translatedFormat('d M H:i').' WITA'
+                    : 'Belum pernah diperiksa',
+                'status' => $monitor->current_status->label(),
+            ])->all(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function latestIncidents(): array
+    {
+        $incidents = MonitorIncident::query()->with('monitor')->latest('started_at')->limit(5)->get();
+
+        return [
+            'title' => 'Insiden terbaru',
+            'url' => MonitorIncidentResource::getUrl(),
+            'items' => $incidents->map(fn (MonitorIncident $incident): array => [
+                'label' => $incident->monitor->name,
+                'detail' => $incident->started_at->translatedFormat('d M H:i').' WITA · '.$incident->durationLabel(),
+                'status' => $incident->resolved_at ? 'Pulih' : 'Offline',
+            ])->all(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function dueServices(): array
+    {
+        $services = HostedService::query()
+            ->active()
+            ->whereDate('expires_at', '<=', today()->addDays(HostedServiceState::EXPIRING_DAYS))
+            ->orderBy('expires_at')
+            ->get();
+
+        return [
+            'title' => 'Hosting jatuh tempo ≤ '.HostedServiceState::EXPIRING_DAYS.' hari',
+            'url' => HostedServiceResource::getUrl(),
+            'items' => $services->map(fn (HostedService $service): array => [
+                'label' => $service->name,
+                'detail' => $service->expires_at->translatedFormat('d F Y'),
+                'status' => $service->state()->label(),
+            ])->all(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function openTickets(): array
+    {
+        $open = Ticket::query()->whereIn('status', TicketStatus::unfinished());
+
+        return [
+            'title' => 'Tiket terbuka · '.(clone $open)->count(),
+            'url' => TicketResource::getUrl(),
+            'items' => $open->latest()->limit(5)->get()->map(fn (Ticket $ticket): array => [
+                'label' => $ticket->code.' · '.$ticket->title,
+                'detail' => $ticket->priority->label(),
+                'status' => $ticket->status->label(),
+            ])->all(),
+        ];
     }
 }

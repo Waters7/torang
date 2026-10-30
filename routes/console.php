@@ -1,8 +1,10 @@
 <?php
 
+use App\Console\Commands\CheckReadinessCommand;
 use App\Jobs\RunDatabaseBackup;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -29,3 +31,8 @@ Schedule::command('wifi:rotation-reminders')->weeklyOn(1, '08:00')->withoutOverl
 // Backup database privat, retensi 14 hari.
 Schedule::job(new RunDatabaseBackup, 'default')->dailyAt('02:00')->withoutOverlapping();
 Schedule::command('backup:clean --disable-notifications')->dailyAt('02:30')->withoutOverlapping();
+
+// Tanda scheduler hidup, diperiksa `php artisan torang:check`.
+Schedule::call(fn () => Cache::put(CheckReadinessCommand::SCHEDULER_HEARTBEAT, now()->toIso8601String(), now()->addDay()))
+    ->everyMinute()
+    ->name('torang:scheduler-heartbeat');

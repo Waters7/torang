@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,7 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             HandleInertiaRequests::class,
+            SecurityHeaders::class,
         ]);
+
+        // Di balik reverse proxy/load balancer (mis. Cloudflare): isi TRUSTED_PROXIES dengan IP proxy atau "*".
+        if (filled($proxies = env('TRUSTED_PROXIES'))) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
 
         $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
     })

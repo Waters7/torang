@@ -10,10 +10,17 @@ use Illuminate\Contracts\Cache\Repository as Cache;
  *
  * Nilai tersimpan di tabel `settings` (kolom JSON) dan di-cache utuh;
  * key yang belum tersimpan memakai default dari config/settings.php.
+ * Dalam satu request/job, hasil cache disimpan di memori (binding `scoped` di AppServiceProvider,
+ * sehingga worker queue membaca ulang di setiap job).
  */
 class SettingsService
 {
     public const CACHE_KEY = 'settings.all';
+
+    /**
+     * @var array<string, mixed>|null
+     */
+    private ?array $memo = null;
 
     public function __construct(private readonly Cache $cache) {}
 
@@ -71,6 +78,7 @@ class SettingsService
 
     public function flush(): void
     {
+        $this->memo = null;
         $this->cache->forget(self::CACHE_KEY);
     }
 
@@ -87,7 +95,7 @@ class SettingsService
      */
     private function stored(): array
     {
-        return $this->cache->rememberForever(
+        return $this->memo ??= $this->cache->rememberForever(
             self::CACHE_KEY,
             fn (): array => Setting::query()->pluck('value', 'key')->all(),
         );

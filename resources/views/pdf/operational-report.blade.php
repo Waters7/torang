@@ -1,4 +1,51 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><style>
-@page { margin: 25px 30px; } body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #183d38; } h1 { font-size: 18px; margin: 14px 0 5px; } table { width:100%; border-collapse:collapse; margin-top:18px; } th { background:#08796c;color:white;text-align:left; } th, td { padding:8px 6px; border:1px solid #dce6e3; } tr { page-break-inside:avoid; } tbody tr:nth-child(even) { background:#f4f8f7; } .note { line-height:1.6; margin-top:15px; color:#52645f; } footer { position:fixed;bottom:-10px;font-size:8px;color:#52645f; }
-</style></head><body><strong>TORANG · {{ $unit }}</strong><div>{{ $institution }}</div><h1>{{ $title }}</h1><div>Periode {{ $start }} s.d. {{ $end }}</div>
-<table><thead><tr>@foreach ($headings as $heading)<th>{{ $heading }}</th>@endforeach</tr></thead><tbody>@forelse ($rows as $row)<tr>@foreach ($row as $cell)<td>{{ is_float($cell) ? number_format($cell, 2, ',', '.') : ($cell ?? 'Tidak ada data') }}</td>@endforeach</tr>@empty<tr><td colspan="{{ count($headings) }}">Tidak ada data untuk periode ini.</td></tr>@endforelse</tbody></table><p class="note">{{ $note }}</p><footer>Dibuat {{ $generatedAt }}</footer></body></html>
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>{{ $title }}</title>
+    <style>
+        @page { margin: 25px 30px; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #183d38; }
+        h1 { font-size: 18px; margin: 14px 0 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th { background: #08796c; color: white; text-align: left; }
+        th, td { padding: 8px 6px; border: 1px solid #dce6e3; }
+        tr { page-break-inside: avoid; }
+        tbody tr:nth-child(even) { background: #f4f8f7; }
+        .note { line-height: 1.6; margin-top: 15px; color: #52645f; }
+        footer { position: fixed; bottom: -10px; font-size: 8px; color: #52645f; }
+    </style>
+</head>
+<body>
+    <strong>TORANG · {{ $unit }}</strong>
+    <div>{{ $institution }}</div>
+    <h1>{{ $title }}</h1>
+    <div>Periode {{ $start }} s.d. {{ $end }}</div>
+
+    <table>
+        <thead>
+            <tr>
+                @foreach ($headings as $heading)
+                    <th>{{ $heading }}</th>
+                @endforeach
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($rows as $row)
+                <tr>
+                    @foreach ($row as $cell)
+                        <td>{{ is_float($cell) ? number_format($cell, 2, ',', '.') : ($cell ?? 'Tidak ada data') }}</td>
+                    @endforeach
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="{{ count($headings) }}">Tidak ada data untuk periode ini.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <p class="note">{{ $note }}</p>
+    <footer>Dibuat {{ $generatedAt }}</footer>
+</body>
+</html>

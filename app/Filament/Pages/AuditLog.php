@@ -15,6 +15,9 @@ use Filament\Tables\Table;
 use Spatie\Activitylog\Models\Activity;
 use UnitEnum;
 
+/**
+ * Audit log aktivitas penting (SPEC §8 no. 4) dari spatie/laravel-activitylog, hanya baca.
+ */
 class AuditLog extends Page implements HasTable
 {
     use InteractsWithTable;
@@ -27,7 +30,7 @@ class AuditLog extends Page implements HasTable
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->is_active && auth()->user()->can(Permission::AuditView->value);
+        return (bool) auth()->user()?->is_active && auth()->user()->can(Permission::AuditView->value);
     }
 
     public function content(Schema $schema): Schema
@@ -37,14 +40,41 @@ class AuditLog extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        return $table->query(Activity::query()->with('causer'))->defaultSort('created_at', 'desc')->columns([
-            TextColumn::make('created_at')->label('Waktu (WITA)')->dateTime('d M Y H:i:s')->sortable(),
-            TextColumn::make('causer.name')->label('Pelaku')->placeholder('Sistem'), TextColumn::make('log_name')->label('Modul')->searchable(),
-            TextColumn::make('description')->label('Aktivitas')->formatStateUsing(fn ($state) => match ($state) {
-                'created' => 'Data dibuat', 'updated' => 'Data diperbarui', 'deleted' => 'Data dihapus', default => $state
-            })->wrap()->searchable(),
-            TextColumn::make('subject_id')->label('ID objek')->description(fn (Activity $record) => class_basename($record->subject_type ?? '')),
-            TextColumn::make('properties.ip')->label('IP akses')->placeholder('—'),
-        ])->filters([SelectFilter::make('log_name')->label('Modul')->options(fn () => Activity::distinct()->pluck('log_name', 'log_name')->all())]);
+        return $table
+            ->query(Activity::query()->with('causer'))
+            ->defaultSort('created_at', 'desc')
+            ->columns([
+                TextColumn::make('created_at')
+                    ->label('Waktu (WITA)')
+                    ->dateTime('d M Y H:i:s')
+                    ->sortable(),
+                TextColumn::make('causer.name')
+                    ->label('Pelaku')
+                    ->placeholder('Sistem'),
+                TextColumn::make('log_name')
+                    ->label('Modul')
+                    ->searchable(),
+                TextColumn::make('description')
+                    ->label('Aktivitas')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'created' => 'Data dibuat',
+                        'updated' => 'Data diperbarui',
+                        'deleted' => 'Data dihapus',
+                        default => $state,
+                    })
+                    ->wrap()
+                    ->searchable(),
+                TextColumn::make('subject_id')
+                    ->label('ID objek')
+                    ->description(fn (Activity $record): string => class_basename($record->subject_type ?? '')),
+                TextColumn::make('properties.ip')
+                    ->label('IP akses')
+                    ->placeholder('—'),
+            ])
+            ->filters([
+                SelectFilter::make('log_name')
+                    ->label('Modul')
+                    ->options(fn (): array => Activity::query()->distinct()->pluck('log_name', 'log_name')->all()),
+            ]);
     }
 }

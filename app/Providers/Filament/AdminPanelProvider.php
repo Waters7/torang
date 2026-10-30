@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\NavigationGroup;
+use App\Http\Middleware\SecurityHeaders;
 use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -72,6 +73,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                SecurityHeaders::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

@@ -10,9 +10,30 @@
 - [x] Fase 7 — Helpdesk, Pengumuman, Laporan, Dashboard
 - [x] Penyempurnaan beranda, petugas mingguan, tema Neumorphism & uji LAN
 - [x] Tambahan: sakelar tampilan halaman depan, WiFi publik terpilih, under maintenance per monitor
-- [ ] Fase 8 — Finalisasi & Deployment VPS
+- [x] Fase 8 — Finalisasi & Deployment VPS
 
 ## Catatan
+
+### Fase 8 — Finalisasi & Deployment VPS — selesai 30 Oktober 2026
+- [x] Seeder data contoh lengkap §16 diuji end-to-end (`DatabaseSeederTest`: jumlah departemen, lab, booking,
+  petugas, monitor + riwayat, WiFi, provider/layanan, tiket, pengumuman, kolegium, laporan UKOM final).
+- [x] Review keamanan: header keamanan (nosniff, frame SAMEORIGIN, Referrer-Policy, Permissions-Policy, COOP,
+  HSTS hanya HTTPS produksi) untuk halaman publik & panel; `TRUSTED_PROXIES`; HTTPS dipaksa di produksi;
+  throttle login panel diuji.
+- [x] Review performa: `preventLazyLoading` di luar produksi (semua halaman utama lolos tanpa N+1), pengaturan
+  di-memo per request (query beranda dingin 68 → 41, hangat 22 → 9), index `activity_log.created_at` dan
+  `monitor_incidents (monitor_id, resolved_at)`; `retry_after` queue 360 detik (> backup 300 detik).
+- [x] Kode Fase 7 dirapikan tanpa mengubah perilaku: enum tiket/pengumuman memakai label & warna seragam,
+  aksi tiket dipusatkan di `TicketActions`, service laporan & dashboard dipecah per bagian.
+- [x] `php artisan torang:sync-permissions` (permission baru untuk role lama tanpa menimpa perubahan panel) dan
+  `php artisan torang:check` (pemeriksaan kesiapan server, keluar gagal bila ada GAGAL) + detak scheduler.
+- [x] `deploy.sh` + contoh `deploy/` (Nginx, Supervisor, cron, sysctl ping), README instalasi VPS Ubuntu
+  24.04 langkah demi langkah, `.env.example` dengan panduan nilai produksi.
+- Verifikasi: `php artisan test` 418 lulus (2141 assertions) · `pint` bersih · TypeScript & build bersih ·
+  migrasi index dijalankan & di-rollback di MySQL lokal · `torang:check` lokal: siap dengan 4 peringatan
+  (LibreOffice, `mysqldump` belum di PATH/`DB_DUMP_BINARY_PATH`, scheduler tidak berjalan, Telegram nonaktif).
+- Belum diuji di VPS sungguhan: `deploy.sh`, konfigurasi Nginx/Supervisor/cron hanya diperiksa sintaksnya
+  (`bash -n`) dan ditinjau manual.
 
 ### Tampilan halaman depan, WiFi publik & maintenance — 30 Oktober 2026
 - Review commit ChatGPT (Fase 7, Neumorphism/LAN, Mode TV): tidak ada celah keamanan; diperbaiki tautan

@@ -3,15 +3,12 @@
 namespace App\Filament\Resources\UsageLogs\Tables;
 
 use App\Filament\Resources\Bookings\BookingResource;
+use App\Filament\Resources\Tickets\TicketActions;
 use App\Models\UsageLog;
-use App\Services\Helpdesk\TicketService;
-use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Validation\ValidationException;
 
 class UsageLogsTable
 {
@@ -59,26 +56,7 @@ class UsageLogsTable
                     ->relationship('booking.lab', 'name'),
             ])
             ->recordActions([
-                Action::make('createTicket')->label('Buat tiket')
-                    ->visible(fn (UsageLog $record) => auth()->user()->can('update', $record))
-                    ->requiresConfirmation()
-                    ->modalDescription('Catatan kendala akan disalin ke tiket baru untuk ditindaklanjuti petugas IT.')
-                    ->action(function (UsageLog $record, Action $action): void {
-                        $booking = $record->booking;
-                        try {
-                            $result = app(TicketService::class)->create([
-                                'reporter_name' => auth()->user()->name, 'reporter_contact' => auth()->user()->email,
-                                'department_id' => $booking->department_id, 'category' => 'cbt',
-                                'title' => 'Kendala '.$booking->lab->name.' · '.$booking->code,
-                                'description' => $record->notes ?: 'Perangkat bermasalah: '.$record->devices_problem,
-                            ], auth()->user(), usageLog: $record);
-                        } catch (ValidationException $exception) {
-                            Notification::make()->warning()->title('Tiket belum dapat dibuat')->body(collect($exception->errors())->flatten()->implode(' '))->send();
-                            $action->halt();
-                        }
-                        Notification::make()->success()->title('Tiket '.$result['ticket']->code.' dibuat')
-                            ->body('Simpan tautan pribadi: '.route('tickets.rating', [$result['ticket']->code, $result['token']]))->persistent()->send();
-                    }),
+                TicketActions::fromUsageLog(),
                 EditAction::make(),
             ]);
     }

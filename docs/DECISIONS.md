@@ -474,3 +474,67 @@ fase terkait.
 - Berakhir manual atau otomatis di awal `monitors:dispatch` saat perkiraan selesai lewat; setelahnya status
   "Tidak diketahui" dan langsung dicek. Menonaktifkan monitor juga mengakhiri maintenance.
 - Izin `monitors.manage` (Petugas IT, Super Admin); Kepala Unit hanya melihat.
+
+## Fase 8 — Finalisasi & Deployment VPS (30 Oktober 2026)
+
+### Keamanan
+- Middleware `SecurityHeaders` (grup web + panel Filament) menambah `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`
+  (kamera, mikrofon, lokasi, dll. dimatikan), dan `Cross-Origin-Opener-Policy: same-origin`, hanya bila
+  respons belum mengaturnya (mis. `no-referrer` pada halaman kode tiket tetap dipakai). HSTS hanya dikirim
+  untuk request HTTPS di produksi agar pengujian lokal/LAN lewat HTTP tidak terkunci.
+- **Tanpa Content-Security-Policy** untuk saat ini: Filament/Livewire/Alpine memakai skrip & style inline dan
+  Turnstile memuat skrip pihak ketiga, sehingga CSP yang ketat butuh nonce di banyak tempat dan berisiko
+  merusak panel. Bisa ditambahkan kemudian dengan mode report-only lebih dulu.
+- Proxy tepercaya lewat env `TRUSTED_PROXIES` (daftar IP dipisah koma atau `*`), kosong secara default.
+  `URL::forceHttps()` hanya di produksi bila `APP_URL` berawalan `https://`.
+- Login panel sudah dibatasi Filament (5 percobaan per menit); ditambah test.
+
+### Permission setelah deploy
+- `torang:sync-permissions` membuat permission yang belum ada dan **hanya** memberikan permission yang baru dibuat
+  ke role bawaan yang memilikinya di `Role::permissions()`. Permission yang sengaja dicabut di panel tidak
+  dikembalikan. Super Admin, role yang baru dibuat, atau opsi `--reset` disinkronkan persis seperti bawaan.
+  Dijalankan otomatis oleh `deploy.sh`.
+
+### Performa
+- `Model::preventLazyLoading()` aktif di luar produksi supaya N+1 baru langsung terlihat saat pengembangan/test;
+  di produksi tidak melempar error.
+- `SettingsService` di-bind `scoped` dan menyimpan hasil cache di memori selama satu request/job; `flush()`
+  mengosongkan keduanya.
+- Index tambahan: `activity_log.created_at` (filter & urutan Audit Log) dan
+  `monitor_incidents (monitor_id, resolved_at)` (insiden terbuka per monitor).
+- `retry_after` queue database/redis default 360 detik, lebih lama dari job terlama (backup 300 detik); timeout
+  worker di contoh Supervisor (monitoring 120, default 330) dibuat lebih kecil dari angka itu.
+
+### Kesiapan server
+- `torang:check` hanya membaca keadaan: APP_KEY, APP_DEBUG, HTTPS & cookie aman, koneksi database, migrasi
+  tertunda, super admin aktif, folder storage, ping ke 127.0.0.1 (Process argumen array), LibreOffice,
+  `mysqldump`/`mariadb-dump`, detak scheduler, job tertahan > 5 menit, job gagal, captcha, mailer, Telegram.
+  Status OK/PERINGATAN/GAGAL; yang wajib di produksi (APP_DEBUG mati, captcha terisi, database, migrasi, super
+  admin, storage) menjadi GAGAL dan membuat kode keluar non-nol. Kelompok yang error dicatat GAGAL tanpa
+  menghentikan pemeriksaan lain.
+- Detak scheduler: tugas `torang:scheduler-heartbeat` tiap menit menulis waktu ke cache; dianggap hidup bila ≤ 3 menit.
+
+### Deployment
+- `deploy.sh`: mode maintenance → `git pull --ff-only` → `composer install --no-dev -o` → `npm ci && npm run build`
+  → `migrate --force` → `torang:sync-permissions` → `optimize` + `filament:optimize` → `queue:restart` → `up` →
+  `torang:check`. Isi skrip dibungkus fungsi agar perubahan skrip saat `git pull` tidak memengaruhi eksekusi
+  yang sedang berjalan; bila gagal, aplikasi tetap dalam mode maintenance.
+- Kode dimiliki user deploy (`torang`); PHP-FPM, worker, dan cron berjalan sebagai `www-data` dengan hak tulis
+  hanya pada `storage/` dan `bootstrap/cache/` lewat ACL. Semua unggahan memakai disk privat, jadi
+  `storage:link` tidak diperlukan.
+- Contoh Nginx ditulis untuk Nginx 1.24 bawaan Ubuntu 24.04 (`listen 443 ssl http2`), tanpa bergantung pada file
+  tambahan Certbot; sertifikat diambil dengan `certbot certonly --nginx`. Aset `/build` di-cache 1 tahun
+  (nama ber-hash); file PHP selain `index.php` dan dotfile ditolak.
+- Supervisor: 3 worker `monitoring` (rentang SPEC 2–4) dan 1 worker `default`, restart tiap jam (`--max-time`).
+- Ping sebagai `www-data` memakai `net.ipv4.ping_group_range` (contoh di `deploy/sysctl`) bila distribusi belum
+  mengizinkannya; alternatif `setcap cap_net_raw`.
+- `composer.json` mengunci platform PHP 8.3.0, sehingga `composer.lock` cocok dengan PHP 8.3 bawaan Ubuntu 24.04.
+- Node.js 22 LTS (minimal 22.12 untuk Vite 8), sama dengan lingkungan pengembangan.
+
+### Perapian Fase 7
+- Enum `TicketStatus`, `TicketPriority`, `TicketCategory`, `AnnouncementType` memakai trait label/warna yang sama
+  dengan enum lain; `TicketStatus::unfinished()` dipakai dashboard & laporan.
+- Aksi tiket (tindak lanjut, komentar, unduh lampiran, buat dari log pemakaian) dipindah ke `TicketActions`;
+  aturan validasi tiket publik dipakai bersama `TicketService::rules()` dan `StoreTicketRequest`.
+- `OperationsDashboard` dan `OperationalReports` dipecah per bagian tanpa mengubah hasil; seluruh test lama tetap lulus.

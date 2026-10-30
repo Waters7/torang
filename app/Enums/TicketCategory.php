@@ -2,10 +2,14 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\HasFilamentLabelAndColor;
+use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum TicketCategory: string implements HasLabel
+enum TicketCategory: string implements HasColor, HasLabel
 {
+    use HasFilamentLabelAndColor;
+
     case Network = 'network';
     case Account = 'account';
     case Device = 'device';
@@ -16,13 +20,17 @@ enum TicketCategory: string implements HasLabel
     public function label(): string
     {
         return match ($this) {
-            self::Network => 'Jaringan', self::Account => 'Akun', self::Device => 'Perangkat',
-            self::Application => 'Aplikasi', self::Cbt => 'CBT', self::Other => 'Lainnya',
+            self::Network => 'Jaringan',
+            self::Account => 'Akun',
+            self::Device => 'Perangkat',
+            self::Application => 'Aplikasi',
+            self::Cbt => 'CBT',
+            self::Other => 'Lainnya',
         };
     }
 
-    public function getLabel(): string
+    public function color(): string
     {
-        return $this->label();
+        return 'gray';
     }
 }
