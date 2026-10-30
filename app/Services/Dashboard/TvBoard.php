@@ -87,7 +87,7 @@ class TvBoard
                     $monitor->current_status === MonitorStatus::Down => $monitor->last_status_change_at
                         ? 'sejak '.$monitor->last_status_change_at->format('H:i')
                         : null,
-                    $monitor->last_latency_ms !== null => "{$monitor->last_latency_ms} ms",
+                    $monitor->current_status->isAvailable() && $monitor->last_latency_ms !== null => "{$monitor->last_latency_ms} ms",
                     default => null,
                 },
             ])

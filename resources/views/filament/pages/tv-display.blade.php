@@ -78,7 +78,7 @@
                     'border-white/10 bg-white/[0.04]' => $count['offline'] === 0,
                 ])>
                     <p class="text-sm text-white/60">{{ $label }}</p>
-                    <p class="mt-2 text-5xl font-semibold tabular-nums [font-family:var(--mono-font-family)]">
+                    <p class="mt-2 text-5xl font-semibold 2xl:text-6xl tabular-nums [font-family:var(--mono-font-family)]">
                         {{ $count['online'] }}<span class="text-2xl text-white/40"> / {{ $count['total'] }}</span>
                     </p>
                     <p class="mt-3 text-sm {{ $problems($count) > 0 ? 'text-[#F5C977]' : 'text-white/50' }}">
@@ -99,7 +99,7 @@
         @if ($labs)
             <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
                 <p class="text-sm text-white/60">Lab CBT dipakai</p>
-                <p class="mt-2 text-5xl font-semibold tabular-nums [font-family:var(--mono-font-family)]">
+                <p class="mt-2 text-5xl font-semibold 2xl:text-6xl tabular-nums [font-family:var(--mono-font-family)]">
                     {{ $labs['inUse'] }}<span class="text-2xl text-white/40"> / {{ $labs['total'] }}</span>
                 </p>
                 <p class="mt-3 text-sm text-white/50">
@@ -115,7 +115,7 @@
                 'border-white/10 bg-white/[0.04]' => $openIncidents === 0,
             ])>
                 <p class="text-sm text-white/60">Insiden aktif</p>
-                <p class="mt-2 text-5xl font-semibold tabular-nums [font-family:var(--mono-font-family)] {{ $openIncidents > 0 ? 'text-[#FF9C9C]' : '' }}">{{ $openIncidents }}</p>
+                <p class="mt-2 text-5xl font-semibold 2xl:text-6xl tabular-nums [font-family:var(--mono-font-family)] {{ $openIncidents > 0 ? 'text-[#FF9C9C]' : '' }}">{{ $openIncidents }}</p>
                 <p class="mt-3 text-sm text-white/50">{{ $openIncidents > 0 ? 'Sedang ditangani' : 'Tidak ada gangguan' }}</p>
             </div>
         @endif
@@ -125,15 +125,15 @@
     @if ($showMonitors)
         <section class="mt-6 grid gap-6 xl:grid-cols-12">
             <div class="xl:col-span-7">
-                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] text-[#70DBCD] uppercase">Jaringan per jurusan</h2>
+                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] 2xl:text-sm text-[#70DBCD] uppercase">Jaringan per jurusan</h2>
                 <div class="grid grid-cols-2 gap-2.5 md:grid-cols-3 2xl:grid-cols-4">
                     @forelse ($networks as $item)
                         @php($t = $tone($item['status']))
                         <div class="flex min-w-0 items-center gap-3 rounded-xl bg-white/[0.04] px-3.5 py-3">
                             <span class="size-2.5 shrink-0 rounded-full {{ $t['dot'] }}" aria-hidden="true"></span>
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-[15px] font-medium">{{ $item['name'] }}</p>
-                                <p class="truncate text-xs {{ $t['text'] }}">{{ $item['label'] }}{{ $item['detail'] ? ' · '.$item['detail'] : '' }}</p>
+                                <p class="truncate text-[15px] font-medium 2xl:text-lg">{{ $item['name'] }}</p>
+                                <p class="truncate text-xs 2xl:text-sm {{ $t['text'] }}">{{ $item['label'] }}{{ $item['detail'] ? ' · '.$item['detail'] : '' }}</p>
                             </div>
                         </div>
                     @empty
@@ -143,14 +143,14 @@
             </div>
 
             <div class="xl:col-span-5">
-                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] text-[#70DBCD] uppercase">Aplikasi kampus</h2>
+                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] 2xl:text-sm text-[#70DBCD] uppercase">Aplikasi kampus</h2>
                 <ul class="divide-y divide-white/5 overflow-hidden rounded-xl bg-white/[0.04]">
                     @forelse ($apps as $item)
                         @php($t = $tone($item['status']))
                         <li class="flex items-center gap-3 px-4 py-3">
                             <span class="size-2.5 shrink-0 rounded-full {{ $t['dot'] }}" aria-hidden="true"></span>
-                            <span class="min-w-0 flex-1 truncate text-[15px] font-medium">{{ $item['name'] }}</span>
-                            <span class="shrink-0 text-xs {{ $t['text'] }}">{{ $item['label'] }}{{ $item['detail'] ? ' · '.$item['detail'] : '' }}</span>
+                            <span class="min-w-0 flex-1 truncate text-[15px] font-medium 2xl:text-lg">{{ $item['name'] }}</span>
+                            <span class="shrink-0 text-xs 2xl:text-sm {{ $t['text'] }}">{{ $item['label'] }}{{ $item['detail'] ? ' · '.$item['detail'] : '' }}</span>
                         </li>
                     @empty
                         <li class="px-4 py-3 text-sm text-white/50">Belum ada monitor aplikasi.</li>
@@ -164,7 +164,7 @@
     @if ($showCbt)
         <section class="mt-6 grid gap-6 xl:grid-cols-12">
             <div class="xl:col-span-8">
-                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] text-[#70DBCD] uppercase">Kegiatan CBT hari ini</h2>
+                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] 2xl:text-sm text-[#70DBCD] uppercase">Kegiatan CBT hari ini</h2>
                 <ul class="space-y-2">
                     @forelse ($bookings as $booking)
                         <li @class([
@@ -177,7 +177,7 @@
                                 <span class="w-28 shrink-0 text-sm tabular-nums [font-family:var(--mono-font-family)]">{{ $booking['time'] }}</span>
                                 <span class="size-2.5 shrink-0 rounded-full" style="background-color: {{ $booking['color'] }}" aria-hidden="true"></span>
                                 <span class="w-24 shrink-0 truncate text-sm text-white/70">{{ $booking['lab'] }}</span>
-                                <span class="min-w-0 flex-1 truncate text-[15px] font-medium">
+                                <span class="min-w-0 flex-1 truncate text-[15px] font-medium 2xl:text-lg">
                                     {{ $booking['activity'] }}@if ($booking['organizer'])<span class="text-white/50"> · {{ $booking['organizer'] }}</span>@endif
                                 </span>
                                 <span class="shrink-0 text-xs text-white/60">
@@ -197,13 +197,13 @@
             </div>
 
             <div class="xl:col-span-4">
-                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] text-[#70DBCD] uppercase">Petugas jaga hari ini</h2>
+                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] 2xl:text-sm text-[#70DBCD] uppercase">Petugas jaga hari ini</h2>
                 <ul class="space-y-2">
                     @forelse ($duty as $person)
                         <li class="flex items-center gap-3 rounded-xl bg-white/[0.04] px-4 py-3">
                             <span @class(['size-2.5 shrink-0 rounded-full', 'bg-[#42B97C]' => $person['now'], 'bg-white/20' => ! $person['now']]) aria-hidden="true"></span>
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-[15px] font-medium">{{ $person['name'] }}</p>
+                                <p class="truncate text-[15px] font-medium 2xl:text-lg">{{ $person['name'] }}</p>
                                 <p class="truncate text-xs text-white/50">{{ $person['shift'] }} · {{ $person['coverage'] }}</p>
                             </div>
                             @if ($person['now'])
