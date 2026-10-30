@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Monitors\Pages;
 
 use App\Filament\Resources\Monitors\ApplicationMonitorResource;
+use App\Filament\Resources\Monitors\MonitorMaintenanceActions;
 use App\Filament\Resources\Monitors\MonitorResource;
 use App\Filament\Resources\Monitors\Widgets\MonitorLatencyChart;
 use Filament\Actions\EditAction;
@@ -16,6 +17,8 @@ class ViewApplicationMonitor extends ViewRecord
     {
         return [
             MonitorResource::checkNowAction(),
+            MonitorMaintenanceActions::start(),
+            MonitorMaintenanceActions::end(),
             EditAction::make(),
         ];
     }

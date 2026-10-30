@@ -47,7 +47,8 @@ interface TurnstileProps {
 export default function Turnstile({ siteKey, onToken, resetKey }: TurnstileProps) {
     const container = useRef<HTMLDivElement>(null);
     const widgetId = useRef<string | null>(null);
-    const [compact, setCompact] = useState(true);
+    // null = lebar kontainer belum diukur; widget baru dirender setelah ukurannya diketahui agar tidak dirender dua kali.
+    const [compact, setCompact] = useState<boolean | null>(null);
     const onTokenRef = useRef(onToken);
     onTokenRef.current = onToken;
 
@@ -61,6 +62,10 @@ export default function Turnstile({ siteKey, onToken, resetKey }: TurnstileProps
     }, []);
 
     useEffect(() => {
+        if (compact === null) {
+            return;
+        }
+
         let cancelled = false;
 
         loadTurnstile()

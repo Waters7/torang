@@ -34,6 +34,14 @@ class WifiNetworkPolicy
     }
 
     /**
+     * Pilih SSID tampil/tidak di halaman depan (beserta password).
+     */
+    public function publish(User $user, WifiNetwork $network): bool
+    {
+        return $user->can(Permission::WifiManage->value);
+    }
+
+    /**
      * Lihat/salin password (termasuk password lama dan kartu QR). Tetap butuh konfirmasi password akun.
      */
     public function revealPassword(User $user, WifiNetwork $network): bool

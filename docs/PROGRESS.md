@@ -9,9 +9,27 @@
 - [x] Fase 6 — Laporan UKOM (SPTJM)
 - [x] Fase 7 — Helpdesk, Pengumuman, Laporan, Dashboard
 - [x] Penyempurnaan beranda, petugas mingguan, tema Neumorphism & uji LAN
+- [x] Tambahan: sakelar tampilan halaman depan, WiFi publik terpilih, under maintenance per monitor
 - [ ] Fase 8 — Finalisasi & Deployment VPS
 
 ## Catatan
+
+### Tampilan halaman depan, WiFi publik & maintenance — 30 Oktober 2026
+- Review commit ChatGPT (Fase 7, Neumorphism/LAN, Mode TV): tidak ada celah keamanan; diperbaiki tautan
+  dashboard ke monitor jaringan/aplikasi (kini tautan "Buka" per kartu), bundel CA pada `start-lan.ps1`
+  (verifikasi captcha di uji LAN), dan widget Turnstile yang sempat dirender dua kali.
+- Dashboard: widget **Tampilan halaman depan** (sakelar Status jaringan, Status aplikasi, WiFi), tabel
+  **Jaringan & aplikasi** (Maintenance/Selesai maintenance, Tampilkan/Sembunyikan dari depan per monitor), dan
+  tabel **WiFi kampus** (pilih SSID tampil di depan dengan konfirmasi; password SSID terpilih terlihat langsung,
+  lainnya tetap lewat "Lihat password").
+- Under maintenance per monitor (juga di tabel & halaman detail monitor): keterangan + perkiraan selesai opsional,
+  pengecekan/notifikasi berhenti, insiden terbuka ditutup, berakhir otomatis saat perkiraan selesai lewat.
+  Halaman depan & /status menampilkan pill Maintenance beserta keterangannya.
+- Beranda: bagian **WiFi kampus** (SSID, lokasi, password + tombol Salin) untuk SSID terpilih saat sakelar WiFi
+  menyala; bagian jaringan/aplikasi (dan datanya di /status & API ringkasan) hilang saat disembunyikan.
+- Verifikasi: `php artisan test` 403 lulus · `pint` bersih · TypeScript & build bersih · migrasi MySQL lokal ·
+  beranda (WiFi, Maintenance) dicek di browser; dashboard dicek lewat render server (akun admin lokal tidak dipakai
+  karena password-nya sudah diganti). Data demo lokal dikembalikan ke bawaan (WiFi tidak tampil).
 
 ### Akses Mode TV dari beranda — 29 Oktober 2026
 - [x] Kartu **Mode TV / NOC** pada bagian layanan beranda, dengan tombol **Buka Mode TV**

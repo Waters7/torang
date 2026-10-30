@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
     'expected_status_codes', 'keyword', 'check_ssl', 'is_public', 'is_active', 'sort_order',
     'current_status', 'consecutive_failures', 'last_checked_at', 'last_status_change_at', 'last_latency_ms',
     'last_packet_loss', 'last_http_status', 'last_error', 'degraded_notified_at', 'ssl_expires_at',
+    'maintenance_note', 'maintenance_started_at', 'maintenance_until',
 ])]
 class Monitor extends Model
 {
@@ -50,16 +51,21 @@ class Monitor extends Model
             'last_packet_loss' => 'float',
             'degraded_notified_at' => 'datetime',
             'ssl_expires_at' => 'datetime',
+            'maintenance_started_at' => 'datetime',
+            'maintenance_until' => 'datetime',
         ];
     }
 
     protected static function booted(): void
     {
-        // Monitor nonaktif berstatus "Dijeda"; saat diaktifkan lagi mulai dari "Tidak diketahui".
+        // Monitor nonaktif berstatus "Dijeda" (maintenance ikut berakhir); saat diaktifkan lagi mulai dari "Tidak diketahui".
         static::saving(function (Monitor $monitor): void {
             if (! $monitor->is_active) {
                 $monitor->current_status = MonitorStatus::Paused;
                 $monitor->consecutive_failures = 0;
+                $monitor->maintenance_note = null;
+                $monitor->maintenance_started_at = null;
+                $monitor->maintenance_until = null;
             } elseif ($monitor->current_status === MonitorStatus::Paused || $monitor->current_status === null) {
                 $monitor->current_status = MonitorStatus::Unknown;
             }
@@ -135,12 +141,27 @@ class Monitor extends Model
         };
     }
 
+    public function isUnderMaintenance(): bool
+    {
+        return $this->current_status === MonitorStatus::Maintenance;
+    }
+
     /**
      * @param  Builder<Monitor>  $query
      */
     public function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);
+    }
+
+    /**
+     * Monitor yang dicek mesin monitoring: aktif dan tidak sedang maintenance.
+     *
+     * @param  Builder<Monitor>  $query
+     */
+    public function scopeCheckable(Builder $query): void
+    {
+        $query->where('is_active', true)->where('current_status', '!=', MonitorStatus::Maintenance);
     }
 
     /**

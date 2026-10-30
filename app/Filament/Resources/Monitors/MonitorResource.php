@@ -202,6 +202,15 @@ abstract class MonitorResource extends Resource
                         TextEntry::make('last_status_change_at')->label('Status sejak')->dateTime('j M Y, H:i')->placeholder('-'),
                         TextEntry::make('consecutive_failures')->label('Gagal berturut-turut'),
                         TextEntry::make('last_error')->label('Keterangan')->placeholder('-')->columnSpanFull(),
+                        TextEntry::make('maintenance_note')
+                            ->label('Maintenance')
+                            ->state(fn (Monitor $record): string => collect([
+                                $record->maintenance_note ?: 'Tanpa keterangan',
+                                'sejak '.$record->maintenance_started_at?->translatedFormat('j M Y, H:i').' WITA',
+                                $record->maintenance_until ? 'perkiraan selesai '.$record->maintenance_until->translatedFormat('j M Y, H:i').' WITA' : null,
+                            ])->filter()->implode(' · '))
+                            ->visible(fn (Monitor $record): bool => $record->isUnderMaintenance())
+                            ->columnSpanFull(),
                         TextEntry::make('ssl_expires_at')
                             ->label('SSL berlaku sampai')
                             ->date('j F Y')
@@ -271,6 +280,8 @@ abstract class MonitorResource extends Resource
                 ViewAction::make(),
                 EditAction::make(),
                 static::checkNowAction(),
+                MonitorMaintenanceActions::start(),
+                MonitorMaintenanceActions::end(),
             ]);
     }
 

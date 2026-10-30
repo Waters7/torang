@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Monitors\Pages;
 
+use App\Filament\Resources\Monitors\MonitorMaintenanceActions;
 use App\Filament\Resources\Monitors\MonitorResource;
 use App\Filament\Resources\Monitors\NetworkMonitorResource;
 use App\Filament\Resources\Monitors\Widgets\MonitorLatencyChart;
@@ -16,6 +17,8 @@ class ViewNetworkMonitor extends ViewRecord
     {
         return [
             MonitorResource::checkNowAction(),
+            MonitorMaintenanceActions::start(),
+            MonitorMaintenanceActions::end(),
             EditAction::make(),
         ];
     }

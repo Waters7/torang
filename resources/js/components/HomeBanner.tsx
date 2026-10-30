@@ -45,15 +45,20 @@ export default function HomeBanner({ announcements, summary }: { announcements: 
             action: 'Ajukan pemakaian lab',
             kind: 'lab',
         },
-        {
-            id: 'status',
-            tag: 'Jaringan & aplikasi',
-            title: 'Cek layanan sebelum mulai aktivitas.',
-            description: 'Lihat kondisi jaringan jurusan dan aplikasi kampus, lengkap dengan riwayat ketersediaannya.',
-            href: '/status',
-            action: 'Lihat status layanan',
-            kind: 'status',
-        },
+        // Slide status hanya bila jaringan/aplikasi ditampilkan di halaman depan (diatur dari dashboard).
+        ...(summary.networks.total + summary.apps.total > 0
+            ? [
+                  {
+                      id: 'status',
+                      tag: 'Jaringan & aplikasi',
+                      title: 'Cek layanan sebelum mulai aktivitas.',
+                      description: 'Lihat kondisi jaringan jurusan dan aplikasi kampus, lengkap dengan riwayat ketersediaannya.',
+                      href: '/status',
+                      action: 'Lihat status layanan',
+                      kind: 'status',
+                  } satisfies Slide,
+              ]
+            : []),
         {
             id: 'help',
             tag: 'Helpdesk UPT TIK',
@@ -174,18 +179,22 @@ export default function HomeBanner({ announcements, summary }: { announcements: 
                             <SignalIcon className="size-8 text-teal" aria-hidden="true" />
                             <p className="mt-4 text-lg font-semibold">Kondisi layanan kampus</p>
                             <div className="mt-5 space-y-4">
-                                {[
-                                    [summary.networks.online, summary.networks.total, 'Jaringan online'],
-                                    [summary.apps.online, summary.apps.total, 'Aplikasi online'],
-                                ].map(([value, total, label]) => (
-                                    <div key={label} className="flex items-center justify-between gap-3 border-t border-white/15 pt-3">
-                                        <span className="text-sm text-white/75">{label}</span>
-                                        <span className="font-mono text-lg text-lime">
-                                            {value}
-                                            <span className="text-sm text-white/60"> / {total}</span>
-                                        </span>
-                                    </div>
-                                ))}
+                                {(
+                                    [
+                                        [summary.networks.online, summary.networks.total, 'Jaringan online'],
+                                        [summary.apps.online, summary.apps.total, 'Aplikasi online'],
+                                    ] as const
+                                )
+                                    .filter(([, total]) => total > 0)
+                                    .map(([value, total, label]) => (
+                                        <div key={label} className="flex items-center justify-between gap-3 border-t border-white/15 pt-3">
+                                            <span className="text-sm text-white/75">{label}</span>
+                                            <span className="font-mono text-lg text-lime">
+                                                {value}
+                                                <span className="text-sm text-white/60"> / {total}</span>
+                                            </span>
+                                        </div>
+                                    ))}
                             </div>
                         </>
                     ) : slide.kind === 'help' ? (

@@ -19,8 +19,9 @@ $phpExecutable = (Get-Command php).Source
 Jika PHP tidak ada di PATH, isi `$phpExecutable` dengan path lengkap `php.exe` dari Laragon.
 Skrip mencetak URL dan PID, menjalankan PHP di latar belakang, serta menyimpan metadata di
 `storage/framework/lan-server.json`. Log ada di `storage/logs/lan-server*.log`.
-PHP memakai konfigurasi sertifikat CA lingkungan yang sama dengan localhost, agar verifikasi
-Turnstile dapat menghubungi Cloudflare.
+Skrip menjalankan PHP dengan `curl.cainfo`/`openssl.cafile` dari bundel CA Laragon
+(`C:\laragon\etc\ssl\cacert.pem`, ganti lewat `-CaBundle`) agar verifikasi Turnstile dapat menghubungi
+Cloudflare. Tanpa bundel itu, captcha gagal dengan cURL error 60 kecuali `php.ini` sudah mengatur `curl.cainfo`.
 
 Atur `APP_URL` pada `.env` lokal ke URL LAN tersebut dan gunakan `APP_DEBUG=false`.
 Jika konfigurasi dicache, jalankan `php artisan config:clear`. URL dari CLI/notifikasi mengikuti APP_URL.

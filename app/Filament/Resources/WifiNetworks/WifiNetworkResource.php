@@ -227,6 +227,14 @@ class WifiNetworkResource extends Resource
                 IconColumn::make('is_active')
                     ->label('Aktif')
                     ->boolean(),
+                IconColumn::make('is_public')
+                    ->label('Di depan')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedGlobeAlt)
+                    ->falseIcon(Heroicon::OutlinedLockClosed)
+                    ->trueColor('warning')
+                    ->falseColor('gray')
+                    ->tooltip(fn (WifiNetwork $record): string => $record->is_public ? 'SSID & password tampil di halaman depan' : 'Tidak tampil di halaman depan'),
             ])
             ->filters([
                 SelectFilter::make('audience')->label('Peruntukan')->options(WifiAudience::class),
@@ -235,11 +243,13 @@ class WifiNetworkResource extends Resource
                     ->label('Jurusan/unit')
                     ->relationship('department', 'name', fn (Builder $query) => $query->ordered()),
                 TernaryFilter::make('is_active')->label('Aktif'),
+                TernaryFilter::make('is_public')->label('Tampil di depan'),
             ])
             ->recordActions([
                 ViewAction::make(),
                 WifiPasswordActions::reveal(),
                 EditAction::make(),
+                WifiPasswordActions::togglePublic(),
             ]);
     }
 

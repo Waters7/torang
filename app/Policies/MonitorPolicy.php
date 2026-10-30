@@ -40,6 +40,14 @@ class MonitorPolicy
 
     public function checkNow(User $user, Monitor $monitor): bool
     {
+        return $user->can(Permission::MonitorsManage->value) && $monitor->is_active && ! $monitor->isUnderMaintenance();
+    }
+
+    /**
+     * Mulai/akhiri maintenance dan atur tampil di halaman depan.
+     */
+    public function maintain(User $user, Monitor $monitor): bool
+    {
         return $user->can(Permission::MonitorsManage->value) && $monitor->is_active;
     }
 }

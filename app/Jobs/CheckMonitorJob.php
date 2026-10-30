@@ -36,7 +36,7 @@ class CheckMonitorJob implements ShouldBeUnique, ShouldQueue
     {
         $monitor = Monitor::query()->find($this->monitorId);
 
-        if ($monitor?->is_active) {
+        if ($monitor?->is_active && ! $monitor->isUnderMaintenance()) {
             $runner->run($monitor);
         }
     }

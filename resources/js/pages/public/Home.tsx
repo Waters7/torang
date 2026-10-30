@@ -2,6 +2,7 @@ import HomeBanner from '@/components/HomeBanner';
 import { OverviewCards, ServiceCards } from '@/components/HomeServiceCards';
 import LabNowCard from '@/components/LabNowCard';
 import { AppStatusCard, NetworkCard } from '@/components/MonitorCards';
+import PublicWifiCards from '@/components/PublicWifiCards';
 import SectionHeading from '@/components/SectionHeading';
 import StatusPill from '@/components/StatusPill';
 import WeekScheduleTable, { ScheduleLegend } from '@/components/WeekScheduleTable';
@@ -16,6 +17,7 @@ import type {
     PublicAnnouncement,
     PublicDutyWeek,
     PublicSummary,
+    PublicWifiNetwork,
     WeekSchedule,
 } from '@/types/public';
 import { ArrowRightIcon, ClockIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
@@ -29,10 +31,11 @@ interface Props {
     dutyWeek: PublicDutyWeek;
     networks: NetworkStatus[];
     apps: AppStatus[];
+    wifi: PublicWifiNetwork[];
     display: DisplaySettings;
 }
 
-export default function Home({ summary, labsNow, week, dutyWeek, networks, apps, display, announcements }: Props) {
+export default function Home({ summary, labsNow, week, dutyWeek, networks, apps, wifi, display, announcements }: Props) {
     const { site } = usePage().props;
     const now = useNow(30_000);
     const stale =
@@ -41,7 +44,12 @@ export default function Home({ summary, labsNow, week, dutyWeek, networks, apps,
             Math.max(summary.intervalMinutes * 3 * 60, display.refreshSeconds * 2) * 1000;
 
     // Jadwal ikut diperbarui agar pergantian hari/minggu dan penerbitan petugas terlihat tanpa membuka ulang halaman.
-    usePoll(display.refreshSeconds * 1000, { only: ['summary', 'labsNow', 'week', 'dutyWeek', 'networks', 'apps', 'announcements'] });
+    // `display` ikut dimuat agar sakelar tampilan di dashboard langsung berlaku tanpa membuka ulang halaman.
+    usePoll(display.refreshSeconds * 1000, {
+        only: ['summary', 'labsNow', 'week', 'dutyWeek', 'networks', 'apps', 'wifi', 'display', 'announcements'],
+    });
+
+    const showWifi = display.showWifi && wifi.length > 0;
 
     return (
         <PublicLayout>
@@ -124,21 +132,26 @@ export default function Home({ summary, labsNow, week, dutyWeek, networks, apps,
                 </section>
 
                 <nav aria-label="Jelajahi informasi beranda" className="mt-7 flex flex-wrap gap-2 border-y border-border py-3">
-                    {[
-                        ['#jadwal', 'Kondisi lab'],
-                        ['#jadwal-minggu', 'Jadwal minggu ini'],
-                        ['#petugas', 'Petugas minggu ini'],
-                        ['#jaringan', 'Jaringan'],
-                        ['#aplikasi', 'Aplikasi'],
-                    ].map(([href, label]) => (
-                        <a
-                            key={href}
-                            href={href}
-                            className="inline-flex min-h-11 items-center rounded-full border border-border bg-white px-4 text-xs font-semibold text-muted hover:border-teal hover:text-teal-text"
-                        >
-                            {label}
-                        </a>
-                    ))}
+                    {(
+                        [
+                            ['#jadwal', 'Kondisi lab', true],
+                            ['#jadwal-minggu', 'Jadwal minggu ini', true],
+                            ['#petugas', 'Petugas minggu ini', true],
+                            ['#wifi', 'WiFi kampus', showWifi],
+                            ['#jaringan', 'Jaringan', display.showNetworks],
+                            ['#aplikasi', 'Aplikasi', display.showApps],
+                        ] as const
+                    )
+                        .filter(([, , visible]) => visible)
+                        .map(([href, label]) => (
+                            <a
+                                key={href}
+                                href={href}
+                                className="inline-flex min-h-11 items-center rounded-full border border-border bg-white px-4 text-xs font-semibold text-muted hover:border-teal hover:text-teal-text"
+                            >
+                                {label}
+                            </a>
+                        ))}
                 </nav>
 
                 <section id="jadwal" aria-labelledby="judul-lab" className="mt-10 scroll-mt-6">
@@ -190,55 +203,76 @@ export default function Home({ summary, labsNow, week, dutyWeek, networks, apps,
                     <WeeklyDutyCards week={dutyWeek} />
                 </div>
 
-                <section id="jaringan" aria-labelledby="judul-jaringan" className="mt-12 scroll-mt-6 border-t border-border pt-10">
-                    <SectionHeading
-                        id="judul-jaringan"
-                        eyebrow="Konektivitas kampus"
-                        title="Jaringan per jurusan"
-                        description="Warna bar menunjukkan kondisi jaringan selama 24 jam terakhir."
-                        aside={
-                            <div className="flex flex-wrap gap-2">
-                                <StatusPill tone="online">{summary.networks.online} Online</StatusPill>
-                                <StatusPill tone="slow">{summary.networks.slow} Lambat</StatusPill>
-                                <StatusPill tone="offline">{summary.networks.offline} Offline</StatusPill>
-                            </div>
-                        }
-                    />
-                    <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {networks.map((monitor) => (
-                            <NetworkCard key={monitor.id} monitor={monitor} showBars={display.showHistoryBars} />
-                        ))}
-                    </div>
-                    {!networks.length && (
-                        <p className="mt-5 rounded-card border border-border bg-white p-6 text-sm text-muted">
-                            Informasi jaringan belum tersedia.
-                        </p>
-                    )}
-                </section>
+                {showWifi && (
+                    <section id="wifi" aria-labelledby="judul-wifi" className="mt-12 scroll-mt-6 border-t border-border pt-10">
+                        <SectionHeading
+                            id="judul-wifi"
+                            eyebrow="Akses internet"
+                            title="WiFi kampus"
+                            description="Jaringan WiFi yang dapat Anda gunakan beserta passwordnya."
+                        />
+                        <div className="mt-5">
+                            <PublicWifiCards networks={wifi} />
+                        </div>
+                    </section>
+                )}
 
-                <section id="aplikasi" aria-labelledby="judul-aplikasi" className="mt-10 scroll-mt-6">
-                    <SectionHeading
-                        id="judul-aplikasi"
-                        eyebrow="Layanan digital"
-                        title="Aplikasi kampus"
-                        description="Kondisi aplikasi dan riwayat ketersediaan 30 hari terakhir."
-                        aside={
-                            <Link href="/status" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-teal-text">
-                                Riwayat & insiden <ArrowRightIcon className="size-4" aria-hidden="true" />
-                            </Link>
-                        }
-                    />
-                    <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {apps.map((monitor) => (
-                            <AppStatusCard key={monitor.id} monitor={monitor} showBars={display.showHistoryBars} />
-                        ))}
-                    </div>
-                    {!apps.length && (
-                        <p className="mt-5 rounded-card border border-border bg-white p-6 text-sm text-muted">
-                            Informasi aplikasi belum tersedia.
-                        </p>
-                    )}
-                </section>
+                {display.showNetworks && (
+                    <section id="jaringan" aria-labelledby="judul-jaringan" className="mt-12 scroll-mt-6 border-t border-border pt-10">
+                        <SectionHeading
+                            id="judul-jaringan"
+                            eyebrow="Konektivitas kampus"
+                            title="Jaringan per jurusan"
+                            description="Warna bar menunjukkan kondisi jaringan selama 24 jam terakhir."
+                            aside={
+                                <div className="flex flex-wrap gap-2">
+                                    <StatusPill tone="online">{summary.networks.online} Online</StatusPill>
+                                    <StatusPill tone="slow">{summary.networks.slow} Lambat</StatusPill>
+                                    <StatusPill tone="offline">{summary.networks.offline} Offline</StatusPill>
+                                    {summary.networks.maintenance > 0 && (
+                                        <StatusPill tone="slow">{summary.networks.maintenance} Maintenance</StatusPill>
+                                    )}
+                                </div>
+                            }
+                        />
+                        <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {networks.map((monitor) => (
+                                <NetworkCard key={monitor.id} monitor={monitor} showBars={display.showHistoryBars} />
+                            ))}
+                        </div>
+                        {!networks.length && (
+                            <p className="mt-5 rounded-card border border-border bg-white p-6 text-sm text-muted">
+                                Informasi jaringan belum tersedia.
+                            </p>
+                        )}
+                    </section>
+                )}
+
+                {display.showApps && (
+                    <section id="aplikasi" aria-labelledby="judul-aplikasi" className="mt-10 scroll-mt-6">
+                        <SectionHeading
+                            id="judul-aplikasi"
+                            eyebrow="Layanan digital"
+                            title="Aplikasi kampus"
+                            description="Kondisi aplikasi dan riwayat ketersediaan 30 hari terakhir."
+                            aside={
+                                <Link href="/status" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-teal-text">
+                                    Riwayat & insiden <ArrowRightIcon className="size-4" aria-hidden="true" />
+                                </Link>
+                            }
+                        />
+                        <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {apps.map((monitor) => (
+                                <AppStatusCard key={monitor.id} monitor={monitor} showBars={display.showHistoryBars} />
+                            ))}
+                        </div>
+                        {!apps.length && (
+                            <p className="mt-5 rounded-card border border-border bg-white p-6 text-sm text-muted">
+                                Informasi aplikasi belum tersedia.
+                            </p>
+                        )}
+                    </section>
+                )}
 
                 <aside className="mt-10 flex flex-wrap items-center justify-between gap-5 rounded-card bg-faint p-6">
                     <div>

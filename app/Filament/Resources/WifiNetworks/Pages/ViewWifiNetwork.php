@@ -19,6 +19,7 @@ class ViewWifiNetwork extends ViewRecord
         return [
             WifiPasswordActions::reveal(),
             WifiPasswordActions::qrCard(),
+            WifiPasswordActions::togglePublic(),
             EditAction::make(),
         ];
     }

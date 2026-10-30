@@ -1,9 +1,43 @@
 import StatusPill, { monitorStatusTone } from '@/components/StatusPill';
 import UptimeBars from '@/components/UptimeBars';
 import { formatPercent } from '@/lib/time';
-import type { AppStatus, NetworkStatus } from '@/types/public';
+import type { AppStatus, MonitorMaintenance, NetworkStatus } from '@/types/public';
+import { WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+
+/** Keterangan maintenance dari petugas: alasan dan perkiraan selesai (WITA). */
+export function MaintenanceNote({ maintenance, className = '' }: { maintenance: MonitorMaintenance | null; className?: string }) {
+    if (!maintenance) {
+        return null;
+    }
+
+    const text = maintenance.note?.trim() || 'Sedang dalam pemeliharaan';
+    const note = /[.!?]$/.test(text) ? text : `${text}.`;
+    const until = maintenance.until
+        ? new Date(maintenance.until).toLocaleString('id-ID', {
+              timeZone: 'Asia/Makassar',
+              day: 'numeric',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+          })
+        : null;
+
+    return (
+        <p className={`flex items-start gap-2 rounded-control bg-slow-bg px-3 py-2 text-xs leading-5 text-slow-text ${className}`}>
+            <WrenchScrewdriverIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <span className="[overflow-wrap:anywhere]">
+                {note}
+                {until && ` Perkiraan selesai ${until} WITA.`}
+            </span>
+        </p>
+    );
+}
 
 function networkMetric(monitor: NetworkStatus): string {
+    if (monitor.status.value === 'maintenance') {
+        return 'dalam maintenance';
+    }
+
     if (monitor.status.value === 'down') {
         return monitor.downSince ? `down sejak ${monitor.downSince}` : 'tidak terjangkau';
     }
@@ -23,6 +57,7 @@ export function NetworkCard({ monitor, showBars }: { monitor: NetworkStatus; sho
                 <h3 className="font-semibold text-ink">{monitor.name}</h3>
                 <StatusPill tone={monitorStatusTone[monitor.status.value]}>{monitor.status.label}</StatusPill>
             </header>
+            <MaintenanceNote maintenance={monitor.maintenance} className="mt-3" />
             {showBars && <UptimeBars hours={monitor.bars} label={`Riwayat 24 jam ${monitor.name}`} className="mt-4" />}
             <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 font-mono text-xs text-muted">
                 <span className={monitor.status.value === 'down' ? 'font-semibold text-offline-text' : ''}>{networkMetric(monitor)}</span>
@@ -42,6 +77,7 @@ export function AppStatusCard({ monitor, showBars }: { monitor: AppStatus; showB
                 </div>
                 <StatusPill tone={monitorStatusTone[monitor.status.value]}>{monitor.status.label}</StatusPill>
             </header>
+            <MaintenanceNote maintenance={monitor.maintenance} className="mt-3" />
             {showBars && <UptimeBars days={monitor.bars} label={`Riwayat 30 hari ${monitor.name}`} className="mt-4" />}
             <div className="mt-4 flex flex-wrap justify-between gap-2 border-t border-border pt-3 font-mono text-xs text-muted">
                 <span>Respons {monitor.status.value === 'down' || monitor.latencyMs === null ? '–' : `${monitor.latencyMs} ms`}</span>
@@ -59,6 +95,7 @@ export function AppStatusRow({ monitor, showBars }: { monitor: AppStatus; showBa
                 <div>
                     <p className="font-semibold text-ink">{monitor.name}</p>
                     {monitor.category && <p className="text-xs text-muted-soft">{monitor.category}</p>}
+                    <MaintenanceNote maintenance={monitor.maintenance} className="mt-2" />
                 </div>
                 <StatusPill tone={monitorStatusTone[monitor.status.value]} className="sm:hidden">
                     {monitor.status.label}

@@ -33,6 +33,17 @@ class RecordCheckResult
             $previous = $monitor->current_status;
             $now = now();
 
+            // Hasil cek yang terlanjur berjalan saat monitor dijadikan maintenance diabaikan:
+            // tidak disimpan (tidak memengaruhi uptime/SLA), status dan insiden tidak berubah.
+            if ($previous === MonitorStatus::Maintenance) {
+                return [$monitor->checks()->make([
+                    'checked_at' => $now,
+                    'status' => $result->status,
+                    'latency_ms' => $result->latencyMs,
+                    'error' => $result->error,
+                ]), null, null];
+            }
+
             if ($result->status === MonitorStatus::Down) {
                 $failures = $monitor->consecutive_failures + 1;
                 $isDown = $failures >= $config->failureThreshold || $previous === MonitorStatus::Down;

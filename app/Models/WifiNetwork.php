@@ -22,12 +22,13 @@ use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * Jaringan WiFi kampus (khusus petugas). Password terenkripsi dan disembunyikan dari array/JSON,
- * tidak ikut activity log; hanya ditampilkan lewat aksi "Lihat password" yang tercatat.
+ * Jaringan WiFi kampus. Password terenkripsi dan disembunyikan dari array/JSON, tidak ikut activity log;
+ * di panel hanya tampil lewat aksi "Lihat password" yang tercatat. SSID yang dipilih petugas (`is_public`)
+ * tampil beserta password di halaman depan saat sakelar WiFi publik aktif (lihat docs/DECISIONS.md).
  */
 #[Fillable([
     'ssid', 'location', 'department_id', 'access_point', 'audience', 'security', 'password', 'vlan',
-    'rotation_days', 'password_changed_at', 'notes', 'is_active',
+    'rotation_days', 'password_changed_at', 'notes', 'is_active', 'is_public',
 ])]
 #[Hidden(['password'])]
 class WifiNetwork extends Model
@@ -40,6 +41,7 @@ class WifiNetwork extends Model
      */
     protected $attributes = [
         'is_active' => true,
+        'is_public' => false,
     ];
 
     /**
@@ -57,6 +59,7 @@ class WifiNetwork extends Model
             'rotation_days' => 'integer',
             'password_changed_at' => 'date',
             'is_active' => 'boolean',
+            'is_public' => 'boolean',
         ];
     }
 
@@ -64,7 +67,7 @@ class WifiNetwork extends Model
     {
         return LogOptions::defaults()
             ->useLogName('wifi')
-            ->logOnly(['ssid', 'location', 'department_id', 'access_point', 'audience', 'security', 'vlan', 'rotation_days', 'is_active'])
+            ->logOnly(['ssid', 'location', 'department_id', 'access_point', 'audience', 'security', 'vlan', 'rotation_days', 'is_active', 'is_public'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }

@@ -445,3 +445,32 @@ fase terkait.
   `BACKUP_ARCHIVE_PASSWORD` opsional untuk enkripsi ZIP. Verifikasi integritas arsip diaktifkan.
 - Verifikasi lokal menjalankan job dengan MySQL sungguhan, membuka ZIP, dan memeriksa dump SQL
   tidak kosong. Akun QA sementara dihapus sebelum dump; tidak ada reset/restore database pengguna.
+
+## Tambahan — Tampilan halaman depan, WiFi publik & maintenance (30 Oktober 2026)
+
+### Pengecualian aturan WiFi (keputusan pengguna)
+- CLAUDE.md mewajibkan password WiFi tidak dikirim ke halaman publik dan halaman publik tidak menampilkan SSID.
+  Atas permintaan pengguna (30 Oktober 2026, pilihan "Semua SSID yang di-ON"), SSID yang dipilih petugas
+  boleh tampil **beserta password** di beranda. CLAUDE.md tidak diubah; pengecualian ini hanya berlaku untuk
+  SSID yang dipilih dan saat sakelar WiFi menyala.
+- Pengaman: default OFF (sakelar global `public.show_wifi` dan `is_public` per SSID); menampilkan butuh izin
+  `wifi.manage` + konfirmasi; setiap tampil/sembunyi tercatat (event `published`/`unpublished`, IP & user agent);
+  data WiFi publik tidak di-cache dan hanya untuk SSID aktif; tidak ikut di /status maupun API ringkasan.
+- Di dashboard, password SSID terpilih terlihat langsung (sudah publik); SSID lain tetap lewat "Lihat password"
+  dengan konfirmasi akun (SPEC §6).
+
+### Sakelar tampilan
+- `public.show_networks`, `public.show_apps` (default ON, izin `monitors.manage`) dan `public.show_wifi`
+  (default OFF, izin `wifi.manage`), diatur dari widget dashboard. Grup yang disembunyikan tidak dikirim ke
+  halaman publik sama sekali (beranda, /status, insiden, API ringkasan); ringkasan grupnya bernilai 0.
+- Pilihan tampil per monitor memakai kolom `is_public` yang sudah ada. Perubahan mengosongkan cache publik.
+- `usePoll` beranda ikut memuat `display` dan `wifi` agar sakelar berlaku tanpa memuat ulang halaman.
+
+### Maintenance per monitor
+- Status baru `maintenance` (label "Maintenance", warna kuning seperti Lambat) + kolom `maintenance_note`,
+  `maintenance_started_at`, `maintenance_until`.
+- Selama maintenance: monitor tidak dikirim ke queue, hasil cek yang terlambat diabaikan (tidak disimpan, tidak
+  memengaruhi uptime/SLA), insiden terbuka ditutup dengan catatan tanpa notifikasi pulih, "Cek sekarang" disembunyikan.
+- Berakhir manual atau otomatis di awal `monitors:dispatch` saat perkiraan selesai lewat; setelahnya status
+  "Tidak diketahui" dan langsung dicek. Menonaktifkan monitor juga mengakhiri maintenance.
+- Izin `monitors.manage` (Petugas IT, Super Admin); Kepala Unit hanya melihat.

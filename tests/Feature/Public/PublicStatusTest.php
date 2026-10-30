@@ -55,8 +55,8 @@ it('menghitung ringkasan jaringan, aplikasi, dan lab dengan benar', function () 
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('public/Home')
-            ->where('summary.networks', ['online' => 1, 'slow' => 1, 'offline' => 1, 'total' => 3])
-            ->where('summary.apps', ['online' => 1, 'slow' => 0, 'offline' => 1, 'total' => 2])
+            ->where('summary.networks', ['online' => 1, 'slow' => 1, 'offline' => 1, 'maintenance' => 0, 'total' => 3])
+            ->where('summary.apps', ['online' => 1, 'slow' => 0, 'offline' => 1, 'maintenance' => 0, 'total' => 2])
             ->where('summary.labs', ['inUse' => 1, 'available' => 1, 'maintenance' => 1, 'total' => 3]));
 });
 

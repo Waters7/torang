@@ -120,19 +120,22 @@ export function OverviewCards({ summary, dutyWeek }: { summary: PublicSummary; d
             tone: 'text-teal-text bg-faint',
         },
         {
+            // Total 0 = bagian jaringan disembunyikan dari halaman depan (atau belum ada monitor publik).
+            visible: summary.networks.total > 0,
             label: 'Jaringan online',
             value: summary.networks.online,
             suffix: `/ ${summary.networks.total}`,
-            note: `${summary.networks.slow} lambat · ${summary.networks.offline} offline`,
+            note: `${summary.networks.slow} lambat · ${summary.networks.offline} offline${summary.networks.maintenance ? ` · ${summary.networks.maintenance} maintenance` : ''}`,
             href: '#jaringan',
             icon: SignalIcon,
             tone: 'text-available-text bg-available-bg',
         },
         {
+            visible: summary.apps.total > 0,
             label: 'Aplikasi online',
             value: summary.apps.online,
             suffix: `/ ${summary.apps.total}`,
-            note: `${summary.apps.slow} lambat · ${summary.apps.offline} offline`,
+            note: `${summary.apps.slow} lambat · ${summary.apps.offline} offline${summary.apps.maintenance ? ` · ${summary.apps.maintenance} maintenance` : ''}`,
             href: '#aplikasi',
             icon: Squares2X2Icon,
             tone: 'text-teal-text bg-faint',
@@ -150,7 +153,7 @@ export function OverviewCards({ summary, dutyWeek }: { summary: PublicSummary; d
 
     return (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {items.map(({ icon: Icon, ...item }) => (
+            {items.filter((item) => item.visible !== false).map(({ icon: Icon, ...item }) => (
                 <a key={item.href} href={item.href} className="group rounded-card border border-border bg-white p-5 hover:border-teal">
                     <div className="flex items-center justify-between gap-2">
                         <p className="text-xs font-medium text-muted">{item.label}</p>

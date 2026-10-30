@@ -10,6 +10,7 @@ use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\View\View;
@@ -65,6 +66,34 @@ class WifiPasswordActions
                 app(WifiPasswordAccess::class)->logQrPrinted($record);
 
                 return response()->streamDownload(fn () => print ($pdf), $card->filename($record), ['Content-Type' => 'application/pdf']);
+            });
+    }
+
+    /**
+     * Tampilkan/sembunyikan SSID (beserta password) di halaman depan. Menampilkan butuh konfirmasi.
+     */
+    public static function togglePublic(): Action
+    {
+        return Action::make('togglePublic')
+            ->label(fn (WifiNetwork $record): string => $record->is_public ? 'Sembunyikan dari depan' : 'Tampilkan di depan')
+            ->icon(fn (WifiNetwork $record): Heroicon => $record->is_public ? Heroicon::OutlinedEyeSlash : Heroicon::OutlinedGlobeAlt)
+            ->color(fn (WifiNetwork $record): string => $record->is_public ? 'gray' : 'warning')
+            ->authorize('publish')
+            ->visible(fn (WifiNetwork $record): bool => $record->is_active)
+            ->requiresConfirmation()
+            ->modalHidden(fn (WifiNetwork $record): bool => $record->is_public)
+            ->modalHeading(fn (WifiNetwork $record): string => "Tampilkan {$record->ssid} di halaman depan?")
+            ->modalDescription(fn (WifiNetwork $record): string => $record->security->requiresPassword()
+                ? 'SSID dan password jaringan ini akan terlihat oleh siapa pun yang membuka halaman depan TORANG, selama sakelar "WiFi" di dashboard menyala.'
+                : 'SSID jaringan ini akan terlihat di halaman depan selama sakelar "WiFi" di dashboard menyala.')
+            ->modalSubmitActionLabel('Ya, tampilkan')
+            ->action(function (WifiNetwork $record): void {
+                app(WifiPasswordAccess::class)->setPublic($record, ! $record->is_public);
+
+                Notification::make()
+                    ->success()
+                    ->title($record->is_public ? "{$record->ssid} tampil di halaman depan" : "{$record->ssid} disembunyikan dari halaman depan")
+                    ->send();
             });
     }
 

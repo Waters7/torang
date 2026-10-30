@@ -29,6 +29,16 @@ class PublicStatus
 {
     public const CACHE_SECONDS = 30;
 
+    /** Key cache bagian publik; dikosongkan saat tampilan/maintenance diubah dari panel. */
+    public const CACHE_KEYS = ['public.summary', 'public.labs-now', 'public.week', 'public.networks', 'public.apps', 'public.status-page'];
+
+    public static function flushCache(): void
+    {
+        foreach (self::CACHE_KEYS as $key) {
+            Cache::forget($key);
+        }
+    }
+
     public function __construct(
         private readonly SettingsService $settings,
         private readonly DutyRoster $roster,
@@ -47,6 +57,7 @@ class PublicStatus
                 'online' => $monitors->where('group', $group)->where('current_status', MonitorStatus::Up)->count(),
                 'slow' => $monitors->where('group', $group)->where('current_status', MonitorStatus::Degraded)->count(),
                 'offline' => $monitors->where('group', $group)->where('current_status', MonitorStatus::Down)->count(),
+                'maintenance' => $monitors->where('group', $group)->where('current_status', MonitorStatus::Maintenance)->count(),
                 'total' => $monitors->where('group', $group)->count(),
             ];
 
@@ -239,7 +250,7 @@ class PublicStatus
 
             $incidents = MonitorIncident::query()
                 ->with('monitor.department')
-                ->whereHas('monitor', fn (Builder $query) => $query->where('is_public', true))
+                ->whereHas('monitor', fn (Builder $query) => $query->where('is_public', true)->whereIn('group', $this->visibleGroups()))
                 ->where(fn (Builder $query) => $query->whereNull('resolved_at')->orWhere('started_at', '>=', now()->subDays(30)))
                 ->orderByDesc('started_at')
                 ->limit(50)
@@ -296,7 +307,7 @@ class PublicStatus
     }
 
     /**
-     * @return array{refreshSeconds: int, showHistoryBars: bool, goodPercent: float, warningPercent: float}
+     * @return array{refreshSeconds: int, showHistoryBars: bool, goodPercent: float, warningPercent: float, showNetworks: bool, showApps: bool, showWifi: bool}
      */
     public function settings(): array
     {
@@ -305,15 +316,33 @@ class PublicStatus
             'showHistoryBars' => (bool) $this->settings->get('public.show_history_bars', true),
             'goodPercent' => (float) $this->settings->get('public.uptime_good_percent', 99.5),
             'warningPercent' => (float) $this->settings->get('public.uptime_warning_percent', 95),
+            'showNetworks' => (bool) $this->settings->get('public.show_networks', true),
+            'showApps' => (bool) $this->settings->get('public.show_apps', true),
+            'showWifi' => (bool) $this->settings->get('public.show_wifi', false),
         ];
     }
 
     /**
+     * Grup monitor yang tampil di halaman publik (sakelar Jaringan/Aplikasi di dashboard).
+     *
+     * @return list<string>
+     */
+    private function visibleGroups(): array
+    {
+        return array_values(array_filter([
+            $this->settings->get('public.show_networks', true) ? MonitorGroup::Network->value : null,
+            $this->settings->get('public.show_apps', true) ? MonitorGroup::Application->value : null,
+        ]));
+    }
+
+    /**
+     * Monitor yang dipilih tampil di publik, aktif, dan grupnya sedang ditampilkan.
+     *
      * @return Builder<Monitor>
      */
     private function publicMonitors(): Builder
     {
-        return Monitor::query()->where('is_public', true)->where('is_active', true)->ordered();
+        return Monitor::query()->where('is_public', true)->where('is_active', true)->whereIn('group', $this->visibleGroups())->ordered();
     }
 
     /**
@@ -335,7 +364,11 @@ class PublicStatus
             'id' => $monitor->id,
             'name' => $monitor->name,
             'status' => ['value' => $monitor->current_status->value, 'label' => $monitor->current_status->label()],
-            'latencyMs' => $monitor->last_latency_ms,
+            'latencyMs' => $monitor->isUnderMaintenance() ? null : $monitor->last_latency_ms,
+            'maintenance' => $monitor->isUnderMaintenance() ? [
+                'note' => $monitor->maintenance_note,
+                'until' => $monitor->maintenance_until?->toIso8601String(),
+            ] : null,
         ];
     }
 

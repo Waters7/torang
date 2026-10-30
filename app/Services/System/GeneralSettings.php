@@ -5,8 +5,8 @@ namespace App\Services\System;
 use App\Enums\Permission;
 use App\Enums\Role;
 use App\Models\User;
+use App\Services\PublicSite\PublicStatus;
 use App\Services\SettingsService;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -45,9 +45,7 @@ class GeneralSettings
             $values[$key] = array_map('intval', $values[$key]);
         }
         app(SettingsService::class)->setMany($values);
-        foreach (['summary', 'labs-now', 'week', 'networks', 'apps', 'status-page'] as $key) {
-            Cache::forget('public.'.$key);
-        }
+        PublicStatus::flushCache();
         activity('settings')->causedBy($actor)->withProperties(['keys' => array_keys($values)])->log('Pengaturan umum diperbarui');
     }
 }

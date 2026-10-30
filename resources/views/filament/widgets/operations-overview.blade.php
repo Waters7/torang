@@ -4,6 +4,11 @@
         <div class="torang-operations-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px">
             @foreach ($groups as $group)
                 <x-filament::section :heading="$group['title']">
+                    @if (filled($group['url'] ?? null))
+                        <x-slot name="afterHeader">
+                            <x-filament::link :href="$group['url']" size="sm" icon="heroicon-m-arrow-right" icon-position="after">Buka</x-filament::link>
+                        </x-slot>
+                    @endif
                     @if (isset($group['summary']))
                         <p style="font-size:12px;line-height:1.7;opacity:.75;margin-bottom:18px">{{ $group['summary'] }}</p>
                     @endif
@@ -16,7 +21,7 @@
                                         <x-filament::badge :color="match ($item['status']) {
                                             'Online', 'Pulih', 'Berlangsung', 'Selesai' => 'success',
                                             'Offline', 'Kedaluwarsa' => 'danger',
-                                            'Lambat', 'Menunggu', 'Segera berakhir' => 'warning',
+                                            'Lambat', 'Menunggu', 'Segera berakhir', 'Maintenance' => 'warning',
                                             default => 'gray',
                                         }">{{ $item['status'] }}</x-filament::badge>
                                     @endif

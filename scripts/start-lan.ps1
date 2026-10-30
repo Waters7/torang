@@ -1,7 +1,9 @@
 param(
     [Parameter(Mandatory = $true)] [string] $InterfaceAlias,
     [Parameter(Mandatory = $true)] [string] $PhpPath,
-    [ValidateRange(1024, 65535)] [int] $Port = 8001
+    [ValidateRange(1024, 65535)] [int] $Port = 8001,
+    # Bundel sertifikat CA untuk koneksi HTTPS keluar (verifikasi Turnstile, gateway notifikasi).
+    [string] $CaBundle = 'C:\laragon\etc\ssl\cacert.pem'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -24,10 +26,18 @@ $existing = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction Sil
     Where-Object { $_.LocalAddress -eq $listenAddress -or $_.LocalAddress -eq '0.0.0.0' }
 if ($existing) { throw "Port $Port sudah dipakai pada alamat LAN. PID: $($existing.OwningProcess -join ', ')" }
 
+$phpArguments = @()
+if (Test-Path -LiteralPath $CaBundle) {
+    $caPath = (Resolve-Path -LiteralPath $CaBundle).Path
+    $phpArguments += '-d', "`"curl.cainfo=$caPath`"", '-d', "`"openssl.cafile=$caPath`""
+} else {
+    Write-Warning "Bundel CA $CaBundle tidak ditemukan; verifikasi captcha bisa gagal (cURL error 60) bila php.ini belum mengatur curl.cainfo."
+}
+
 $env:APP_URL = $url
 $env:APP_DEBUG = 'false'
 $server = Start-Process -FilePath $phpExecutable -ArgumentList @(
-    '-S', "${listenAddress}:$Port", '../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php'
+    $phpArguments + @('-S', "${listenAddress}:$Port", '../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')
 ) -WorkingDirectory (Join-Path $projectRoot 'public') -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput (Join-Path $projectRoot 'storage/logs/lan-server.log') `
     -RedirectStandardError (Join-Path $projectRoot 'storage/logs/lan-server-error.log')

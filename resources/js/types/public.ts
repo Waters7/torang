@@ -59,13 +59,30 @@ export interface BookingRulesProps {
     closeTime: string;
 }
 
-export type MonitorStatusValue = 'up' | 'degraded' | 'down' | 'unknown' | 'paused';
+export type MonitorStatusValue = 'up' | 'degraded' | 'down' | 'unknown' | 'paused' | 'maintenance';
 
 export interface StatusCount {
     online: number;
     slow: number;
     offline: number;
+    maintenance: number;
     total: number;
+}
+
+/** Keterangan maintenance dari petugas (null bila tidak sedang maintenance). */
+export interface MonitorMaintenance {
+    note: string | null;
+    until: string | null;
+}
+
+/** SSID yang dipilih petugas tampil di halaman depan (password null untuk jaringan Open). */
+export interface PublicWifiNetwork {
+    id: number;
+    ssid: string;
+    location: string;
+    audience: string;
+    security: string;
+    password: string | null;
 }
 
 export interface PublicSummary {
@@ -151,6 +168,7 @@ interface MonitorBase {
     status: { value: MonitorStatusValue; label: string };
     latencyMs: number | null;
     uptime30d: number | null;
+    maintenance: MonitorMaintenance | null;
 }
 
 export interface NetworkStatus extends MonitorBase {
@@ -186,4 +204,7 @@ export interface DisplaySettings {
     showHistoryBars: boolean;
     goodPercent: number;
     warningPercent: number;
+    showNetworks: boolean;
+    showApps: boolean;
+    showWifi: boolean;
 }

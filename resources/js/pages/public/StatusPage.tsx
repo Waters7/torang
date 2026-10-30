@@ -1,3 +1,4 @@
+import { MaintenanceNote } from '@/components/MonitorCards';
 import SectionHeading from '@/components/SectionHeading';
 import StatusPill, { monitorStatusTone, type StatusTone } from '@/components/StatusPill';
 import UptimeBars from '@/components/UptimeBars';
@@ -15,12 +16,19 @@ interface Props {
 function overall(summary: PublicSummary): { tone: StatusTone; text: string } {
     const offline = summary.networks.offline + summary.apps.offline;
     const slow = summary.networks.slow + summary.apps.slow;
+    const maintenance = summary.networks.maintenance + summary.apps.maintenance;
 
     if (offline > 0) {
         return { tone: 'offline', text: `${offline} layanan sedang mengalami gangguan` };
     }
 
-    return slow > 0 ? { tone: 'slow', text: `${slow} layanan sedang lambat` } : { tone: 'online', text: 'Semua layanan berjalan normal' };
+    if (slow > 0) {
+        return { tone: 'slow', text: `${slow} layanan sedang lambat` };
+    }
+
+    return maintenance > 0
+        ? { tone: 'slow', text: `${maintenance} layanan dalam maintenance` }
+        : { tone: 'online', text: 'Semua layanan berjalan normal' };
 }
 
 function MonitorList({ title, monitors, showBars }: { title: string; monitors: StatusPageMonitor[]; showBars: boolean }) {
@@ -34,6 +42,7 @@ function MonitorList({ title, monitors, showBars }: { title: string; monitors: S
                             <div>
                                 <p className="font-semibold text-ink">{monitor.name}</p>
                                 {monitor.category && <p className="text-xs text-muted-soft">{monitor.category}</p>}
+                                <MaintenanceNote maintenance={monitor.maintenance} className="mt-2" />
                             </div>
                             <StatusPill tone={monitorStatusTone[monitor.status.value]}>{monitor.status.label}</StatusPill>
                         </div>
@@ -81,8 +90,8 @@ export default function StatusPage({ summary, status, display }: Props) {
                         title="Uptime harian"
                         description={`Hijau ≥ ${formatPercent(display.goodPercent)}, kuning ≥ ${formatPercent(display.warningPercent, 0)}, merah di bawahnya, abu-abu tanpa data. Alamat IP dan URL internal tidak ditampilkan.`}
                     />
-                    <MonitorList title="Jaringan per jurusan" monitors={status.networks} showBars={display.showHistoryBars} />
-                    <MonitorList title="Aplikasi kampus" monitors={status.apps} showBars={display.showHistoryBars} />
+                    {display.showNetworks && <MonitorList title="Jaringan per jurusan" monitors={status.networks} showBars={display.showHistoryBars} />}
+                    {display.showApps && <MonitorList title="Aplikasi kampus" monitors={status.apps} showBars={display.showHistoryBars} />}
                 </section>
 
                 <section aria-labelledby="judul-insiden" className="mt-12">

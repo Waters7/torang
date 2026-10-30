@@ -27,6 +27,10 @@ class WifiPasswordAccess
 
     public const EVENT_CHANGED = 'password_changed';
 
+    public const EVENT_PUBLISHED = 'published';
+
+    public const EVENT_UNPUBLISHED = 'unpublished';
+
     public function isConfirmed(): bool
     {
         $confirmedAt = session('auth.password_confirmed_at');
@@ -86,6 +90,18 @@ class WifiPasswordAccess
     public function logChanged(WifiNetwork $network): void
     {
         $this->log($network, self::EVENT_CHANGED, 'Mengganti password');
+    }
+
+    /**
+     * Pilih SSID tampil/tidak di halaman depan (beserta password) dan catat siapa yang mengubahnya.
+     */
+    public function setPublic(WifiNetwork $network, bool $public): void
+    {
+        $network->forceFill(['is_public' => $public])->saveQuietly();
+
+        $this->log($network, $public ? self::EVENT_PUBLISHED : self::EVENT_UNPUBLISHED, $public
+            ? 'Menampilkan SSID & password di halaman depan'
+            : 'Menyembunyikan SSID dari halaman depan');
     }
 
     private function log(WifiNetwork $network, string $event, string $description, ?WifiPasswordHistory $history = null): void

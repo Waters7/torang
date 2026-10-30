@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\PublicSite\PublicAnnouncements;
 use App\Services\PublicSite\PublicDutyRoster;
 use App\Services\PublicSite\PublicStatus;
+use App\Services\PublicSite\PublicWifi;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,6 +25,8 @@ class HomeController extends Controller
             'dutyWeek' => fn (): array => app(PublicDutyRoster::class)->currentWeek(),
             'networks' => fn (): array => $status->networks(),
             'apps' => fn (): array => $status->apps(),
+            // SSID & password yang dipilih tampil; tidak di-cache (lihat PublicWifi).
+            'wifi' => fn (): array => app(PublicWifi::class)->networks(),
             'display' => fn (): array => $status->settings(),
         ]);
     }

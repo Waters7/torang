@@ -15,6 +15,8 @@ enum MonitorStatus: string implements HasColor, HasLabel
     case Down = 'down';
     case Unknown = 'unknown';
     case Paused = 'paused';
+    /** Ditetapkan petugas: pengecekan, insiden, dan notifikasi berhenti sampai maintenance selesai. */
+    case Maintenance = 'maintenance';
 
     public function label(): string
     {
@@ -24,6 +26,7 @@ enum MonitorStatus: string implements HasColor, HasLabel
             self::Down => 'Offline',
             self::Unknown => 'Tidak diketahui',
             self::Paused => 'Dijeda',
+            self::Maintenance => 'Maintenance',
         };
     }
 
@@ -31,7 +34,7 @@ enum MonitorStatus: string implements HasColor, HasLabel
     {
         return match ($this) {
             self::Up => 'success',
-            self::Degraded => 'warning',
+            self::Degraded, self::Maintenance => 'warning',
             self::Down => 'danger',
             self::Unknown, self::Paused => 'gray',
         };
@@ -46,7 +49,7 @@ enum MonitorStatus: string implements HasColor, HasLabel
             self::Down => 3,
             self::Degraded => 2,
             self::Up => 1,
-            self::Unknown, self::Paused => 0,
+            self::Unknown, self::Paused, self::Maintenance => 0,
         };
     }
 

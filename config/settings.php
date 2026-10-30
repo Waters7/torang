@@ -60,6 +60,10 @@ return [
         'public.show_history_bars' => true,
         'public.uptime_good_percent' => 99.5,
         'public.uptime_warning_percent' => 95,
+        // Sakelar tampilan halaman depan (diatur dari dashboard). WiFi default tidak tampil.
+        'public.show_networks' => true,
+        'public.show_apps' => true,
+        'public.show_wifi' => false,
 
         // Laporan UKOM (SPTJM)
         'reports.ukom.number_pattern' => 'PP.06.03/F.XXX.20/{seq:3}/{year}',

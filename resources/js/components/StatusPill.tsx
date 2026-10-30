@@ -25,6 +25,7 @@ export const monitorStatusTone: Record<MonitorStatusValue, StatusTone> = {
     down: 'offline',
     unknown: 'nodata',
     paused: 'nodata',
+    maintenance: 'slow',
 };
 
 /**
