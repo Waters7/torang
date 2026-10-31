@@ -11,6 +11,9 @@ const PALETTE = ['#1BBBCB', '#04B6A3', '#D4E022', '#42B97C'];
 /** Batas baris per daftar agar layar TV tidak perlu digulir. */
 const MAX_ROWS = 4;
 
+const LOGO_SRC = '/images/brand/logo-poltekkes-manado.webp';
+const SUPERGRAPHIC_SRC = '/images/brand/supergrafis-kemenkes.webp';
+
 function SessionRow({ session, done = false }: { session: LabTvSession; done?: boolean }) {
     return (
         <li className={`flex items-start gap-4 rounded-2xl border border-white/10 px-4 py-3 2xl:px-6 2xl:py-4 ${done ? 'opacity-60' : 'bg-white/5'}`}>
@@ -19,7 +22,9 @@ function SessionRow({ session, done = false }: { session: LabTvSession; done?: b
             </span>
             <span className="min-w-0">
                 <span className="block truncate text-lg font-semibold 2xl:text-2xl">{session.activityName}</span>
-                <span className="block truncate text-sm text-white/60 2xl:text-lg">{[session.organizer, session.activityType].filter(Boolean).join(' · ')}</span>
+                <span className="block truncate text-sm text-white/60 2xl:text-lg">
+                    {[session.organizer, session.activityType].filter(Boolean).join(' · ')}
+                </span>
             </span>
             {done && <CheckCircleIcon className="ml-auto size-6 shrink-0 text-green 2xl:size-8" aria-label="Selesai" />}
         </li>
@@ -69,12 +74,27 @@ export default function LabTv({ board }: { board: LabTvBoard }) {
     const nextToday = board.upcoming[0] ?? null;
 
     return (
-        <div className="flex min-h-screen flex-col bg-ink-dark text-white">
+        <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-ink-dark text-white">
             <Head title={`TV ${lab.name}`} />
 
-            <header className="flex flex-wrap items-center justify-between gap-6 border-b border-white/10 px-6 py-5 lg:px-12 lg:py-7">
-                <div className="flex min-w-0 items-center gap-4 2xl:gap-6">
-                    <TorangMark faint={false} onDark className="size-12 shrink-0 lg:size-16 2xl:size-20" />
+            {/* Supergrafis Kemenkes sebagai dekorasi latar; samar agar teks tetap terbaca dari jauh. */}
+            <img
+                src={SUPERGRAPHIC_SRC}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-[18vh] -bottom-[22vh] -z-10 h-[78vh] w-auto max-w-none opacity-[0.13] select-none"
+            />
+            <img
+                src={SUPERGRAPHIC_SRC}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute top-[38%] -left-[16vh] -z-10 hidden h-[34vh] w-auto max-w-none opacity-[0.07] select-none lg:block"
+            />
+
+            <header className="flex flex-wrap items-center justify-between gap-6 border-b border-white/10 bg-ink-dark/80 px-6 py-5 lg:px-12 lg:py-7">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-8 gap-y-4 2xl:gap-x-12">
+                    <img src={LOGO_SRC} alt="Kemenkes Poltekkes Manado" width={2000} height={544} className="h-12 w-auto shrink-0 lg:h-16 2xl:h-20" />
+                    <span className="hidden h-16 w-px bg-white/15 lg:block 2xl:h-20" aria-hidden="true" />
                     <div className="min-w-0">
                         <p className="font-mono text-xs font-semibold tracking-[0.14em] text-teal uppercase 2xl:text-base">TORANG · Layar Lab CBT</p>
                         <h1 className="flex items-center gap-3 truncate text-3xl font-bold lg:text-5xl 2xl:text-6xl">
@@ -192,6 +212,7 @@ export default function LabTv({ board }: { board: LabTvBoard }) {
 
             <footer className="flex flex-wrap items-center justify-between gap-4 px-6 pb-6 text-sm text-white/60 lg:px-12 2xl:text-lg">
                 <div className="flex items-center gap-4">
+                    <TorangMark faint={false} onDark className="size-7 shrink-0 2xl:size-9" />
                     <div className="grid w-28 grid-cols-4 gap-1" aria-hidden="true">
                         {PALETTE.map((color) => (
                             <span key={color} className="h-1.5 rounded-full" style={{ backgroundColor: color }} />
