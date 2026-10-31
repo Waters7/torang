@@ -42,4 +42,18 @@ class TurnstileVerifier
     {
         return config('services.turnstile.site_key') ?: null;
     }
+
+    public function configured(): bool
+    {
+        return filled(config('services.turnstile.site_key')) && filled(config('services.turnstile.secret_key'));
+    }
+
+    /**
+     * Captcha di halaman masuk & atur ulang kata sandi petugas: wajib bila kunci terisi, dan selalu wajib di
+     * produksi (tanpa kunci verifikasi gagal, sama seperti form publik). Di lokal tanpa kunci dilewati.
+     */
+    public function requiredForPanel(): bool
+    {
+        return $this->configured() || app()->isProduction();
+    }
 }

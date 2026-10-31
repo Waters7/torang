@@ -2,8 +2,10 @@
 
 use App\Enums\Permission;
 use App\Enums\Role;
+use App\Filament\Auth\Login;
 use App\Services\Helpdesk\TicketService;
-use Filament\Auth\Pages\Login;
+use App\Services\TurnstileVerifier;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission as PermissionModel;
 use Spatie\Permission\Models\Role as RoleModel;
@@ -32,15 +34,16 @@ describe('header keamanan', function () {
 });
 
 it('membatasi percobaan login admin', function () {
+    Http::fake([TurnstileVerifier::VERIFY_URL => Http::response(['success' => true])]);
     $user = userWithRole(Role::ItStaff);
 
     $login = Livewire::test(Login::class);
 
     foreach (range(1, 5) as $attempt) {
-        $login->fillForm(['email' => $user->email, 'password' => 'salah'])->call('authenticate')->assertHasFormErrors(['email']);
+        $login->fillForm(['email' => $user->email, 'password' => 'salah', 'captcha' => 'token'])->call('authenticate')->assertHasFormErrors(['email']);
     }
 
-    $login->fillForm(['email' => $user->email, 'password' => 'password'])->call('authenticate')->assertNotified();
+    $login->fillForm(['email' => $user->email, 'password' => 'password', 'captcha' => 'token'])->call('authenticate')->assertNotified();
     $this->assertGuest();
 });
 

@@ -589,3 +589,33 @@ fase terkait.
 ### Versi & favicon
 - `config('torang.version')` (1.1.0) tampil di halaman login dan menjadi penanda `?v=` pada tautan favicon publik &
   panel (partial `partials/favicons`), sehingga browser mengganti ikon yang tersimpan di cache.
+
+## Tambahan — Lupa kata sandi & captcha masuk petugas (31 Oktober 2026)
+
+### Lupa kata sandi
+- Memakai alur reset bawaan Filament/Laravel (`->passwordReset()`), dengan halaman sendiri di `app/Filament/Auth`
+  (bukan `app/Filament/Pages`, agar tidak ikut auto-discovery sebagai halaman panel).
+- Tautan hanya dikirim ke akun yang `canAccessPanel` (aktif dan punya role). Pesan ke peminta selalu
+  "Periksa email Anda…" — tidak membedakan email tidak dikenal, nonaktif, atau dibatasi — untuk mencegah enumerasi
+  akun (bawaan Filament menampilkan "email tidak ditemukan").
+- Email `StaffPasswordReset` berbahasa Indonesia, lewat antrean `default` (sama dengan notifikasi lain), tautan
+  bertanda tangan dan kedaluwarsa sesuai `auth.passwords.users.expire` (60 menit), token sekali pakai.
+- Batas: 2 permintaan/menit per IP (Filament) dan 1 email/menit per alamat (throttle broker Laravel). Penggantian
+  kata sandi juga dibatasi 2/menit. Setelah berhasil, sesi lain akun itu keluar karena `AuthenticateSession`
+  membandingkan hash kata sandi.
+- Audit log `auth`: event `password_reset_requested` (hanya bila email benar-benar dikirim) dan `password_reset`
+  (dari event `PasswordReset`), dengan IP & user agent.
+
+### Captcha halaman masuk petugas
+- Komponen form `TurnstileCaptcha` (Turnstile mode explicit, token disimpan ke state Livewire tanpa request
+  tambahan) dipasang di halaman masuk, lupa kata sandi, dan atur ulang kata sandi. Verifikasi memakai
+  `TurnstileVerifier` yang sama dengan form publik, saat validasi form — sebelum kredensial diperiksa.
+- Token Turnstile sekali pakai: halaman mengirim event `torang-turnstile-reset` setelah percobaan gagal agar widget
+  meminta token baru.
+- Wajib bila kunci terisi, dan selalu wajib di produksi (tanpa kunci → ditolak, sama dengan form publik; `torang:check`
+  GAGAL). Di lokal/test tanpa kunci captcha dilewati agar pengembangan tetap bisa masuk.
+
+### Logo di layar TV lab
+- Logo Kemenkes Poltekkes Manado dan supergrafis Kemenkes (file dari pengguna, latar transparan) disimpan di
+  `public/images/brand/`. Supergrafis hanya dekorasi (`aria-hidden`, opasitas rendah) agar teks tetap terbaca dari jauh;
+  simbol TORANG pindah ke footer supaya header tidak memuat dua logo.

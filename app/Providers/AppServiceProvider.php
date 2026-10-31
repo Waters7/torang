@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Notifications\Channels\WhatsAppChannel;
+use App\Services\Auth\StaffPasswordResets;
 use App\Services\SettingsService;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\DevCommands;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -40,6 +44,13 @@ class AppServiceProvider extends ServiceProvider
 
         Notification::resolved(function (ChannelManager $channels): void {
             $channels->extend('whatsapp', fn ($app) => $app->make(WhatsAppChannel::class));
+        });
+
+        // Audit log saat petugas mengganti kata sandi lewat tautan email.
+        Event::listen(function (PasswordReset $event): void {
+            if ($event->user instanceof User) {
+                app(StaffPasswordResets::class)->recordCompleted($event->user);
+            }
         });
 
         // `composer run dev`: worker juga memproses queue monitoring (menggantikan "queue" bawaan),

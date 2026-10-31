@@ -12,8 +12,19 @@
 - [x] Tambahan: sakelar tampilan halaman depan, WiFi publik terpilih, under maintenance per monitor
 - [x] Fase 8 — Finalisasi & Deployment VPS
 - [x] Tambahan: dashboard bertab, Dashboard Eksekutif, layar TV per lab, palet Kemenkes, login & favicon
+- [x] Tambahan: logo & supergrafis di TV lab, lupa kata sandi via email, captcha Turnstile di halaman masuk petugas
 
 ## Catatan
+
+### Logo TV lab, lupa kata sandi, captcha masuk petugas — 31 Oktober 2026
+- [x] Layar TV lab: logo Kemenkes Poltekkes Manado di header dan supergrafis Kemenkes sebagai dekorasi latar
+  (aset di `public/images/brand/`); tetap satu layar di 1920×1080 dan 1366×768.
+- [x] **Lupa kata sandi?** di halaman masuk: email berisi tautan bertanda tangan (berlaku 60 menit) hanya untuk akun
+  petugas aktif; pesan selalu sama apa pun email yang diisi; permintaan & penggantian tercatat di audit log.
+- [x] **Captcha Cloudflare Turnstile** di halaman masuk, lupa kata sandi, dan atur ulang kata sandi; diverifikasi di
+  server sebelum kata sandi diperiksa dan dimuat ulang setelah percobaan gagal.
+- Verifikasi: `php artisan test` 474 lulus (14 test baru di `StaffPasswordResetTest`, test throttle login diperbarui) · widget captcha dicek di
+  browser pada halaman masuk & lupa kata sandi (kunci uji Cloudflare di lokal) · form tidak dikirim dari browser.
 
 ### Dashboard bertab, Dashboard Eksekutif, TV per lab — 31 Oktober 2026
 - [x] Dashboard awal bertab: **Ringkasan** (kartu angka + "Perlu tindakan"), **Lab CBT** (kegiatan, pengajuan,

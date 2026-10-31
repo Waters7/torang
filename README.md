@@ -143,9 +143,9 @@ Nilai yang wajib diubah untuk produksi (lihat komentar "Produksi:" di `.env.exam
 | `SESSION_SECURE_COOKIE` | `true` |
 | `DB_*` | database dan user dari langkah 2 |
 | `LOG_STACK` / `LOG_LEVEL` | `daily` / `warning` |
-| `MAIL_*` | SMTP email kampus |
+| `MAIL_*` | SMTP email kampus — dipakai notifikasi dan email **lupa kata sandi** petugas |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | akun super admin awal (kosongkan password setelah login pertama) |
-| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | kunci Cloudflare Turnstile asli — form publik menolak kiriman bila kosong |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | kunci Cloudflare Turnstile asli (domain TORANG didaftarkan di dasbor Cloudflare) — wajib untuk form publik dan halaman masuk petugas; bila kosong di produksi keduanya menolak kiriman |
 | `TELEGRAM_BOT_TOKEN` | token bot dari @BotFather (opsional) |
 | `WHATSAPP_GATEWAY_URL`, `WHATSAPP_GATEWAY_TOKEN` | gateway WhatsApp (opsional, nonaktif secara default) |
 | `TRUSTED_PROXIES` | isi hanya bila memakai reverse proxy/CDN (mis. Cloudflare) |
@@ -248,5 +248,6 @@ dari kerusakan server. Isi `BACKUP_ARCHIVE_PASSWORD` bila arsip ingin dienkripsi
 | Monitor tetap "Tidak diketahui" | `supervisorctl status`, `storage/logs/worker-monitoring.log`, baris Scheduler di `torang:check` |
 | Monitor jaringan selalu Offline | ping sebagai `www-data` (langkah 7) |
 | Tombol PDF laporan UKOM nonaktif | `soffice` belum terpasang atau `LIBREOFFICE_BINARY` salah |
-| Form publik selalu ditolak captcha | kunci Turnstile dan domain di dasbor Cloudflare |
+| Form publik atau halaman masuk selalu ditolak captcha | kunci Turnstile dan domain di dasbor Cloudflare |
+| Email lupa kata sandi tidak sampai | `MAIL_*`, worker `default` (`supervisorctl status`), folder spam penerima |
 | IP pengunjung salah di log/rate limit | `TRUSTED_PROXIES` bila memakai proxy/CDN |
