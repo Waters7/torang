@@ -5,7 +5,6 @@ namespace App\Filament\Pages;
 use App\Enums\Permission;
 use App\Services\Dashboard\TvBoard;
 use App\Services\SettingsService;
-use Filament\Pages\Dashboard as DashboardPage;
 use Filament\Pages\Page;
 
 /**
@@ -39,7 +38,7 @@ class TvDisplay extends Page
             ...app(TvBoard::class)->data(auth()->user()),
             'unit' => $settings->get('identity.unit_name'),
             'institution' => $settings->get('identity.institution_name'),
-            'dashboardUrl' => DashboardPage::getUrl(),
+            'dashboardUrl' => Dashboard::getUrl(),
         ];
     }
 }

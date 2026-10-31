@@ -10,6 +10,7 @@ use App\Filament\Resources\Tickets\Pages\CreateTicket;
 use App\Filament\Resources\Tickets\Pages\ListTickets;
 use App\Filament\Resources\Tickets\Pages\ViewTicket;
 use App\Models\Ticket;
+use App\Support\Format;
 use BackedEnum;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\FileUpload;
@@ -105,6 +106,10 @@ class TicketResource extends Resource
                     TextEntry::make('priority')->label('Prioritas')->badge(),
                     TextEntry::make('assignee.name')->label('Petugas')->placeholder('Belum ditugaskan'),
                     TextEntry::make('created_at')->label('Diterima')->dateTime('d M Y H:i')->suffix(' WITA'),
+                    TextEntry::make('first_responded_at')
+                        ->label('Waktu tanggap')
+                        ->state(fn (Ticket $record): ?string => $record->first_responded_at ? Format::duration($record->responseMinutes()) : null)
+                        ->placeholder('Belum ditindaklanjuti'),
                 ]),
             Section::make('Penilaian pelapor')
                 ->columnSpanFull()

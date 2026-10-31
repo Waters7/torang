@@ -123,7 +123,7 @@ class OperationalReports
      *
      * @param  list<int>  $days  Hari ISO (1 = Senin).
      */
-    private function availableMinutes(CarbonImmutable $start, CarbonImmutable $end, array $days, string $open, string $close): float
+    public function availableMinutes(CarbonImmutable $start, CarbonImmutable $end, array $days, string $open, string $close): float
     {
         $available = 0.0;
 
@@ -144,7 +144,7 @@ class OperationalReports
      * @param  Collection<int, Booking>  $bookings
      * @param  list<int>  $days
      */
-    private function occupiedMinutes(Collection $bookings, array $days, string $open, string $close): float
+    public function occupiedMinutes(Collection $bookings, array $days, string $open, string $close): float
     {
         $occupied = 0.0;
 

@@ -19,7 +19,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 #[Fillable([
     'code', 'reporter_name', 'reporter_contact', 'department_id', 'usage_log_id', 'category', 'title', 'description',
-    'priority', 'status', 'source', 'assigned_to', 'created_by', 'resolved_at', 'closed_at', 'rating_token_hash',
+    'priority', 'status', 'source', 'assigned_to', 'first_responded_at', 'created_by', 'resolved_at', 'closed_at', 'rating_token_hash',
     'rating', 'feedback', 'rated_at', 'attachment_path',
 ])]
 #[Hidden(['rating_token_hash'])]
@@ -38,6 +38,7 @@ class Ticket extends Model
             'category' => TicketCategory::class,
             'priority' => TicketPriority::class,
             'status' => TicketStatus::class,
+            'first_responded_at' => 'datetime',
             'resolved_at' => 'datetime',
             'closed_at' => 'datetime',
             'rated_at' => 'datetime',
@@ -86,5 +87,21 @@ class Ticket extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(TicketComment::class);
+    }
+
+    /**
+     * Menit dari tiket diterima sampai tindak lanjut pertama petugas (tidak pernah negatif).
+     */
+    public function responseMinutes(): ?int
+    {
+        return $this->first_responded_at ? max(0, (int) $this->created_at->diffInMinutes($this->first_responded_at)) : null;
+    }
+
+    /**
+     * Menit dari tiket diterima sampai ditandai selesai (tidak pernah negatif).
+     */
+    public function resolutionMinutes(): ?int
+    {
+        return $this->resolved_at ? max(0, (int) $this->created_at->diffInMinutes($this->resolved_at)) : null;
     }
 }

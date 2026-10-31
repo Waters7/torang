@@ -208,3 +208,35 @@ export interface DisplaySettings {
     showApps: boolean;
     showWifi: boolean;
 }
+
+/** Sesi kegiatan pada layar TV lab — tanpa data pribadi pemohon. */
+export interface LabTvSession {
+    activityName: string;
+    activityType: string;
+    organizer: string | null;
+    start: string;
+    end: string;
+    startsAt: string;
+    endsAt: string;
+    participants: number;
+    isMaintenance: boolean;
+}
+
+export interface LabTvBoard {
+    lab: {
+        code: string;
+        name: string;
+        location: string | null;
+        color: string;
+        readyPcs: number;
+    };
+    state: 'ongoing' | 'available' | 'maintenance';
+    maintenanceNote: string | null;
+    dateLabel: string;
+    current: LabTvSession | null;
+    upcoming: LabTvSession[];
+    completed: LabTvSession[];
+    nextDay: (LabTvSession & { dateLabel: string }) | null;
+    staff: string[];
+    refreshSeconds: number;
+}

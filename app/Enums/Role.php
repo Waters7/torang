@@ -65,6 +65,7 @@ enum Role: string
                 Permission::AnnouncementsManage->value,
                 Permission::ReportsView->value,
                 Permission::ReportsUkomManage->value,
+                Permission::DashboardExecutive->value,
                 Permission::AuditView->value,
             ],
             self::ItStaff => [

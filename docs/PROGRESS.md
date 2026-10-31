@@ -11,8 +11,28 @@
 - [x] Penyempurnaan beranda, petugas mingguan, tema Neumorphism & uji LAN
 - [x] Tambahan: sakelar tampilan halaman depan, WiFi publik terpilih, under maintenance per monitor
 - [x] Fase 8 — Finalisasi & Deployment VPS
+- [x] Tambahan: dashboard bertab, Dashboard Eksekutif, layar TV per lab, palet Kemenkes, login & favicon
 
 ## Catatan
+
+### Dashboard bertab, Dashboard Eksekutif, TV per lab — 31 Oktober 2026
+- [x] Dashboard awal bertab: **Ringkasan** (kartu angka + "Perlu tindakan"), **Lab CBT** (kegiatan, pengajuan,
+  petugas, tautan TV lab), **Jaringan & Aplikasi**, **Infrastruktur**, **Layanan**, **Halaman depan**. Tab tanpa izin
+  tidak tampil; tab aktif di URL `?tab=`.
+- [x] Palet Kemenkes (teal, lime, cyan, hijau) pada tab, kartu angka, garis aksen bagian, garis empat warna di
+  bawah topbar, dan seri grafik.
+- [x] **Dashboard Eksekutif** (`/admin/eksekutif`, izin baru `dashboard.executive` untuk Kepala Unit & Super Admin):
+  filter periode, 6 indikator dibanding periode sebelumnya, insight & rekomendasi otomatis, grafik pemakaian lab,
+  pengaduan jaringan vs insiden, waktu tanggap & penyelesaian tiket, uptime jaringan per jurusan.
+- [x] Waktu tanggap tiket: kolom `first_responded_at` (tindak lanjut/komentar petugas pertama), tampil di detail tiket.
+- [x] **Layar TV per lab** `/tv/lab/{kode}` tanpa login: sedang berlangsung, sesi berikutnya, sudah selesai hari ini,
+  sesi hari berikutnya; tombol **Buka TV** di daftar lab dan tab Lab CBT.
+- [x] Halaman login berwarna palet Kemenkes + "TORANG · Versi 1.1.0"; favicon diberi penanda versi agar ikon lama
+  (cache browser dari proyek lain di localhost:8000) terganti.
+- Verifikasi: `php artisan test` 460 lulus (42 test baru: dashboard, eksekutif, TV lab, waktu tanggap) · `pint`, TypeScript & build bersih · TV lab dicek di browser 1920×1080 dan
+  375 px tanpa gulir horizontal · login mode terang & gelap · tab dashboard & Dashboard Eksekutif dirender di
+  server dengan data lokal (akun admin tidak dipakai di browser). Setelah deploy jalankan `torang:sync-permissions`
+  (otomatis di `deploy.sh`) agar izin `dashboard.executive` ada.
 
 ### Fase 8 — Finalisasi & Deployment VPS — selesai 30 Oktober 2026
 - [x] Seeder data contoh lengkap §16 diuji end-to-end (`DatabaseSeederTest`: jumlah departemen, lab, booking,

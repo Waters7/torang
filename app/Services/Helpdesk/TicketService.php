@@ -122,6 +122,11 @@ class TicketService
 
             $locked->fill($data);
 
+            // Tindak lanjut pertama petugas (status, prioritas, atau penugasan) = waktu tanggap.
+            if ($locked->isDirty() && ! $locked->first_responded_at) {
+                $locked->first_responded_at = now();
+            }
+
             if ($next === TicketStatus::Resolved && ! $locked->resolved_at) {
                 $locked->resolved_at = now();
             }
@@ -147,6 +152,8 @@ class TicketService
         $data = Validator::make(['body' => $body], ['body' => ['required', 'string', 'max:5000']])->validate();
 
         $ticket->comments()->create([...$data, 'is_internal' => $internal, 'user_id' => $actor->id]);
+
+        Ticket::query()->whereKey($ticket->id)->whereNull('first_responded_at')->update(['first_responded_at' => now()]);
 
         activity('tickets')->causedBy($actor)->performedOn($ticket)->log('Komentar tiket ditambahkan');
     }

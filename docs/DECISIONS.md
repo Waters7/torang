@@ -538,3 +538,54 @@ fase terkait.
 - Aksi tiket (tindak lanjut, komentar, unduh lampiran, buat dari log pemakaian) dipindah ke `TicketActions`;
   aturan validasi tiket publik dipakai bersama `TicketService::rules()` dan `StoreTicketRequest`.
 - `OperationsDashboard` dan `OperationalReports` dipecah per bagian tanpa mengubah hasil; seluruh test lama tetap lulus.
+
+## Tambahan — Dashboard bertab, Dashboard Eksekutif, TV per lab (31 Oktober 2026)
+
+### Dashboard bertab
+- `App\Filament\Pages\Dashboard` menggantikan dashboard bawaan Filament. Tab didefinisikan di satu tempat
+  (label, ikon, warna aksen, izin, widget); tab tampil bila pengguna punya salah satu izinnya. Hanya widget tab aktif
+  yang dimuat (`?tab=`), dan kunci Livewire memuat nama tab agar widget yang sama di tab lain dimuat ulang.
+- `OperationsOverview` menerima `section` (attention/cbt/monitoring/infrastructure/helpdesk); tanpa section tetap
+  mengembalikan semua kelompok seperti sebelumnya. `AccountWidget` tidak lagi dipasang (menu pengguna sudah ada).
+- "Perlu tindakan" = pengajuan menunggu (3 terdekat), monitor Offline/Maintenance, hosting jatuh tempo ≤ 7 hari
+  atau lewat, dan jumlah tiket tanpa petugas.
+
+### Palet Kemenkes
+- Empat warna dari Pedoman Identitas Kemenkes (turunan logo UPT Poltekkes): teal `#04B6A3` (C75 Y45),
+  lime `#D4E022` (C20 Y100), cyan `#1BBBCB` (C74 Y21), hijau `#42B97C` (C69 Y68), disimpan di
+  `OperationsDashboard::ACCENTS` dan variabel CSS `--kemenkes-*`. Lime hanya untuk aksen/garis/latar ikon, tidak untuk
+  teks di latar terang. Warna primer panel tetap `#08796C` agar kontras teks aman.
+- Garis empat warna memakai `linear-gradient` dengan batas keras (blok warna padat, bukan gradien visual).
+
+### Dashboard Eksekutif
+- Halaman Filament dashboard kedua (`/admin/eksekutif`) dengan filter periode: Bulan ini, 3 bulan terakhir (bawaan),
+  6 bulan terakhir, Tahun ini. Periode pembanding = jumlah hari yang sama tepat sebelum periode. Grafik per minggu
+  untuk "Bulan ini", selain itu per bulan.
+- Indikator: utilisasi lab (rata-rata per lab; menit terpakai ÷ menit operasional sampai saat ini, memakai helper
+  laporan CBT), kegiatan CBT & peserta (tanpa maintenance), uptime jaringan tertimbang dari statistik harian,
+  pengaduan jaringan (tiket kategori jaringan), median waktu tanggap & penyelesaian tiket, rata-rata penilaian pelapor.
+- Ambang insight (konstanta `ExecutiveInsights`): lab padat ≥ 80%, jarang dipakai ≤ 20%, PC rusak ≥ 10% (≥ 25%
+  kritis), uptime jaringan < 99,5% (< 95% kritis, sama dengan ambang bar status), pengaduan naik ≥ 30% (minimal 3
+  tiket), median waktu tanggap > 4 jam, tiket belum selesai > 3 hari, pengajuan menunggu > 2 hari, hosting kedaluwarsa
+  atau ≤ 30 hari (dengan perkiraan biaya). Bila tidak ada temuan Perlu perhatian/Kritis, tampil "Semua indikator dalam
+  batas normal".
+- Izin baru `dashboard.executive` (Kepala Unit; Super Admin otomatis semua izin). Widget juga memeriksa izin ini.
+
+### Waktu tanggap tiket
+- Kolom `tickets.first_responded_at`: diisi saat tindak lanjut pertama petugas yang mengubah status, prioritas, atau
+  petugas, atau saat komentar petugas pertama. Simpan tanpa perubahan tidak dihitung.
+- Tiket lama diisi migrasi dari komentar petugas pertama atau waktu selesai (yang lebih awal); bila sudah bukan
+  "Terbuka" tanpa keduanya, waktu perubahan terakhir dipakai sebagai perkiraan. Nilai tidak pernah sebelum tiket diterima,
+  dan durasi dibatasi minimal 0.
+
+### Layar TV per lab
+- Route publik `/tv/lab/{kode}` (tanpa login, `throttle:60,1`), React + Inertia, `usePoll` 30 detik, jam berjalan di
+  klien (WITA). Datanya sama dengan kartu "Sedang berlangsung" di beranda: nama kegiatan, penyelenggara singkat, jam,
+  jumlah peserta, PC siap, petugas jaga — tanpa nama/NIP/email/WhatsApp pemohon dan tanpa kode pengajuan
+  (`LabTvSessionResource`). Lab nonaktif → 404. Tidak di-cache karena query ringan dan per lab.
+- Isi: sedang berlangsung (progres & sisa menit), sesi berikutnya hari ini, sudah selesai hari ini (maks. 4 baris
+  per daftar), dan sesi pertama dalam 7 hari ke depan bila hari ini tidak ada sesi lagi.
+
+### Versi & favicon
+- `config('torang.version')` (1.1.0) tampil di halaman login dan menjadi penanda `?v=` pada tautan favicon publik &
+  panel (partial `partials/favicons`), sehingga browser mengganti ikon yang tersimpan di cache.

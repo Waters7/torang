@@ -113,3 +113,184 @@
 .dark .fi-body .fi-input-wrp:focus-within {
     outline-color: #57cbbc;
 }
+
+/* ------------------------------------------------------------------
+   Palet Kemenkes (Pedoman Identitas, turunan logo UPT Poltekkes):
+   teal C75 Y45, lime C20 Y100, cyan C74 Y21, hijau C69 Y68.
+   Lime hanya untuk aksen (bukan teks di latar terang).
+------------------------------------------------------------------- */
+.fi-body {
+    --kemenkes-teal: #04b6a3;
+    --kemenkes-lime: #d4e022;
+    --kemenkes-cyan: #1bbbcb;
+    --kemenkes-green: #42b97c;
+}
+
+/* Garis empat warna di bawah topbar, seperti modul simbol TORANG. */
+.fi-topbar {
+    position: relative;
+}
+.fi-topbar::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -3px 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        var(--kemenkes-cyan) 0 25%,
+        var(--kemenkes-teal) 25% 50%,
+        var(--kemenkes-lime) 50% 75%,
+        var(--kemenkes-green) 75% 100%
+    );
+    pointer-events: none;
+}
+
+.torang-brand-stripe {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    max-width: 120px;
+}
+.torang-brand-stripe > span {
+    height: 4px;
+    border-radius: 999px;
+}
+
+/* Tab dashboard: ikon & garis tab aktif mengikuti warna kategori. */
+.torang-dashboard-tabs .fi-tabs-item .fi-icon {
+    color: var(--torang-accent);
+}
+.torang-dashboard-tabs .fi-tabs-item.fi-active {
+    box-shadow: inset 0 -3px 0 var(--torang-accent);
+}
+
+/* Bagian ringkasan dengan garis aksen di atas. */
+.fi-section.torang-accent-section {
+    border-top: 4px solid var(--torang-accent);
+}
+
+/* Kartu angka utama. */
+.torang-kpi {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    padding: 18px 18px 16px;
+    border: 1px solid var(--neo-outline);
+    border-radius: 16px;
+    background-color: var(--neo-surface);
+    box-shadow: var(--neo-small);
+    transition:
+        transform var(--neo-duration),
+        box-shadow var(--neo-duration);
+}
+.torang-kpi::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background-color: var(--torang-accent);
+}
+.torang-kpi-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: #0f2e2b;
+    background-color: color-mix(in srgb, var(--torang-accent) 28%, transparent);
+}
+.dark .torang-kpi-icon {
+    color: #ffffff;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    a.torang-kpi:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--neo-raised);
+    }
+}
+a.torang-kpi:focus-visible {
+    outline: 2px solid #08796c;
+    outline-offset: 2px;
+}
+
+/* Kartu insight Dashboard Eksekutif. */
+.torang-insight {
+    border: 1px solid var(--neo-outline);
+    border-left: 5px solid var(--torang-accent);
+    border-radius: 14px;
+    padding: 14px 16px;
+    background-color: var(--neo-surface);
+}
+
+/* Halaman masuk: latar tint teal dengan modul palet Kemenkes. */
+.fi-simple-layout {
+    position: relative;
+    isolation: isolate;
+    background-color: #e6f6f3;
+}
+.dark .fi-simple-layout {
+    background-color: #0b1f1d;
+}
+.torang-auth-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+.torang-auth-module {
+    position: absolute;
+    top: var(--top);
+    left: var(--left);
+    width: var(--size);
+    height: var(--size);
+    border-radius: 28%;
+    opacity: 0.85;
+}
+.torang-auth-dot {
+    border-radius: 999px;
+}
+.dark .torang-auth-module {
+    opacity: 0.35;
+}
+@media (max-width: 640px) {
+    .torang-auth-module {
+        opacity: 0.35;
+    }
+}
+.fi-simple-layout .fi-simple-main {
+    position: relative;
+    overflow: hidden;
+    background-color: #ffffff;
+    border-top: 0;
+}
+.dark .fi-simple-layout .fi-simple-main {
+    background-color: #12302c;
+}
+.fi-simple-layout .fi-simple-main::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+    background: linear-gradient(
+        90deg,
+        var(--kemenkes-cyan) 0 25%,
+        var(--kemenkes-teal) 25% 50%,
+        var(--kemenkes-lime) 50% 75%,
+        var(--kemenkes-green) 75% 100%
+    );
+}
+.torang-login-footer {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 12px;
+    text-align: center;
+    color: #3f5a56;
+}
+.dark .torang-login-footer {
+    color: #a7c4bf;
+}

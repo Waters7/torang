@@ -49,6 +49,7 @@ enum Permission: string
     // Laporan
     case ReportsView = 'reports.view';
     case ReportsUkomManage = 'reports.ukom.manage';
+    case DashboardExecutive = 'dashboard.executive';
 
     /**
      * @return list<string>

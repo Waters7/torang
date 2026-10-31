@@ -40,6 +40,24 @@ final class Format
         return 'Rp'.number_format(round((float) $amount), 0, ',', '.');
     }
 
+    /** "45 menit", "1 jam 20 menit", "2 hari 3 jam" */
+    public static function duration(?int $minutes): string
+    {
+        if ($minutes === null) {
+            return '—';
+        }
+
+        $days = intdiv($minutes, 1440);
+        $hours = intdiv($minutes % 1440, 60);
+        $rest = $minutes % 60;
+
+        return match (true) {
+            $days > 0 => trim("{$days} hari".($hours > 0 ? " {$hours} jam" : '')),
+            $hours > 0 => trim("{$hours} jam".($rest > 0 ? " {$rest} menit" : '')),
+            default => "{$rest} menit",
+        };
+    }
+
     private static function carbon(CarbonInterface|string $date): CarbonInterface
     {
         return ($date instanceof CarbonInterface ? $date : CarbonImmutable::parse($date))->locale(config('app.locale'));

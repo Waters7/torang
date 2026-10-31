@@ -9,11 +9,11 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -35,7 +35,9 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(fn () => view('filament.brand'))
             ->darkModeBrandLogo(fn () => view('filament.brand', ['dark' => true]))
             ->brandLogoHeight('2.5rem')
-            ->favicon(asset('favicon.svg'))
+            ->renderHook(PanelsRenderHook::HEAD_END, fn (): View => view('partials.favicons'))
+            ->renderHook(PanelsRenderHook::SIMPLE_LAYOUT_START, fn (): View => view('filament.auth.backdrop'))
+            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn (): View => view('filament.auth.login-footer'))
             ->font('Sora', provider: GoogleFontProvider::class)
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->monoFont('JetBrains Mono', provider: GoogleFontProvider::class)
@@ -55,14 +57,9 @@ class AdminPanelProvider extends PanelProvider
                     ->editable(false)
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            // Dashboard bertab (App\Filament\Pages\Dashboard) dan Dashboard Eksekutif ikut ditemukan di sini.
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->pages([
-                Dashboard::class,
-            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                AccountWidget::class,
-            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

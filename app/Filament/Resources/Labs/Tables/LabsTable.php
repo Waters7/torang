@@ -4,8 +4,10 @@ namespace App\Filament\Resources\Labs\Tables;
 
 use App\Enums\LabStatus;
 use App\Models\Lab;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -53,6 +55,12 @@ class LabsTable
                     ->options(LabStatus::class),
             ])
             ->recordActions([
+                Action::make('tv')
+                    ->label('Buka TV')
+                    ->icon(Heroicon::OutlinedTv)
+                    ->color('gray')
+                    ->url(fn (Lab $record): string => route('labs.tv', $record), shouldOpenInNewTab: true)
+                    ->hidden(fn (Lab $record): bool => $record->status === LabStatus::Inactive),
                 EditAction::make(),
                 DeleteAction::make(),
             ]);
