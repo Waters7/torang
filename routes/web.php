@@ -28,6 +28,8 @@ Route::get('/lapor/terkirim/{code}', [TicketController::class, 'sent'])->middlew
 Route::get('/cek-tiket', [TicketController::class, 'status'])->middleware('throttle:30,1')->name('tickets.status');
 Route::get('/tiket/{code}/penilaian/{token}', [TicketController::class, 'rating'])->middleware('throttle:30,1')->name('tickets.rating');
 Route::post('/tiket/{code}/penilaian/{token}', [TicketController::class, 'rate'])->middleware('throttle:5,1')->name('tickets.rate');
+Route::get('/tiket/{code}/nilai', [TicketController::class, 'review'])->middleware(['signed', 'throttle:30,1'])->name('tickets.review');
+Route::post('/tiket/{code}/nilai', [TicketController::class, 'submitReview'])->middleware(['signed', 'throttle:5,1'])->name('tickets.review.submit');
 
 // Pengajuan pemakaian Lab CBT (publik)
 Route::get('/ajukan', [BookingController::class, 'create'])->name('bookings.create');

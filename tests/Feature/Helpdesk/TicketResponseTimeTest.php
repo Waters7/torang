@@ -21,7 +21,7 @@ it('mencatat waktu tanggap pada tindak lanjut pertama saja', function () {
     expect($this->ticket->fresh()->responseMinutes())->toBe(45);
 
     $this->travel(2)->hours();
-    app(TicketService::class)->update($this->ticket->fresh(), ['status' => 'resolved', 'priority' => 'high', 'assigned_to' => $this->ticket->fresh()->assigned_to], $this->staff);
+    app(TicketService::class)->update($this->ticket->fresh(), ['status' => 'resolved', 'priority' => 'high', 'assigned_to' => $this->ticket->fresh()->assigned_to, 'resolution_notes' => 'Kabel diganti.'], $this->staff);
 
     expect($this->ticket->fresh()->first_responded_at->equalTo($first))->toBeTrue()
         ->and($this->ticket->fresh()->resolutionMinutes())->toBe(165);

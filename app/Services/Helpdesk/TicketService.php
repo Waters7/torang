@@ -19,8 +19,9 @@ use Illuminate\Validation\ValidationException;
 use Throwable;
 
 /**
- * Alur tiket helpdesk: buat (publik, panel, atau dari log pemakaian), tindak lanjut sesuai alur status,
- * komentar, dan penilaian pelapor dengan token rahasia (hanya hash yang disimpan).
+ * Alur tiket helpdesk: buat (publik, panel, atau dari log pemakaian), tindak lanjut sesuai alur status
+ * (pelapor dikabari saat dikerjakan & selesai), komentar, dan penilaian pelapor dengan token rahasia
+ * (hanya hash yang disimpan) atau tautan bertanda tangan dari pesan "selesai".
  */
 class TicketService
 {
@@ -106,10 +107,16 @@ class TicketService
             'status' => ['required', Rule::enum(TicketStatus::class)],
             'priority' => ['required', Rule::enum(TicketPriority::class)],
             'assigned_to' => ['nullable', 'integer', Rule::exists('staff', 'id')->where('is_active', true)],
+            'resolution_notes' => ['nullable', 'string', 'max:2000', 'required_if:status,'.TicketStatus::Resolved->value],
+        ], [
+            'resolution_notes.required_if' => 'Isi pekerjaan yang dilakukan sebelum menandai tiket selesai.',
         ])->validate();
 
-        return DB::transaction(function () use ($ticket, $data): Ticket {
+        $previous = null;
+
+        $updated = DB::transaction(function () use ($ticket, $data, &$previous): Ticket {
             $locked = Ticket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+            $previous = $locked->status;
             $next = TicketStatus::from($data['status']);
 
             if ($next !== $locked->status && ! in_array($next, $locked->status->next(), true)) {
@@ -143,6 +150,13 @@ class TicketService
 
             return $locked;
         });
+
+        // Kabari pelapor saat mulai dikerjakan dan saat selesai (setelah transaksi tersimpan).
+        if ($updated->status !== $previous && in_array($updated->status, [TicketStatus::InProgress, TicketStatus::Resolved], true)) {
+            app(ReporterUpdates::class)->notifyStatusChange($updated);
+        }
+
+        return $updated;
     }
 
     public function comment(Ticket $ticket, string $body, bool $internal, User $actor): void
@@ -165,14 +179,25 @@ class TicketService
      */
     public function rate(Ticket $ticket, string $token, array $input): void
     {
+        abort_unless($this->validToken($ticket, $token), 404);
+
+        $this->rateVerified($ticket, $input);
+    }
+
+    /**
+     * Penilaian lewat tautan yang sudah diverifikasi pemanggil (token rahasia atau URL bertanda tangan).
+     *
+     * @param  array<string, mixed>  $input
+     */
+    public function rateVerified(Ticket $ticket, array $input): void
+    {
         $data = Validator::make($input, [
             'rating' => ['required', 'integer', 'between:1,5'],
             'feedback' => ['nullable', 'string', 'max:2000'],
         ])->validate();
 
-        DB::transaction(function () use ($ticket, $token, $data): void {
+        DB::transaction(function () use ($ticket, $data): void {
             $locked = Ticket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
-            abort_unless($this->validToken($locked, $token), 404);
 
             if (! $locked->status->isFinished() || $locked->rated_at) {
                 throw ValidationException::withMessages(['rating' => 'Penilaian hanya dapat dikirim sekali setelah tiket selesai.']);

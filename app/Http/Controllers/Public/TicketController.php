@@ -13,6 +13,8 @@ use App\Services\Helpdesk\TicketService;
 use App\Services\TurnstileVerifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
@@ -74,10 +76,43 @@ class TicketController extends Controller
         $ticket = Ticket::query()->where('code', $code)->firstOrFail();
         abort_unless($service->validToken($ticket, $token), 404);
 
+        return $this->ratingPage($request, $ticket, route('tickets.rate', [$code, $token]), $turnstile);
+    }
+
+    public function rate(Request $request, string $code, string $token, TicketService $service): RedirectResponse
+    {
+        $this->validateRating($request);
+
+        $service->rate(Ticket::query()->where('code', $code)->firstOrFail(), $token, $request->only('rating', 'feedback'));
+
+        return to_route('tickets.rating', [$code, $token]);
+    }
+
+    /**
+     * Tautan penilaian dari pesan "tiket selesai" (URL bertanda tangan, middleware `signed`).
+     */
+    public function review(Request $request, string $code, TurnstileVerifier $turnstile): HttpResponse
+    {
+        $ticket = Ticket::query()->where('code', $code)->firstOrFail();
+
+        return $this->ratingPage($request, $ticket, $this->signedReviewUrl($request, 'tickets.review.submit', $code), $turnstile);
+    }
+
+    public function submitReview(Request $request, string $code, TicketService $service): RedirectResponse
+    {
+        $this->validateRating($request);
+
+        $service->rateVerified(Ticket::query()->where('code', $code)->firstOrFail(), $request->only('rating', 'feedback'));
+
+        return redirect()->to($this->signedReviewUrl($request, 'tickets.review', $code));
+    }
+
+    private function ratingPage(Request $request, Ticket $ticket, string $submitUrl, TurnstileVerifier $turnstile): HttpResponse
+    {
         return $this->private(Inertia::render('public/TicketRating', [
             'ticket' => PublicTicketResource::make($ticket)->resolve(),
             'rated' => $ticket->rated_at !== null,
-            'submitUrl' => route('tickets.rate', [$code, $token]),
+            'submitUrl' => $submitUrl,
             'comments' => $ticket->comments()
                 ->where('is_internal', false)
                 ->orderBy('created_at')
@@ -88,16 +123,20 @@ class TicketController extends Controller
         ]), $request);
     }
 
-    public function rate(Request $request, string $code, string $token, TicketService $service): RedirectResponse
+    private function validateRating(Request $request): void
     {
         $request->validate([
             'website' => ['prohibited'],
             'captcha_token' => ['required', new Turnstile($request->ip())],
         ]);
+    }
 
-        $service->rate(Ticket::query()->where('code', $code)->firstOrFail(), $token, $request->only('rating', 'feedback'));
-
-        return to_route('tickets.rating', [$code, $token]);
+    /**
+     * URL bertanda tangan pasangan GET/POST dengan masa berlaku yang sama seperti tautan yang sedang dibuka.
+     */
+    private function signedReviewUrl(Request $request, string $route, string $code): string
+    {
+        return URL::temporarySignedRoute($route, Carbon::createFromTimestamp((int) $request->query('expires')), ['code' => $code]);
     }
 
     /**

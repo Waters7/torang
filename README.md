@@ -147,7 +147,7 @@ Nilai yang wajib diubah untuk produksi (lihat komentar "Produksi:" di `.env.exam
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | akun super admin awal (kosongkan password setelah login pertama) |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | kunci Cloudflare Turnstile asli (domain TORANG didaftarkan di dasbor Cloudflare) — wajib untuk form publik dan halaman masuk petugas; bila kosong di produksi keduanya menolak kiriman |
 | `TELEGRAM_BOT_TOKEN` | token bot dari @BotFather (opsional) |
-| `WHATSAPP_GATEWAY_URL`, `WHATSAPP_GATEWAY_TOKEN` | gateway WhatsApp (opsional, nonaktif secara default) |
+| `WHATSAPP_GATEWAY_URL`, `WHATSAPP_GATEWAY_TOKEN` | gateway WhatsApp (opsional, nonaktif secara default) — kabar otomatis ke pemohon Lab CBT dan pelapor tiket; tanpa gateway petugas tetap bisa memakai tombol "Chat WhatsApp pelapor" |
 | `TRUSTED_PROXIES` | isi hanya bila memakai reverse proxy/CDN (mis. Cloudflare) |
 
 `.env` berisi rahasia: jangan di-commit dan batasi aksesnya:

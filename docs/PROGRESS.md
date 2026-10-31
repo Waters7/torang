@@ -13,8 +13,23 @@
 - [x] Fase 8 — Finalisasi & Deployment VPS
 - [x] Tambahan: dashboard bertab, Dashboard Eksekutif, layar TV per lab, palet Kemenkes, login & favicon
 - [x] Tambahan: logo & supergrafis di TV lab, lupa kata sandi via email, captcha Turnstile di halaman masuk petugas
+- [x] Tambahan: kabar tiket ke pelapor (WhatsApp/email), catatan pekerjaan, tautan penilaian bertanda tangan
 
 ## Catatan
+
+### Kabar tiket ke pelapor lewat WhatsApp & email — 31 Oktober 2026
+- [x] **Pekerjaan yang dilakukan** (`tickets.resolution_notes`) wajib diisi saat tiket ditandai Selesai; tampil di detail
+  tiket, halaman cek status, dan halaman penilaian setelah tiket selesai.
+- [x] Tombol **Chat WhatsApp pelapor** (kontak nomor HP → wa.me berisi pesan siap kirim) atau **Balas email pelapor**
+  (kontak email → dikirim dari TORANG) di detail tiket; template "Tiket diproses" / "Tiket selesai" bisa disunting.
+- [x] Kabar otomatis saat status berubah ke Dikerjakan dan Selesai: email bila kontaknya email; WhatsApp bila nomor HP
+  dan kanal WhatsApp aktif di Pengaturan.
+- [x] Pesan "selesai" berisi pekerjaan yang dilakukan, petugas, dan **tautan penilaian bertanda tangan** (14 hari);
+  tautan rusak/kedaluwarsa ditolak dengan pesan berbahasa Indonesia.
+- [x] Setiap kabar tercatat di audit log tiket (manual/otomatis, kanal, jenis pesan).
+- Verifikasi: 15 test baru di `ReporterUpdatesTest` + test lama diberi catatan pekerjaan · halaman penilaian dari
+  tautan bertanda tangan & tolakan tautan rusak dicek di browser · detail tiket dirender di server (tombol
+  "Balas email pelapor" untuk kontak email). Pengiriman WhatsApp lewat gateway belum diuji dengan gateway sungguhan.
 
 ### Logo TV lab, lupa kata sandi, captcha masuk petugas — 31 Oktober 2026
 - [x] Layar TV lab: logo Kemenkes Poltekkes Manado di header dan supergrafis Kemenkes sebagai dekorasi latar

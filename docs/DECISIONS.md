@@ -619,3 +619,25 @@ fase terkait.
 - Logo Kemenkes Poltekkes Manado dan supergrafis Kemenkes (file dari pengguna, latar transparan) disimpan di
   `public/images/brand/`. Supergrafis hanya dekorasi (`aria-hidden`, opasitas rendah) agar teks tetap terbaca dari jauh;
   simbol TORANG pindah ke footer supaya header tidak memuat dua logo.
+
+## Tambahan — Kabar tiket ke pelapor lewat WhatsApp & email (31 Oktober 2026)
+
+- Kontak pelapor tetap satu isian bebas ("Email / WhatsApp"). Dianggap nomor WhatsApp bila setelah spasi/tanda baca
+  dibuang cocok `^(0|62)8\d{7,12}$` (nomor HP Indonesia, dinormalkan ke 62…); dianggap email bila valid sebagai
+  email; selain itu tidak ada tombol kabar (mis. nomor telepon kantor atau teks bebas).
+- **Manual** di detail tiket (izin kelola tiket): satu tombol yang menyesuaikan kontak — nomor HP membuka
+  `https://wa.me/62…?text=…` di tab baru (dikirim dari WhatsApp petugas/kantor, tanpa gateway; notifikasi berisi
+  tombol cadangan bila pop-up diblokir), email dikirim dari mailer TORANG. Template mengikuti status tiket
+  (belum selesai → "Tiket diproses", sudah selesai → "Tiket selesai") dan bisa disunting.
+- **Otomatis** setelah transaksi tersimpan, hanya saat status berubah ke Dikerjakan atau Selesai: email selalu
+  dikirim bila kontaknya email (sama dengan pemohon Lab CBT); WhatsApp lewat gateway hanya bila kanal WhatsApp aktif.
+  Lewat antrean `default`.
+- "Pekerjaan yang dilakukan" wajib saat status menjadi Selesai (maks. 2000 karakter), ditulis untuk pelapor; tampil
+  di halaman publik hanya setelah tiket selesai.
+- Tautan penilaian di pesan "selesai" memakai URL bertanda tangan (`tickets.review`, 14 hari) sehingga tidak perlu
+  menyimpan token polos; tautan rahasia lama (hash) tetap berlaku. POST penilaian juga bertanda tangan dengan masa
+  berlaku yang sama, tetap memakai captcha & honeypot. `InvalidSignatureException` dipetakan ke 403 berpesan
+  "Tautan tidak valid atau sudah kedaluwarsa."
+- Audit log `tickets` event `reporter_notified` dengan jenis pesan, kanal (chat WhatsApp / WhatsApp gateway / email),
+  dan mode (manual/otomatis). Untuk chat WhatsApp yang tercatat adalah saat petugas membuka chat; pengiriman
+  sebenarnya terjadi di aplikasi WhatsApp.

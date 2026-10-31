@@ -8,14 +8,18 @@ use App\Enums\TicketStatus;
 use App\Models\Staff;
 use App\Models\Ticket;
 use App\Models\UsageLog;
+use App\Services\Helpdesk\ReporterUpdates;
 use App\Services\Helpdesk\TicketService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Js;
 use Illuminate\Validation\ValidationException;
+use Livewire\Component;
 
 /**
  * Aksi tiket di halaman detail dan tombol "Buat tiket" di Log Pemakaian. Logika lewat TicketService.
@@ -32,6 +36,7 @@ class TicketActions
                 'status' => $record->status->value,
                 'priority' => $record->priority->value,
                 'assigned_to' => $record->assigned_to,
+                'resolution_notes' => $record->resolution_notes,
             ])
             ->schema([
                 Select::make('status')
@@ -50,6 +55,13 @@ class TicketActions
                     ->options(fn (): array => Staff::query()->active()->pluck('name', 'id')->all())
                     ->searchable()
                     ->requiredIf('status', TicketStatus::InProgress->value),
+                Textarea::make('resolution_notes')
+                    ->label('Pekerjaan yang dilakukan')
+                    ->helperText('Dikirim ke pelapor dan tampil di halaman cek status tiket. Tulis dengan bahasa yang mudah dipahami.')
+                    ->rows(4)
+                    ->maxLength(2000)
+                    ->visible(fn (Get $get): bool => in_array($get('status'), [TicketStatus::Resolved->value, TicketStatus::Closed->value], true))
+                    ->required(fn (Get $get): bool => $get('status') === TicketStatus::Resolved->value),
             ])
             ->action(function (Ticket $record, array $data, Action $action): void {
                 self::attempt(fn () => app(TicketService::class)->update($record, $data, auth()->user()), $action, 'Tiket belum dapat diperbarui', 'danger');
@@ -73,6 +85,55 @@ class TicketActions
                     ->helperText('Komentar untuk pelapor hanya terlihat melalui tautan rahasia penilaian.'),
             ])
             ->action(fn (Ticket $record, array $data) => app(TicketService::class)->comment($record, $data['body'], $data['is_internal'], auth()->user()));
+    }
+
+    /**
+     * Kabari pelapor sesuai kontaknya: chat WhatsApp (wa.me, dikirim dari WhatsApp petugas) atau balas email.
+     * Template mengikuti status tiket (diproses/selesai) dan bisa disunting sebelum dikirim.
+     */
+    public static function contactReporter(): Action
+    {
+        $updates = app(ReporterUpdates::class);
+
+        return Action::make('contactReporter')
+            ->label(fn (Ticket $record): string => $record->reporterPhone() ? 'Chat WhatsApp pelapor' : 'Balas email pelapor')
+            ->icon(fn (Ticket $record): Heroicon => $record->reporterPhone() ? Heroicon::OutlinedChatBubbleOvalLeftEllipsis : Heroicon::OutlinedEnvelope)
+            ->color('success')
+            ->visible(fn (Ticket $record): bool => auth()->user()->can('update', $record) && ($record->reporterPhone() || $record->reporterEmail()))
+            ->modalHeading(fn (Ticket $record): string => ReporterUpdates::LABELS[$updates->kindFor($record)].' — '.$record->code)
+            ->modalDescription(fn (Ticket $record): string => $record->reporterPhone()
+                ? "WhatsApp terbuka di tab baru ke +{$record->reporterPhone()} dengan pesan ini; tekan Kirim di WhatsApp."
+                : "Dikirim ke {$record->reporterEmail()} dari alamat email TORANG.")
+            ->modalSubmitActionLabel(fn (Ticket $record): string => $record->reporterPhone() ? 'Buka WhatsApp' : 'Kirim email')
+            ->fillForm(fn (Ticket $record): array => ['message' => $updates->message($record, $updates->kindFor($record))])
+            ->schema([
+                Textarea::make('message')
+                    ->label('Pesan')
+                    ->rows(14)
+                    ->required()
+                    ->maxLength(3000),
+            ])
+            ->action(function (Ticket $record, array $data, Component $livewire) use ($updates): void {
+                if ($record->reporterPhone()) {
+                    $url = $updates->openWhatsApp($record, $data['message'], auth()->user());
+                    $livewire->js('window.open('.Js::from($url).', "_blank", "noopener")');
+
+                    // Cadangan bila pop-up diblokir browser.
+                    Notification::make()
+                        ->success()
+                        ->title('Chat WhatsApp pelapor dibuka')
+                        ->body('Bila WhatsApp tidak terbuka otomatis, klik tombol di bawah.')
+                        ->actions([Action::make('openWhatsApp')->label('Buka WhatsApp')->url($url, shouldOpenInNewTab: true)])
+                        ->persistent()
+                        ->send();
+
+                    return;
+                }
+
+                $updates->replyByEmail($record, $data['message'], auth()->user());
+
+                Notification::make()->success()->title("Email terkirim ke {$record->reporterEmail()}")->send();
+            });
     }
 
     public static function downloadAttachment(): Action

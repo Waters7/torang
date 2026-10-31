@@ -57,7 +57,7 @@ it('membuat tiket internal dan menindaklanjuti dengan komentar', function () {
     Storage::disk('local')->assertExists($ticket->attachment_path);
     Livewire::test(ViewTicket::class, ['record' => $ticket->id])->callAction('updateTicket', ['status' => 'in_progress', 'priority' => 'normal', 'assigned_to' => null])->assertHasActionErrors(['assigned_to']);
     Livewire::test(ViewTicket::class, ['record' => $ticket->id])->callAction('comment', ['body' => 'Sedang diperiksa', 'is_internal' => true])->assertHasNoActionErrors()
-        ->callAction('updateTicket', ['status' => 'resolved', 'priority' => 'normal', 'assigned_to' => null])->assertHasNoActionErrors();
+        ->callAction('updateTicket', ['status' => 'resolved', 'priority' => 'normal', 'assigned_to' => null, 'resolution_notes' => 'Kabel LAN diganti.'])->assertHasNoActionErrors();
     expect($ticket->refresh()->status->value)->toBe('resolved')->and($ticket->comments()->count())->toBe(1);
 });
 

@@ -74,7 +74,7 @@ it('memvalidasi transisi status dan petugas aktif', function () {
     expect(validationErrors(fn () => $service->update($ticket, ['status' => 'in_progress', 'priority' => 'normal'], $actor)))->toHaveKey('assigned_to');
     $staff = Staff::factory()->create();
     $service->update($ticket, ['status' => 'in_progress', 'priority' => 'high', 'assigned_to' => $staff->id], $actor);
-    $service->update($ticket, ['status' => 'resolved', 'priority' => 'high', 'assigned_to' => $staff->id], $actor);
+    $service->update($ticket, ['status' => 'resolved', 'priority' => 'high', 'assigned_to' => $staff->id, 'resolution_notes' => 'Router di-restart.'], $actor);
     expect($ticket->refresh()->resolved_at)->not->toBeNull();
     $service->update($ticket, ['status' => 'closed', 'priority' => 'high', 'assigned_to' => $staff->id], $actor);
     expect($ticket->refresh()->closed_at)->not->toBeNull();
@@ -107,7 +107,7 @@ it('melindungi komentar internal dan penilaian dengan token rahasia', function (
     $this->get(route('tickets.rating', [$ticket->code, str_repeat('x', 64)]))->assertNotFound();
     $this->get(route('tickets.rating', [$ticket->code, $token]))->assertOk()->assertHeader('Referrer-Policy', 'no-referrer')->assertSee('Kami sedang memeriksa')->assertDontSee('Catatan internal rahasia');
     expect(validationErrors(fn () => $service->rate($ticket, $token, ['rating' => 5])))->toHaveKey('rating');
-    $service->update($ticket, ['status' => 'resolved', 'priority' => 'normal'], $actor);
+    $service->update($ticket, ['status' => 'resolved', 'priority' => 'normal', 'resolution_notes' => 'Akun dipulihkan.'], $actor);
     $this->post(route('tickets.rate', [$ticket->code, $token]), ['rating' => 5, 'feedback' => 'Terima kasih', 'captcha_token' => 'ok'])->assertRedirect();
     expect($ticket->refresh()->rating)->toBe(5);
     expect(validationErrors(fn () => $service->rate($ticket, $token, ['rating' => 1])))->toHaveKey('rating');

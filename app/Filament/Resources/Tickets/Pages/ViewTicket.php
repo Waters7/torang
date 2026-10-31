@@ -15,6 +15,7 @@ class ViewTicket extends ViewRecord
     {
         return [
             TicketActions::followUp(),
+            TicketActions::contactReporter(),
             TicketActions::comment(),
             TicketActions::downloadAttachment(),
         ];

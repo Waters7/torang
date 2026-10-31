@@ -110,6 +110,10 @@ class TicketResource extends Resource
                         ->label('Waktu tanggap')
                         ->state(fn (Ticket $record): ?string => $record->first_responded_at ? Format::duration($record->responseMinutes()) : null)
                         ->placeholder('Belum ditindaklanjuti'),
+                    TextEntry::make('resolution_notes')
+                        ->label('Pekerjaan yang dilakukan')
+                        ->placeholder('Diisi saat tiket diselesaikan')
+                        ->columnSpanFull(),
                 ]),
             Section::make('Penilaian pelapor')
                 ->columnSpanFull()

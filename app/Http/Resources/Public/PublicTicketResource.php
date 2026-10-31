@@ -25,6 +25,8 @@ class PublicTicketResource extends JsonResource
             'finished' => $this->status->isFinished(),
             'createdAt' => $this->created_at->toIso8601String(),
             'resolvedAt' => $this->resolved_at?->toIso8601String(),
+            // Ditulis petugas untuk pelapor (form "Tindak lanjuti"), hanya setelah tiket selesai.
+            'resolutionNotes' => $this->status->isFinished() ? $this->resolution_notes : null,
         ];
     }
 }
