@@ -1,5 +1,6 @@
 import StatusPill from '@/components/StatusPill';
 import TorangMark from '@/components/TorangMark';
+import { POLTEKKES_LOGO, SUPERGRAPHIC_SRC } from '@/lib/brand';
 import { formatTime, useNow } from '@/lib/time';
 import type { LabTvBoard, LabTvSession } from '@/types/public';
 import { CheckCircleIcon, ClockIcon, ComputerDesktopIcon, UserGroupIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
@@ -10,9 +11,6 @@ const PALETTE = ['#1BBBCB', '#04B6A3', '#D4E022', '#42B97C'];
 
 /** Batas baris per daftar agar layar TV tidak perlu digulir. */
 const MAX_ROWS = 4;
-
-const LOGO_SRC = '/images/brand/logo-poltekkes-manado.webp';
-const SUPERGRAPHIC_SRC = '/images/brand/supergrafis-kemenkes.webp';
 
 function SessionRow({ session, done = false }: { session: LabTvSession; done?: boolean }) {
     return (
@@ -93,7 +91,13 @@ export default function LabTv({ board }: { board: LabTvBoard }) {
 
             <header className="flex flex-wrap items-center justify-between gap-6 border-b border-white/10 bg-ink-dark/80 px-6 py-5 lg:px-12 lg:py-7">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-8 gap-y-4 2xl:gap-x-12">
-                    <img src={LOGO_SRC} alt="Kemenkes Poltekkes Manado" width={2000} height={544} className="h-12 w-auto shrink-0 lg:h-16 2xl:h-20" />
+                    <img
+                        src={POLTEKKES_LOGO.src}
+                        alt={POLTEKKES_LOGO.alt}
+                        width={POLTEKKES_LOGO.width}
+                        height={POLTEKKES_LOGO.height}
+                        className="h-12 w-auto shrink-0 lg:h-16 2xl:h-20"
+                    />
                     <span className="hidden h-16 w-px bg-white/15 lg:block 2xl:h-20" aria-hidden="true" />
                     <div className="min-w-0">
                         <p className="font-mono text-xs font-semibold tracking-[0.14em] text-teal uppercase 2xl:text-base">TORANG · Layar Lab CBT</p>
