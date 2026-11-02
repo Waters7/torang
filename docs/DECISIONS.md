@@ -3,6 +3,17 @@
 Catatan keputusan yang tidak diatur langsung oleh `docs/SPEC.md`. Tambahkan entri baru di bawah
 fase terkait.
 
+## TV IT: bagian lipat dan tiket belum selesai (2 November 2026)
+
+- Bagian jaringan/aplikasi memakai elemen native `details`/`summary`, terbuka secara default, dengan
+  `wire:ignore.self` dan kunci stabil. Livewire memperbarui isi tanpa mengubah atribut buka/tutup milik browser.
+  Pilihan berlaku selama layar terbuka; muat ulang penuh kembali ke kondisi awal. Monitoring tetap berjalan.
+- Antrean tiket memakai `TicketStatus::unfinished()` dan `TicketPolicy::viewAny`, bukan batas tanggal hari ini.
+  Tiket diurutkan Mendesak → Tinggi → Normal → Rendah, lalu waktu masuk terlama dan ID. Seluruh antrean tersedia
+  dalam area gulir berfokus keyboard, tanpa pemotongan jumlah tiket.
+- `TvBoard` hanya memilih kolom yang diperlukan serta memuat relasi petugas/unit sekaligus; data TV tidak memuat
+  nama/kontak pelapor, deskripsi, token, atau catatan internal. Tiket tidak di-cache dan mengikuti polling 60 detik.
+
 ## Keseragaman visual TV IT dan Lab CBT (2 November 2026)
 
 - Tema Filament memakai Tailwind `source(none)`, sehingga folder `resources/views/components` harus

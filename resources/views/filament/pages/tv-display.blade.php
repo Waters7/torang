@@ -129,8 +129,7 @@
     {{-- Status jaringan & aplikasi: bermasalah di urutan teratas --}}
     @if ($showMonitors)
         <section class="mt-6 grid gap-6 xl:grid-cols-12">
-            <div class="xl:col-span-7">
-                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] 2xl:text-sm text-[#70DBCD] uppercase">Jaringan per jurusan</h2>
+            <x-tv-collapsible id="tv-networks" title="Jaringan per jurusan" class="xl:col-span-7">
                 <div class="grid grid-cols-2 gap-2.5 md:grid-cols-3 2xl:grid-cols-4">
                     @forelse ($networks as $item)
                         @php($t = $tone($item['status']))
@@ -145,10 +144,9 @@
                         <p class="text-sm text-white/50">Belum ada monitor jaringan.</p>
                     @endforelse
                 </div>
-            </div>
+            </x-tv-collapsible>
 
-            <div class="xl:col-span-5">
-                <h2 class="mb-3 text-xs font-semibold tracking-[0.18em] 2xl:text-sm text-[#70DBCD] uppercase">Aplikasi kampus</h2>
+            <x-tv-collapsible id="tv-apps" title="Aplikasi kampus" class="xl:col-span-5">
                 <ul class="divide-y divide-white/5 overflow-hidden rounded-xl bg-white/[0.04]">
                     @forelse ($apps as $item)
                         @php($t = $tone($item['status']))
@@ -161,8 +159,12 @@
                         <li class="px-4 py-3 text-sm text-white/50">Belum ada monitor aplikasi.</li>
                     @endforelse
                 </ul>
-            </div>
+            </x-tv-collapsible>
         </section>
+    @endif
+
+    @if ($tickets !== null)
+        <x-tv-ticket-board :tickets="$tickets" />
     @endif
 
     {{-- Kegiatan CBT & petugas hari ini --}}

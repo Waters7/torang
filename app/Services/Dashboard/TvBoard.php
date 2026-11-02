@@ -8,12 +8,14 @@ use App\Enums\LabStatus;
 use App\Enums\MonitorGroup;
 use App\Enums\MonitorStatus;
 use App\Enums\Permission;
+use App\Enums\TicketStatus;
 use App\Models\Announcement;
 use App\Models\Booking;
 use App\Models\DutyAssignment;
 use App\Models\Lab;
 use App\Models\Monitor;
 use App\Models\MonitorIncident;
+use App\Models\Ticket;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +23,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Data layar Mode TV / NOC: angka ringkas, monitor bermasalah di urutan teratas, kegiatan CBT dan petugas hari ini,
- * serta pengumuman yang sedang aktif. Bagian tampil sesuai izin pengguna yang login.
+ * tiket yang belum selesai, serta pengumuman aktif. Bagian tampil sesuai izin pengguna yang login.
  */
 class TvBoard
 {
@@ -33,6 +35,7 @@ class TvBoard
         $now = CarbonImmutable::now();
         $showMonitors = $user->can(Permission::MonitorsView->value);
         $showCbt = $user->can(Permission::BookingsView->value);
+        $showTickets = $user->can('viewAny', Ticket::class);
 
         $monitors = $showMonitors
             ? Monitor::query()->active()->with('department')->ordered()->get()
@@ -50,9 +53,44 @@ class TvBoard
             'openIncidents' => $showMonitors ? MonitorIncident::query()->whereNull('resolved_at')->count() : null,
             'showMonitors' => $showMonitors,
             'showCbt' => $showCbt,
+            'tickets' => $showTickets ? $this->unfinishedTickets() : null,
             'labs' => $showCbt ? $this->labs($now) : null,
             'bookings' => $showCbt ? $this->bookings($now) : [],
             'duty' => $showCbt ? $this->duty($now) : [],
+        ];
+    }
+
+    /**
+     * Semua tiket yang belum selesai, tanpa kontak pelapor, isi laporan, atau catatan internal.
+     *
+     * @return array{total: int, unassigned: int, items: list<array<string, mixed>>}
+     */
+    private function unfinishedTickets(): array
+    {
+        $tickets = Ticket::query()
+            ->select(['id', 'code', 'title', 'status', 'priority', 'department_id', 'assigned_to', 'created_at'])
+            ->with(['assignee:id,name', 'department:id,name,short_name'])
+            ->whereIn('status', TicketStatus::unfinished())
+            ->orderByRaw("CASE priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'normal' THEN 2 ELSE 3 END")
+            ->oldest()
+            ->orderBy('id')
+            ->get();
+
+        return [
+            'total' => $tickets->count(),
+            'unassigned' => $tickets->whereNull('assigned_to')->count(),
+            'items' => $tickets->map(fn (Ticket $ticket): array => [
+                'id' => $ticket->id,
+                'code' => $ticket->code,
+                'title' => $ticket->title,
+                'status' => $ticket->status->value,
+                'statusLabel' => $ticket->status->label(),
+                'priority' => $ticket->priority->value,
+                'priorityLabel' => $ticket->priority->label(),
+                'department' => $ticket->department?->short_name ?? $ticket->department?->name,
+                'assignee' => $ticket->assignee?->name,
+                'receivedAt' => $ticket->created_at->translatedFormat('j M Y, H:i').' WITA',
+            ])->all(),
         ];
     }
 

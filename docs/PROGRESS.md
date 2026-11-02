@@ -17,6 +17,17 @@
 
 ## Catatan
 
+### TV IT: bagian monitor lipat & antrean tiket — 2 November 2026
+- [x] **Jaringan per jurusan** dan **Aplikasi kampus** memiliki kontrol Tutup/Tampilkan terpisah, mendukung
+  keyboard, dan mempertahankan kondisi buka/tutup saat polling otomatis.
+- [x] Kartu tiket belum selesai (Baru/Dikerjakan/Menunggu) berisi kode, judul, unit, prioritas, waktu masuk WITA,
+  serta nama petugas atau **Belum ditugaskan**; dilengkapi jumlah total dan jumlah tanpa penugasan.
+- [x] Seluruh tiket belum selesai dimuat, prioritas mendesak lebih dulu lalu yang terlama; daftar dapat digulir.
+  Tiket Selesai/Ditutup dikeluarkan saat penyegaran. Data hanya tersedia bagi pengguna berizin melihat tiket.
+- Verifikasi: **499 test lulus (2601 assertions)**, Pint, TypeScript & build bersih. Enam test baru mencakup
+  status, penugasan, urutan, kelengkapan antrean, izin, dan penyegaran Livewire. Buka/tutup serta tata letak
+  Full HD/ponsel diperiksa melalui render template dengan data contoh; tidak ada data lokal yang diubah.
+
 ### Keseragaman tampilan TV IT dan Lab CBT — 2 November 2026
 - [x] Tema admin menyertakan komponen Blade bersama saat build, sehingga warna, ukuran, jarak, dan fokus tab
   IT/NOC sama dengan tab pada layar TV lab.
