@@ -17,6 +17,15 @@
 
 ## Catatan
 
+### Keseragaman tampilan TV IT dan Lab CBT — 2 November 2026
+- [x] Tema admin menyertakan komponen Blade bersama saat build, sehingga warna, ukuran, jarak, dan fokus tab
+  IT/NOC sama dengan tab pada layar TV lab.
+- [x] Layar IT menggunakan logo Poltekkes, supergrafis, header/jam WITA, posisi tab, jarak tepi, dan footer
+  yang seragam dengan layar lab; kontrol layar penuh dan Dashboard tersedia di footer.
+- Verifikasi: **493 test lulus (2564 assertions)**, Pint, TypeScript, dan build bersih. Gaya tab dibandingkan
+  di browser (tinggi 44 px, radius 12 px, jarak 8 px); pratinjau Blade dengan data contoh dicek pada Full HD
+  dan ponsel tanpa gulir horizontal halaman. Pengujian halaman asli memakai autentikasi test.
+
 ### Tab pilihan Mode TV IT / Lab CBT — 2 November 2026
 - [x] Navigasi tab pada Mode TV IT/NOC dan layar TV tiap lab: **IT / NOC** serta nama semua lab aktif/perawatan
   sesuai data Master Lab, diurutkan berdasarkan kode lab; lab nonaktif tidak ditampilkan.

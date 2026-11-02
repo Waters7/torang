@@ -3,6 +3,16 @@
 Catatan keputusan yang tidak diatur langsung oleh `docs/SPEC.md`. Tambahkan entri baru di bawah
 fase terkait.
 
+## Keseragaman visual TV IT dan Lab CBT (2 November 2026)
+
+- Tema Filament memakai Tailwind `source(none)`, sehingga folder `resources/views/components` harus
+  didaftarkan sebagai sumber kelas. Komponen tab bersama kini ikut build tema admin, termasuk latar aktif,
+  jarak antar-tab, tinggi tombol, dan outline fokus.
+- Header IT mengikuti ukuran serta jarak layar lab, memakai aset logo dan supergrafis Poltekkes yang sama.
+  Tombol layar penuh dan Dashboard berada di footer agar posisi header dan baris tab konsisten.
+- Verifikasi visual IT memakai render template sebenarnya dengan data contoh pada server pratinjau lokal
+  sementara; akses halaman asli tetap diuji melalui feature test tanpa mengubah akun atau izin lokal.
+
 ## Tab Mode TV IT / Lab CBT (2 November 2026)
 
 - `TvNavigation` menjadi sumber daftar tab bersama untuk tampilan Filament IT/NOC dan React TV lab.
