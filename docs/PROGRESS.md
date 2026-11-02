@@ -17,6 +17,14 @@
 
 ## Catatan
 
+### Tab pilihan Mode TV IT / Lab CBT — 2 November 2026
+- [x] Navigasi tab pada Mode TV IT/NOC dan layar TV tiap lab: **IT / NOC** serta nama semua lab aktif/perawatan
+  sesuai data Master Lab, diurutkan berdasarkan kode lab; lab nonaktif tidak ditampilkan.
+- [x] Tab aktif ditandai, daftar dapat digeser di layar kecil, dan tab lab terpilih otomatis masuk area terlihat.
+- [x] Daftar pilihan ikut diperbarui saat polling layar (IT 60 detik, lab 30 detik); tautan tiap layar tetap bisa dibuka langsung.
+- Verifikasi: seluruh **493 test lulus (2564 assertions)**, Pint, TypeScript & build bersih; perpindahan lab,
+  penanda tab aktif, dan lebar ponsel tanpa gulir horizontal halaman diperiksa di browser.
+
 ### Kabar tiket ke pelapor lewat WhatsApp & email — 31 Oktober 2026
 - [x] **Pekerjaan yang dilakukan** (`tickets.resolution_notes`) wajib diisi saat tiket ditandai Selesai; tampil di detail
   tiket, halaman cek status, dan halaman penilaian setelah tiket selesai.

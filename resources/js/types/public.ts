@@ -209,6 +209,14 @@ export interface DisplaySettings {
     showWifi: boolean;
 }
 
+/** Navigasi bersama untuk layar IT/NOC dan lab yang tersedia. */
+export interface TvModeTab {
+    key: string;
+    label: string;
+    url: string;
+    active: boolean;
+}
+
 /** Sesi kegiatan pada layar TV lab — tanpa data pribadi pemohon. */
 export interface LabTvSession {
     activityName: string;

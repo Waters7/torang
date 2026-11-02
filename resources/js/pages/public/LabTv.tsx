@@ -1,8 +1,9 @@
 import StatusPill from '@/components/StatusPill';
 import TorangMark from '@/components/TorangMark';
+import TvModeTabs from '@/components/TvModeTabs';
 import { POLTEKKES_LOGO, SUPERGRAPHIC_SRC } from '@/lib/brand';
 import { formatTime, useNow } from '@/lib/time';
-import type { LabTvBoard, LabTvSession } from '@/types/public';
+import type { LabTvBoard, LabTvSession, TvModeTab } from '@/types/public';
 import { CheckCircleIcon, ClockIcon, ComputerDesktopIcon, UserGroupIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import { Head, usePage, usePoll } from '@inertiajs/react';
 
@@ -51,12 +52,12 @@ function SessionList({ title, sessions, empty, done = false }: { title: string; 
 }
 
 /** Layar TV di depan lab: kegiatan berlangsung, sesi berikutnya, dan yang sudah selesai hari ini. */
-export default function LabTv({ board }: { board: LabTvBoard }) {
+export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: TvModeTab[] }) {
     const { site } = usePage().props;
     const now = useNow(1_000);
     const { lab, current } = board;
 
-    usePoll(board.refreshSeconds * 1000, { only: ['board'] });
+    usePoll(board.refreshSeconds * 1000, { only: ['board', 'tvTabs'] });
 
     let progress = 0;
     let remaining = 0;
@@ -115,6 +116,10 @@ export default function LabTv({ board }: { board: LabTvBoard }) {
                     <p className="mt-1 text-white/60 2xl:text-xl">{board.dateLabel}</p>
                 </div>
             </header>
+
+            <div className="min-w-0 border-b border-white/10 px-6 lg:px-12">
+                <TvModeTabs tabs={tvTabs} />
+            </div>
 
             <main className="grid flex-1 gap-6 px-6 py-6 lg:grid-cols-[1.6fr_1fr] lg:gap-10 lg:px-12 lg:py-10">
                 <section

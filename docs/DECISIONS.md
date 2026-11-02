@@ -3,6 +3,17 @@
 Catatan keputusan yang tidak diatur langsung oleh `docs/SPEC.md`. Tambahkan entri baru di bawah
 fase terkait.
 
+## Tab Mode TV IT / Lab CBT (2 November 2026)
+
+- `TvNavigation` menjadi sumber daftar tab bersama untuk tampilan Filament IT/NOC dan React TV lab.
+  Nama/URL lab disaring melalui `TvLabResource`, hanya lab aktif atau perawatan, mengikuti urutan kode Master Lab.
+- Tab berupa navigasi tautan dengan `aria-current="page"`, bukan panel yang dimuat sekaligus; perpindahan memakai
+  navigasi HTML karena layar IT dan lab memakai dua renderer berbeda. Setiap layar tetap punya URL langsung.
+- Polling menyegarkan daftar pilihan bersama konten layar. Pada ponsel daftar dapat digeser horizontal;
+  tab lab aktif otomatis terlihat setelah navigasi, tanpa menggeser halaman secara vertikal.
+- Akses mengikuti implementasi yang sudah ada: IT/NOC `/admin/tv` memerlukan petugas aktif dengan izin
+  `monitors.view`, sementara `/tv/lab/{kode}` tetap publik tanpa data pribadi pemohon.
+
 ## Akses Mode TV dari beranda (29 Oktober 2026)
 
 - Permintaan menaruh Mode TV / NOC di halaman depan diterapkan sebagai kartu akses ke `/admin/tv`.

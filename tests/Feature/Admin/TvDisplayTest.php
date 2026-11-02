@@ -61,3 +61,22 @@ it('hanya untuk pengguna dengan izin melihat monitoring', function () {
     $this->actingAs(userWithRole(Role::HeadOfUnit))->get('/admin/tv')->assertOk();
     $this->actingAs(userWithRole(Role::CbtManager))->get('/admin/tv')->assertForbidden();
 });
+
+it('memuat tab IT dan lab yang tersedia sesuai urutan tampil', function () {
+    Lab::factory()->create(['code' => 'CBT-2', 'name' => 'Ruang Kedua']);
+    Lab::factory()->maintenance()->create(['code' => 'CBT-1', 'name' => 'Ruang Pertama']);
+    Lab::factory()->create(['code' => 'CBT-9', 'name' => 'Ruang Nonaktif', 'status' => 'inactive']);
+
+    $this->actingAs($this->staff)->get('/admin/tv')
+        ->assertOk()
+        ->assertSee('Pilihan tampilan TV')
+        ->assertSeeInOrder(['IT / NOC', 'Ruang Pertama', 'Ruang Kedua'])
+        ->assertSee('href="/tv/lab/CBT-1"', false)
+        ->assertSee('href="/tv/lab/CBT-2"', false)
+        ->assertSee('aria-current="page"', false)
+        ->assertDontSee('Ruang Nonaktif');
+});
+
+it('tetap meminta login untuk data internal IT walaupun tautannya tersedia pada tab TV publik', function () {
+    $this->get('/admin/tv')->assertRedirect('/admin/login');
+});

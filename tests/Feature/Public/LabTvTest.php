@@ -83,3 +83,35 @@ it('tidak tersedia untuk lab nonaktif atau kode tidak dikenal', function () {
 it('diberi rate limit', function () {
     expect(Route::getRoutes()->getByName('labs.tv')->gatherMiddleware())->toContain('throttle:60,1');
 });
+
+it('menyediakan tab IT dan lab terdaftar tanpa menyertakan lab nonaktif atau detail internal', function () {
+    Lab::factory()->maintenance()->create(['code' => 'LAB-2', 'name' => 'Lab Perawatan']);
+    Lab::factory()->create(['code' => 'LAB-9', 'name' => 'Lab Nonaktif', 'status' => 'inactive']);
+
+    $this->get('/tv/lab/LAB-1')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->has('tvTabs', 3)
+        ->where('tvTabs.0', ['key' => 'it', 'label' => 'IT / NOC', 'url' => '/admin/tv', 'active' => false])
+        ->where('tvTabs.1', ['key' => 'lab-LAB-1', 'label' => 'Lab CBT 1', 'url' => '/tv/lab/LAB-1', 'active' => true])
+        ->where('tvTabs.2', ['key' => 'lab-LAB-2', 'label' => 'Lab Perawatan', 'url' => '/tv/lab/LAB-2', 'active' => false]));
+});
+
+it('menandai lab yang dipilih dan menyegarkan pilihan ketika data lab berubah', function () {
+    Lab::factory()->create(['code' => 'LAB-2', 'name' => 'Lab CBT 2']);
+
+    $this->get('/tv/lab/LAB-2')->assertInertia(fn (Assert $page) => $page
+        ->where('board.lab.code', 'LAB-2')
+        ->where('tvTabs.1.active', false)
+        ->where('tvTabs.2.active', true));
+
+    $this->lab->update(['status' => 'inactive']);
+    Lab::factory()->create(['code' => 'LAB-3', 'name' => 'Lab Baru']);
+
+    $this->get('/tv/lab/LAB-2')->assertInertia(fn (Assert $page) => $page
+        ->reloadOnly(['board', 'tvTabs'], fn (Assert $reload) => $reload
+            ->where('board.lab.code', 'LAB-2')
+            ->has('tvTabs', 3)
+            ->where('tvTabs.1.key', 'lab-LAB-2')
+            ->where('tvTabs.1.active', true)
+            ->where('tvTabs.2.label', 'Lab Baru')
+            ->where('tvTabs.2.active', false)));
+});

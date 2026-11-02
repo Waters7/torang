@@ -54,6 +54,8 @@
         </div>
     </header>
 
+    <x-tv-mode-tabs :tabs="$tvTabs" />
+
     {{-- Pengumuman aktif --}}
     @foreach ($announcements as $announcement)
         <div @class([

@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\Permission;
 use App\Services\Dashboard\TvBoard;
+use App\Services\PublicSite\TvNavigation;
 use App\Services\SettingsService;
 use Filament\Pages\Page;
 
@@ -39,6 +40,7 @@ class TvDisplay extends Page
             'unit' => $settings->get('identity.unit_name'),
             'institution' => $settings->get('identity.institution_name'),
             'dashboardUrl' => Dashboard::getUrl(),
+            'tvTabs' => app(TvNavigation::class)->tabs(),
         ];
     }
 }
