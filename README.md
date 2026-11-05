@@ -41,6 +41,7 @@ composer run dev
 | `npm run build` | build aset frontend |
 | `php artisan torang:check` | periksa kesiapan server (konfigurasi, database, ping, LibreOffice, queue, scheduler) |
 | `php artisan torang:sync-permissions` | tambahkan permission baru ke role tanpa menimpa perubahan di panel |
+| `php artisan torang:import-users` | buat akun petugas dari berkas CSV privat (kata sandi awal = NIP, wajib diganti) |
 
 ## Deployment VPS (Ubuntu 24.04 LTS)
 
@@ -216,6 +217,26 @@ Setelah itu login ke `/admin`, ganti password super admin, lalu lengkapi
 **Sistem › Pengaturan umum** (identitas instansi, Kepala Unit, kontak helpdesk),
 **Monitoring › Pengaturan** (channel notifikasi, chat ID grup Telegram), dan data lab, monitor,
 serta petugas.
+
+### Akun petugas
+
+Data pegawai asli tidak boleh masuk repo. Siapkan berkas CSV dengan format
+[`deploy/users.example.csv`](deploy/users.example.csv) (`nip,nama,email,whatsapp,role`), salin ke server
+(mis. dengan `scp`) ke `storage/app/private/deploy/users.csv`, lalu setelah `db:seed`:
+
+```bash
+php artisan torang:import-users --dry-run
+php artisan torang:import-users
+rm storage/app/private/deploy/users.csv
+```
+
+- Petugas masuk dengan **NIP atau email**. Kata sandi awal sama dengan NIP dan **wajib diganti saat login pertama**
+  (minimal 12 karakter, tidak memuat NIP); sebelum itu panel tidak bisa dipakai.
+- NIP mudah diketahui orang lain, jadi minta semua petugas login segera setelah impor, terutama akun Super Admin.
+  `torang:check` menampilkan jumlah akun yang masih memakai kata sandi awal.
+- Perintah aman dijalankan ulang: akun yang sudah ada dilewati, kata sandi dan role-nya tidak ditimpa.
+- Setelah itu kata sandi diganti dari menu pengguna › profil, atau lewat **Lupa kata sandi?** di halaman masuk
+  (tautan dikirim ke email akun, jadi `MAIL_*` harus aktif).
 
 ### Pembaruan aplikasi
 

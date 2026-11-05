@@ -15,6 +15,7 @@ use App\Http\Controllers\Public\PublicSummaryController;
 use App\Http\Controllers\Public\ScheduleController;
 use App\Http\Controllers\Public\StatusPageController;
 use App\Http\Controllers\Public\TicketController;
+use App\Http\Middleware\EnsurePasswordChanged;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -45,7 +46,7 @@ Route::prefix('api/public')->name('api.public.')->group(function () {
 });
 
 // Unduhan berkas privat untuk petugas
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', EnsurePasswordChanged::class])->group(function () {
     Route::get('/admin/unduh/backup/{name}', DownloadDatabaseBackupController::class)->where('name', '[A-Za-z0-9_.-]+\.zip')->name('admin.backups.download');
     Route::get('/admin/unduh/tiket/{ticket}', DownloadTicketAttachmentController::class)->name('admin.tickets.attachment');
     Route::get('/admin/lampiran/pengajuan/{booking}', DownloadBookingAttachmentController::class)

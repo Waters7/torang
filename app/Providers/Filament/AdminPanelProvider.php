@@ -2,10 +2,12 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\EditProfile;
 use App\Filament\Auth\Login;
 use App\Filament\Auth\RequestPasswordReset;
 use App\Filament\Auth\ResetPassword;
 use App\Filament\NavigationGroup;
+use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\SecurityHeaders;
 use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
@@ -35,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
+            ->profile(EditProfile::class)
             ->brandName('TORANG')
             ->brandLogo(fn () => view('filament.brand'))
             ->darkModeBrandLogo(fn () => view('filament.brand', ['dark' => true]))
@@ -78,6 +81,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsurePasswordChanged::class,
             ]);
     }
 }

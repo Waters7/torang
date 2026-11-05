@@ -14,8 +14,20 @@
 - [x] Tambahan: dashboard bertab, Dashboard Eksekutif, layar TV per lab, palet Kemenkes, login & favicon
 - [x] Tambahan: logo & supergrafis di TV lab, lupa kata sandi via email, captcha Turnstile di halaman masuk petugas
 - [x] Tambahan: kabar tiket ke pelapor (WhatsApp/email), catatan pekerjaan, tautan penilaian bertanda tangan
+- [x] Tambahan: login NIP atau email, wajib ganti kata sandi saat login pertama, ganti kata sandi di profil, impor akun petugas
 
 ## Catatan
+
+### Akun petugas & kata sandi — 5 November 2026
+- [x] Petugas masuk dengan **NIP atau email**; **Lupa kata sandi?** juga menerima NIP.
+- [x] Kata sandi awal = NIP, **wajib diganti saat login pertama**: semua halaman panel dan unduhan diarahkan ke halaman
+  ganti kata sandi sampai diganti. Kata sandi baru minimal 12 karakter dan tidak boleh memuat NIP.
+- [x] Ganti kata sandi kapan saja dari menu pengguna › profil (memerlukan kata sandi lama, tercatat di audit log).
+- [x] `php artisan torang:import-users` membuat akun dari berkas CSV privat; data pegawai asli tidak masuk repo.
+  Form Pengguna mendapat isian NIP dan sakelar wajib ganti kata sandi; `torang:check` menampilkan akun yang belum ganti.
+- Verifikasi: `php artisan test` 546 lulus · `pint` bersih · halaman masuk dicek di browser · impor berkas asli
+  diuji dengan `--dry-run` (4 akun terbaca, belum ada yang dibuat). Alur login NIP & ganti kata sandi diuji lewat
+  feature test, belum dicoba manual di browser.
 
 ### TV IT: bagian monitor lipat & antrean tiket — 2 November 2026
 - [x] **Jaringan per jurusan** dan **Aplikasi kampus** memiliki kontrol Tutup/Tampilkan terpisah, mendukung

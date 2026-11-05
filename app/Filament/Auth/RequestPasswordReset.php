@@ -6,7 +6,9 @@ use App\Filament\Forms\Components\TurnstileCaptcha;
 use App\Services\Auth\StaffPasswordResets;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Pages\PasswordReset\RequestPasswordReset as BaseRequestPasswordReset;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Validation\ValidationException;
@@ -40,7 +42,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
         Notification::make()
             ->title('Periksa email Anda')
-            ->body("Bila email tersebut terdaftar sebagai akun petugas aktif, tautan atur ulang kata sandi sudah dikirim dan berlaku {$minutes} menit.")
+            ->body("Bila data tersebut terdaftar sebagai akun petugas aktif, tautan atur ulang kata sandi sudah dikirim ke email akun dan berlaku {$minutes} menit.")
             ->success()
             ->send();
 
@@ -56,8 +58,18 @@ class RequestPasswordReset extends BaseRequestPasswordReset
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            $this->getEmailFormComponent()->helperText('Masukkan email akun petugas. Tautan atur ulang dikirim ke email tersebut.'),
+            $this->getEmailFormComponent(),
             TurnstileCaptcha::make('captcha'),
         ]);
+    }
+
+    protected function getEmailFormComponent(): Component
+    {
+        return TextInput::make('email')
+            ->label('Email atau NIP')
+            ->helperText('Tautan atur ulang dikirim ke email yang terdaftar pada akun petugas.')
+            ->required()
+            ->autocomplete('username')
+            ->autofocus();
     }
 }

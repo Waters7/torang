@@ -14,7 +14,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'telegram_chat_id', 'is_active'])]
+#[Fillable(['name', 'email', 'nip', 'password', 'must_change_password', 'phone', 'telegram_chat_id', 'is_active'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -38,8 +38,23 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Kolom pencarian akun dari isian "Email atau NIP".
+     *
+     * @return array{email: string}|array{nip: string}
+     */
+    public static function loginLookup(string $identifier): array
+    {
+        $identifier = trim($identifier);
+
+        return str_contains($identifier, '@')
+            ? ['email' => $identifier]
+            : ['nip' => preg_replace('/\D/', '', $identifier) ?? ''];
     }
 
     public function canAccessPanel(Panel $panel): bool

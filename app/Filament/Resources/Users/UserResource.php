@@ -48,6 +48,12 @@ class UserResource extends Resource
                 ->required()
                 ->maxLength(255)
                 ->unique(ignoreRecord: true),
+            TextInput::make('nip')
+                ->label('NIP')
+                ->helperText('Opsional. Petugas bisa masuk memakai NIP atau email.')
+                ->maxLength(30)
+                ->regex('/^\d{9,30}$/')
+                ->unique(ignoreRecord: true),
             // Tidak pernah diisi dari database.
             TextInput::make('password')
                 ->label('Password baru')
@@ -68,6 +74,8 @@ class UserResource extends Resource
             TextInput::make('telegram_chat_id')
                 ->label('Telegram chat ID')
                 ->maxLength(50),
+            Toggle::make('must_change_password')
+                ->label('Wajib ganti kata sandi saat login berikutnya'),
             Toggle::make('is_active')
                 ->label('Aktif')
                 ->default(true),
@@ -80,6 +88,7 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('name')->label('Nama')->searchable(),
                 TextColumn::make('email')->label('Email')->searchable(),
+                TextColumn::make('nip')->label('NIP')->searchable()->placeholder('—')->toggleable(),
                 TextColumn::make('roles.name')->label('Role')->badge(),
                 IconColumn::make('is_active')->label('Aktif')->boolean(),
             ])

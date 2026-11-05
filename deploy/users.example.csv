@@ -1,0 +1,5 @@
+nip,nama,email,whatsapp,role
+000000000000000001,Nama Kepala Unit,kepala@example.ac.id,081200000001,kepala_unit
+000000000000000002,Nama Petugas IT,petugas@example.ac.id,081200000002,petugas_it
+000000000000000003,Nama Pengelola CBT,cbt@example.ac.id,,pengelola_cbt
+000000000000000004,Nama Admin Sistem,admin@example.ac.id,081200000004,super_admin

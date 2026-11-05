@@ -3,6 +3,8 @@
 namespace App\Filament\Auth;
 
 use App\Filament\Forms\Components\TurnstileCaptcha;
+use App\Models\User;
+use App\Rules\StaffPassword;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse;
 use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
 use Filament\Schemas\Schema;
@@ -21,7 +23,8 @@ class ResetPassword extends BaseResetPassword
     {
         return $schema->components([
             $this->getEmailFormComponent(),
-            $this->getPasswordFormComponent(),
+            $this->getPasswordFormComponent()
+                ->rule(fn (): StaffPassword => new StaffPassword(User::query()->where('email', $this->email)->value('nip'))),
             $this->getPasswordConfirmationFormComponent(),
             TurnstileCaptcha::make('captcha'),
         ]);

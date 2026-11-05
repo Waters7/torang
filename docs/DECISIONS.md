@@ -673,3 +673,20 @@ fase terkait.
 - Audit log `tickets` event `reporter_notified` dengan jenis pesan, kanal (chat WhatsApp / WhatsApp gateway / email),
   dan mode (manual/otomatis). Untuk chat WhatsApp yang tercatat adalah saat petugas membuka chat; pengiriman
   sebenarnya terjadi di aplikasi WhatsApp.
+
+## Tambahan — Akun petugas, login NIP & kata sandi awal (5 November 2026)
+
+- Atas permintaan pengguna, petugas masuk dengan NIP atau email dan kata sandi awal sama dengan NIP. NIP mudah
+  diketahui (bahkan tertera di dokumen resmi), jadi pengamannya: wajib ganti saat login pertama, captcha, batas
+  percobaan login, dan peringatan `torang:check`. Risiko tersisa ada di rentang antara impor dan login pertama.
+- `users.must_change_password` ditegakkan middleware `EnsurePasswordChanged` pada panel dan rute unduhan; hanya
+  halaman profil dan keluar yang boleh dibuka. Permintaan Livewire tidak dicegat karena tanpa halaman yang terbuka
+  tidak ada komponen untuk dipanggil.
+- Kata sandi baru minimal 12 karakter (sama dengan form Pengguna) dan tidak boleh memuat NIP, baik di profil maupun
+  di atur ulang lewat email. Reset lewat email ikut melepas kewajiban ganti.
+- Halaman profil memakai `EditProfile` Filament versi simple; nama, NIP, dan email hanya tampil (diubah admin lewat
+  menu Pengguna) supaya halaman ini khusus kata sandi.
+- Data pegawai asli tidak boleh masuk repo publik, jadi akun dibuat dari CSV privat lewat `torang:import-users`, bukan
+  seeder. Kolomnya hanya `nip,nama,email,whatsapp,role`: NIK dan tanggal lahir dari DUK tidak disimpan. Berkas
+  divalidasi utuh lebih dulu; satu baris salah membatalkan semuanya. Akun yang sudah ada tidak pernah ditimpa, dan NIP
+  tidak ditampilkan di layar. Data Petugas dengan NIP yang sama otomatis disambungkan ke akun.

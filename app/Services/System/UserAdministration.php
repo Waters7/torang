@@ -27,7 +27,9 @@ class UserAdministration
         $data = Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
+            'nip' => ['nullable', 'regex:/^\d{9,30}$/', Rule::unique('users', 'nip')->ignore($user?->id)],
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:12', 'max:255'],
+            'must_change_password' => ['sometimes', 'boolean'],
             'is_active' => ['required', 'boolean'],
             'role_names' => ['required', 'array', 'min:1'],
             'role_names.*' => [Rule::in(Role::values())],

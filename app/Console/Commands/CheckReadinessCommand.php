@@ -123,7 +123,14 @@ class CheckReadinessCommand extends Command
         $admins = Schema::hasTable('roles') && RoleModel::query()->where('name', Role::SuperAdmin->value)->exists()
             ? User::role(Role::SuperAdmin->value)->where('is_active', true)->count()
             : 0;
-        $this->result('Super Admin', $admins > 0 ? self::OK : self::FAIL, $admins > 0 ? "{$admins} akun aktif" : 'Belum ada — isi ADMIN_EMAIL/ADMIN_PASSWORD lalu jalankan seeder');
+        $this->result('Super Admin', $admins > 0 ? self::OK : self::FAIL, $admins > 0 ? "{$admins} akun aktif" : 'Belum ada — isi ADMIN_EMAIL/ADMIN_PASSWORD lalu jalankan seeder, atau impor akun (torang:import-users)');
+
+        $initial = Schema::hasColumn('users', 'must_change_password')
+            ? User::query()->where('must_change_password', true)->where('is_active', true)->count()
+            : 0;
+        $this->result('Kata sandi awal', $initial === 0 ? self::OK : self::WARN, $initial === 0
+            ? 'Semua akun sudah mengganti kata sandi'
+            : "{$initial} akun masih memakai kata sandi awal (NIP) — minta segera login dan menggantinya");
     }
 
     private function storage(): void

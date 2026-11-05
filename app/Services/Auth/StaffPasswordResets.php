@@ -19,8 +19,17 @@ class StaffPasswordResets
 
     public const EVENT_COMPLETED = 'password_reset';
 
-    public function requestLink(string $email): void
+    /**
+     * @param  string  $identifier  Email atau NIP akun.
+     */
+    public function requestLink(string $identifier): void
     {
+        $email = User::query()->where(User::loginLookup($identifier))->value('email');
+
+        if ($email === null) {
+            return;
+        }
+
         Password::broker()->sendResetLink(['email' => $email], function (User $user, #[SensitiveParameter] string $token): void {
             if (! $user->canAccessPanel(Filament::getPanel('admin'))) {
                 return;
@@ -39,6 +48,9 @@ class StaffPasswordResets
 
     public function recordCompleted(User $user): void
     {
+        // Sandi baru dari tautan email sudah menggantikan kata sandi awal (NIP).
+        $user->forceFill(['must_change_password' => false])->save();
+
         activity('auth')
             ->causedBy($user)
             ->performedOn($user)
