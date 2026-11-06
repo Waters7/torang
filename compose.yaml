@@ -1,0 +1,92 @@
+# Stack produksi TORANG. Rahasia dibaca dari .env di server (contoh: docker/.env.production.example).
+# Panduan: README › Deployment dengan Docker. Pembaruan: ./deploy-docker.sh
+
+name: torang
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
+x-app: &app
+  image: torang-app:latest
+  env_file: .env
+  restart: unless-stopped
+  depends_on:
+    db:
+      condition: service_healthy
+  volumes:
+    - storage:/var/www/html/storage
+  <<: *logging
+
+services:
+  app:
+    <<: *app
+    build:
+      context: .
+      target: app
+    environment:
+      TORANG_ROLE: web
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  web:
+    image: torang-web:latest
+    build:
+      context: .
+      target: web
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    # Hanya localhost: Nginx host menangani domain dan HTTPS (deploy/nginx/torang-docker.conf).
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8110}:80"
+    <<: *logging
+
+  # Cek jaringan & aplikasi berjalan paralel; satu cek dibatasi 90 detik.
+  worker-monitoring:
+    <<: *app
+    command: php artisan queue:work database --queue=monitoring --sleep=1 --tries=1 --timeout=120 --max-time=3600
+    deploy:
+      replicas: 3
+    stop_grace_period: 150s
+
+  # Email, notifikasi, PDF UKOM, backup. --timeout harus di bawah DB_QUEUE_RETRY_AFTER (360).
+  worker-default:
+    <<: *app
+    command: php artisan queue:work database --queue=default --sleep=3 --tries=3 --backoff=30 --timeout=330 --max-time=3600
+    stop_grace_period: 6m
+
+  scheduler:
+    <<: *app
+    command: php artisan schedule:work
+
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:?isi DB_DATABASE di .env}
+      MARIADB_USER: ${DB_USERNAME:?isi DB_USERNAME di .env}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?isi DB_PASSWORD di .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?isi DB_ROOT_PASSWORD di .env}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    volumes:
+      - db-data:/var/lib/mysql
+    <<: *logging
+
+volumes:
+  db-data:
+  storage:

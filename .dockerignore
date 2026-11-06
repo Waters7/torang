@@ -1,0 +1,34 @@
+# Rahasia dan data tidak boleh masuk image.
+.env
+.env.*
+!.env.example
+*.xlsx
+*.csv
+storage/app
+storage/framework
+storage/logs
+bootstrap/cache/*.php
+
+# Dibuat ulang saat build.
+node_modules
+vendor
+public/build
+public/hot
+public/css/filament
+public/js/filament
+public/fonts
+
+# Tidak dipakai saat aplikasi berjalan.
+.git
+.github
+.claude
+.vscode
+.idea
+tests
+docs
+deploy
+scripts
+*.md
+Dockerfile
+compose.yaml
+.dockerignore

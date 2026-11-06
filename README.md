@@ -43,6 +43,54 @@ composer run dev
 | `php artisan torang:sync-permissions` | tambahkan permission baru ke role tanpa menimpa perubahan di panel |
 | `php artisan torang:import-users` | buat akun petugas dari berkas CSV privat (kata sandi awal = NIP, wajib diganti) |
 
+## Deployment dengan Docker
+
+Cara yang dipakai di server produksi. `compose.yaml` menjalankan `app` (PHP-FPM), `web` (Nginx, hanya di localhost),
+`worker-monitoring` ×3, `worker-default`, `scheduler`, dan `db` (MariaDB). Domain dan HTTPS ditangani Nginx host,
+jadi stack ini bisa berdampingan dengan aplikasi lain di server yang sama. Image memuat `ping`, LibreOffice, dan klien
+database; tidak perlu memasang PHP, Node, atau MySQL di host.
+
+```bash
+git clone https://github.com/Waters7/torang.git /opt/torang
+cd /opt/torang
+cp docker/.env.production.example .env
+chmod 600 .env
+nano .env
+```
+
+Isi `APP_URL`, `WEB_PORT` (port localhost yang masih kosong), `APP_KEY` (`echo base64:$(openssl rand -base64 32)`),
+`DB_PASSWORD` dan `DB_ROOT_PASSWORD` (`openssl rand -hex 24`), kunci Turnstile, serta `MAIL_*`. Lalu:
+
+```bash
+docker compose build
+docker compose up -d --wait db
+docker compose run --rm -T app php artisan migrate --force
+docker compose run --rm -T app php artisan db:seed --force
+docker compose up -d
+```
+
+HTTPS: ikuti langkah di [`deploy/nginx/torang-docker.conf`](deploy/nginx/torang-docker.conf). A record domain harus
+mengarah langsung ke server.
+
+Akun petugas (format pada bagian **Akun petugas** di bawah); berkasnya hanya dipasang untuk perintah ini:
+
+```bash
+docker compose run --rm -T -v /root/users.csv:/tmp/users.csv:ro app php artisan torang:import-users /tmp/users.csv
+shred -u /root/users.csv
+```
+
+Sehari-hari:
+
+| Perintah | Kegunaan |
+|---|---|
+| `./deploy-docker.sh` | perbarui aplikasi: kode, image, migrasi, permission, restart worker |
+| `docker compose exec app php artisan torang:check` | periksa kesiapan server |
+| `docker compose up -d` | terapkan perubahan `.env` |
+| `docker compose logs -f app` | lihat log kontainer (log aplikasi ada di `storage/logs`) |
+
+Unggahan dan backup ada di volume `torang_storage`, database di `torang_db-data`. Salin backup secara berkala ke
+luar server.
+
 ## Deployment VPS (Ubuntu 24.04 LTS)
 
 TORANG butuh VPS, bukan shared hosting: monitoring menjalankan `ping`, worker queue, dan cron.

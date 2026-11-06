@@ -15,8 +15,19 @@
 - [x] Tambahan: logo & supergrafis di TV lab, lupa kata sandi via email, captcha Turnstile di halaman masuk petugas
 - [x] Tambahan: kabar tiket ke pelapor (WhatsApp/email), catatan pekerjaan, tautan penilaian bertanda tangan
 - [x] Tambahan: login NIP atau email, wajib ganti kata sandi saat login pertama, ganti kata sandi di profil, impor akun petugas
+- [x] Tambahan: deployment Docker (image, compose, Nginx host + HTTPS) dan produksi pertama
 
 ## Catatan
+
+### Deployment Docker & produksi pertama — 6 November 2026
+- [x] `Dockerfile` bertahap, `compose.yaml`, `deploy-docker.sh`, dan contoh `.env` produksi. Rahasia tidak masuk image.
+- [x] Tayang di domain produksi lewat HTTPS: 4 akun petugas diimpor, berkas CSV dihapus dari server.
+- Verifikasi di server: image berhasil dibangun; migrasi dan seeder di MariaDB; `torang:check` lulus untuk database,
+  migrasi, scheduler, worker, ping, LibreOffice, dan program dump; backup sungguhan berhasil; template UKOM terkonversi
+  ke PDF; halaman publik dan login merespons 200 dari luar, tanpa error konsol; `/.env` dan log tertutup; HSTS aktif.
+  Situs lain di server merespons sama sebelum dan sesudah reload Nginx.
+- Belum selesai: kunci Turnstile asli (sampai diisi, login petugas dan form publik menolak kiriman) dan SMTP. Login
+  sungguhan, ganti kata sandi pertama, dan kiriman form belum diuji di produksi.
 
 ### Akun petugas & kata sandi — 5 November 2026
 - [x] Petugas masuk dengan **NIP atau email**; **Lupa kata sandi?** juga menerima NIP.

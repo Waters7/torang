@@ -690,3 +690,20 @@ fase terkait.
   seeder. Kolomnya hanya `nip,nama,email,whatsapp,role`: NIK dan tanggal lahir dari DUK tidak disimpan. Berkas
   divalidasi utuh lebih dulu; satu baris salah membatalkan semuanya. Akun yang sudah ada tidak pernah ditimpa, dan NIP
   tidak ditampilkan di layar. Data Petugas dengan NIP yang sama otomatis disambungkan ke akun.
+
+## Tambahan — Deployment Docker (6 November 2026)
+
+- Server produksi dipakai bersama aplikasi lain, dengan Nginx host di port 80/443 dan Certbot. Jadi stack TORANG tidak
+  membuka port publik: kontainer `web` hanya di localhost (`WEB_PORT`), lalu Nginx host menangani domain dan HTTPS.
+  Rancangan awal dengan Caddy dibatalkan karena akan berebut port. Kode di `/opt/torang`, database dan jaringan Docker
+  terpisah dari aplikasi lain.
+- Karena semua lalu lintas lewat Nginx host, `TRUSTED_PROXIES=*` aman, dan Nginx host menimpa `X-Forwarded-For` dengan
+  `$remote_addr` agar nilai kiriman pengunjung tidak dipercaya.
+- PHP 8.4, versi yang dipakai seluruh test (`composer.json` tetap mengizinkan 8.3). MariaDB 11.4, bukan MySQL, karena
+  `mysqldump` dari klien Debian adalah MariaDB dan tidak cocok dengan server MySQL 8.4 untuk backup.
+- Satu image `torang-app` untuk PHP-FPM, worker, dan scheduler; kontainer berjalan sebagai `www-data`. Konfigurasi
+  di-cache di entrypoint karena nilainya dari environment. `clear_env = no` diperlukan karena `TRUSTED_PROXIES` dibaca
+  saat bootstrap. Nginx kontainer memakai DNS Docker agar tidak menyimpan alamat lama kontainer `app` setelah deploy.
+- `.env` dan CSV akun tidak masuk image (`.dockerignore`). `APP_KEY` dan kata sandi database dibuat di server.
+- Worker monitoring dan default dipisah seperti Supervisor; satu worker bersama membuat antrean `default` tertahan
+  karena antrean `monitoring` tidak pernah kosong.
