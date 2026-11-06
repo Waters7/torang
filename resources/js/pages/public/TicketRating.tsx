@@ -1,16 +1,20 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePoll } from '@inertiajs/react';
 import { useState, type FormEvent } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import Turnstile from '@/components/Turnstile';
 import { inputClass } from '@/components/form/Field';
-import type { PublicTicket } from './TicketStatus';
+import type { PublicTicket } from '@/types/tickets';
+import TicketProgressTimeline from '@/components/TicketProgressTimeline';
 
 export default function TicketRating({ ticket, rated, submitUrl, turnstileSiteKey, comments }: { ticket: PublicTicket; rated: boolean; submitUrl: string; turnstileSiteKey: string; comments: { body: string; at: string }[] }) {
     const [resetKey, setResetKey] = useState(0);
+    usePoll(30_000, { only: ['ticket', 'comments', 'rated'] });
     const form = useForm({ rating: '', feedback: '', website: '', captcha_token: '' });
     const submit = (e: FormEvent) => { e.preventDefault(); form.post(submitUrl, { onError: () => setResetKey(k => k + 1) }); };
     return <PublicLayout><Head title="Tanggapan & penilaian tiket"><meta name="referrer" content="no-referrer" /></Head><div className="mx-auto max-w-2xl px-4 py-12">
         <p className="eyebrow">Tanggapan & penilaian</p><h1 className="mt-3 break-all font-mono text-xl font-bold">{ticket.code}</h1><p className="mt-3 font-semibold text-teal-text">{ticket.status}</p>
+        <p className="mt-3 text-sm text-muted">Petugas: {ticket.assigneeName ?? 'Belum ditugaskan'}</p>
+        <TicketProgressTimeline entries={ticket.progress} />
         {ticket.resolutionNotes && <div className="mt-4 rounded-card border border-border bg-white p-5"><p className="text-sm font-semibold">Pekerjaan yang dilakukan</p><p className="mt-1 whitespace-pre-wrap">{ticket.resolutionNotes}</p></div>}
         {comments.map((c, i) => <div key={i} className="mt-4 rounded-card border border-border bg-white p-5"><p className="whitespace-pre-wrap">{c.body}</p><p className="mt-2 text-xs text-muted">{new Date(c.at).toLocaleString('id-ID', { timeZone: 'Asia/Makassar' })} WITA</p></div>)}
         {rated ? <p className="mt-6 rounded-card bg-faint p-6">Terima kasih. Penilaian Anda sudah tersimpan.</p> : !ticket.finished ? <p className="mt-6">Penilaian tersedia setelah tiket selesai ditangani.</p> : <form onSubmit={submit} className="mt-6 space-y-5 rounded-card border border-border bg-white p-6">

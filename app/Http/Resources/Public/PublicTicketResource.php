@@ -27,6 +27,9 @@ class PublicTicketResource extends JsonResource
             'resolvedAt' => $this->resolved_at?->toIso8601String(),
             // Ditulis petugas untuk pelapor (form "Tindak lanjuti"), hanya setelah tiket selesai.
             'resolutionNotes' => $this->status->isFinished() ? $this->resolution_notes : null,
+            'assigneeName' => $this->whenLoaded('assignee', fn () => $this->assignee->name),
+            'progress' => $this->whenLoaded('publicProgressEntries', fn (): array => $this->publicProgressEntries
+                ->map(fn ($entry): array => PublicTicketProgressResource::make($entry)->resolve())->all()),
         ];
     }
 }

@@ -121,6 +121,21 @@ class TicketResource extends Resource
                     TextEntry::make('rating')->label('Nilai (1–5)')->placeholder('Belum dinilai'),
                     TextEntry::make('feedback')->label('Masukan')->placeholder('—'),
                 ]),
+            RepeatableEntry::make('progressEntries')
+                ->label('Rencana & perkembangan penanganan')
+                ->state(fn (Ticket $record) => $record->progressEntries()->with('user:id,name')->get())
+                ->placeholder('Belum ada catatan penanganan.')
+                ->columns(3)
+                ->columnSpanFull()
+                ->schema([
+                    TextEntry::make('type')->label('Jenis')->badge(),
+                    TextEntry::make('user.name')->label('Dicatat oleh')->placeholder('Tim IT'),
+                    TextEntry::make('created_at')->label('Waktu')->dateTime('d M Y H:i')->suffix(' WITA'),
+                    TextEntry::make('status')->label('Status saat dicatat')->badge(),
+                    TextEntry::make('is_internal')->label('Dapat dilihat oleh')
+                        ->formatStateUsing(fn (bool $state): string => $state ? 'Internal tim IT' : 'Semua pemegang nomor tiket'),
+                    TextEntry::make('body')->label('Catatan')->columnSpanFull(),
+                ]),
             RepeatableEntry::make('comments')
                 ->label('Riwayat komentar')
                 ->columns(3)

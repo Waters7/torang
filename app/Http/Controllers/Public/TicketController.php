@@ -51,24 +51,24 @@ class TicketController extends Controller
 
         return $this->private(Inertia::render('public/TicketStatus', [
             'query' => $code,
-            'ticket' => PublicTicketResource::make($ticket)->resolve(),
+            'ticket' => $this->publicTicket($ticket),
             'ratingUrl' => $request->session()->get('ticket_rating_url'),
             'sent' => true,
         ]), $request);
     }
 
-    public function status(Request $request): Response
+    public function status(Request $request): HttpResponse
     {
         $data = $request->validate(['kode' => ['nullable', 'string', 'max:40']]);
         $query = strtoupper(trim((string) ($data['kode'] ?? '')));
         $ticket = $query ? Ticket::query()->where('code', $query)->first() : null;
 
-        return Inertia::render('public/TicketStatus', [
+        return $this->private(Inertia::render('public/TicketStatus', [
             'query' => $query,
-            'ticket' => $ticket ? PublicTicketResource::make($ticket)->resolve() : null,
+            'ticket' => $ticket ? $this->publicTicket($ticket) : null,
             'ratingUrl' => null,
             'sent' => false,
-        ]);
+        ]), $request);
     }
 
     public function rating(Request $request, string $code, string $token, TicketService $service, TurnstileVerifier $turnstile): HttpResponse
@@ -110,7 +110,7 @@ class TicketController extends Controller
     private function ratingPage(Request $request, Ticket $ticket, string $submitUrl, TurnstileVerifier $turnstile): HttpResponse
     {
         return $this->private(Inertia::render('public/TicketRating', [
-            'ticket' => PublicTicketResource::make($ticket)->resolve(),
+            'ticket' => $this->publicTicket($ticket),
             'rated' => $ticket->rated_at !== null,
             'submitUrl' => $submitUrl,
             'comments' => $ticket->comments()
@@ -129,6 +129,13 @@ class TicketController extends Controller
             'website' => ['prohibited'],
             'captcha_token' => ['required', new Turnstile($request->ip())],
         ]);
+    }
+
+    private function publicTicket(Ticket $ticket): array
+    {
+        $ticket->load(['assignee:id,name', 'publicProgressEntries.user:id,name']);
+
+        return PublicTicketResource::make($ticket)->resolve();
     }
 
     /**

@@ -14,6 +14,7 @@
 - [x] Tambahan: dashboard bertab, Dashboard Eksekutif, layar TV per lab, palet Kemenkes, login & favicon
 - [x] Tambahan: logo & supergrafis di TV lab, lupa kata sandi via email, captcha Turnstile di halaman masuk petugas
 - [x] Tambahan: kabar tiket ke pelapor (WhatsApp/email), catatan pekerjaan, tautan penilaian bertanda tangan
+- [x] Tambahan: riwayat rencana/tindakan/perkembangan tiket dan 13 monitor aplikasi kampus
 - [x] Tambahan: login NIP atau email, wajib ganti kata sandi saat login pertama, ganti kata sandi di profil, impor akun petugas
 - [x] Tambahan: deployment Docker (image, compose, Nginx host + HTTPS) dan produksi pertama
 
@@ -44,6 +45,19 @@
 - Verifikasi: `php artisan test` 546 lulus · `pint` bersih · halaman masuk dicek di browser · impor berkas asli
   diuji dengan `--dry-run` (4 akun terbaca, belum ada yang dibuat). Alur login NIP & ganti kata sandi diuji lewat
   feature test, belum dicoba manual di browser.
+
+### Riwayat penanganan tiket & aplikasi kampus — 5 November 2026
+- [x] Petugas berizin mengelola tiket dapat menambahkan **Rencana**, **Tindakan**, atau **Perkembangan** di detail
+  tiket. Setiap entri menyimpan penulis, waktu WITA, status saat dicatat, dan pilihan publik/internal.
+- [x] Riwayat publik serta nama petugas tampil pada cek status berdasarkan nomor tiket dan halaman pelapor,
+  diperbarui otomatis setiap 30 detik. Catatan internal dan komentar lama pada tautan privat tetap terlindungi.
+- [x] Daftar 13 aplikasi kampus termasuk **SITOU** pada **Kepegawaian & perjalanan dinas** tersedia melalui
+  `monitors:sync-campus-applications`. Sinkronisasi tidak menggandakan URL atau menimpa pengaturan operator.
+- [x] Database lokal telah dimigrasikan, 13 monitor asli ditambahkan, dan 7 aplikasi contoh dijeda serta
+  disembunyikan tanpa menghapus riwayat. Pemeriksaan awal mencatat respons HTTP dari 10 aplikasi; Repositori
+  gagal koneksi, SITOU gagal koneksi TLS, dan TORANG gagal resolusi DNS dari komputer pengujian.
+- Verifikasi: **517 test lulus (2887 assertions)**, Pint, TypeScript, dan build bersih. Riwayat menggunakan
+  data contoh pada pratinjau desktop/ponsel; tidak ada tiket contoh yang dimasukkan ke database lokal.
 
 ### TV IT: bagian monitor lipat & antrean tiket — 2 November 2026
 - [x] **Jaringan per jurusan** dan **Aplikasi kampus** memiliki kontrol Tutup/Tampilkan terpisah, mendukung

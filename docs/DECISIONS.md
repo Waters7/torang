@@ -3,6 +3,29 @@
 Catatan keputusan yang tidak diatur langsung oleh `docs/SPEC.md`. Tambahkan entri baru di bawah
 fase terkait.
 
+## Riwayat penanganan tiket & aplikasi kampus (5 November 2026)
+
+- Atas permintaan pengguna, rencana/tindakan/perkembangan menjadi entri tersendiri yang hanya ditambahkan,
+  tanpa tombol ubah/hapus. Penulis berasal dari pengguna terautentikasi; status tiket disalin saat pencatatan
+  di dalam transaksi dengan kunci baris. Respons pertama diisi sekali bila sebelumnya kosong.
+- Catatan baru secara default publik bagi pemilik nomor tiket, dengan pilihan **Hanya untuk tim IT** sebelum
+  disimpan. Form menjelaskan audiens ini. Komentar lama tetap memakai aturan tautan privat sebelumnya;
+  tidak ada perubahan massal terhadap visibilitas catatan lama.
+- Resource publik memilih isi catatan publik, jenis, penulis, waktu, status saat dicatat, serta nama petugas
+  yang ditugaskan. Identitas/kontak pelapor, token, dan catatan internal tidak dikirim. Halaman cek status memakai
+  `no-store` dan `no-referrer`; polling 30 detik memperbarui riwayat. Pencatatan tidak mengirim notifikasi eksternal.
+- Daftar 13 URL asli disimpan di `config/campus-applications.php` dan diterapkan lewat perintah eksplisit
+  `monitors:sync-campus-applications`; bukan seeder otomatis. Pencocokan host/path/query menoleransi perbedaan
+  HTTP/HTTPS dan garis miring penutup. Nama, kategori, dan URL mengikuti daftar; privasi, jeda, maintenance,
+  PIC, interval, dan riwayat monitor yang sudah ada dipertahankan.
+- Monitor baru aktif/publik dengan status **Belum diperiksa**, HTTP check, dan pengaturan interval/ambang global.
+  Sebelas URL HTTPS mengaktifkan pemeriksaan SSL; P360 dan TORANG memakai HTTP sesuai URL pengguna.
+  Tidak dibuat riwayat atau uptime sintetis. Opsi `--pause-samples` hanya menjeda pasangan nama/URL persis dari
+  tujuh aplikasi contoh, menyembunyikannya dari publik tanpa menghapus data.
+- Sinkronisasi dilindungi kunci cache dan transaksi, lalu menghapus cache status publik. Pemeriksaan awal lokal
+  dilakukan sekali setelah pendaftaran; hasil gagal pertama mengikuti ambang tiga kegagalan sebelum Offline.
+  Pemeriksaan berkala tetap membutuhkan scheduler serta worker queue `monitoring,default` yang berjalan.
+
 ## TV IT: bagian lipat dan tiket belum selesai (2 November 2026)
 
 - Bagian jaringan/aplikasi memakai elemen native `details`/`summary`, terbuka secara default, dengan

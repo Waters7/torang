@@ -90,6 +90,16 @@ class Ticket extends Model
         return $this->hasMany(TicketComment::class);
     }
 
+    public function progressEntries(): HasMany
+    {
+        return $this->hasMany(TicketProgressEntry::class)->orderBy('created_at')->orderBy('id');
+    }
+
+    public function publicProgressEntries(): HasMany
+    {
+        return $this->progressEntries()->where('is_internal', false);
+    }
+
     /**
      * Nomor WhatsApp pelapor (format 62…) bila kontaknya berupa nomor HP Indonesia.
      */

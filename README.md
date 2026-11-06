@@ -42,6 +42,33 @@ composer run dev
 | `php artisan torang:check` | periksa kesiapan server (konfigurasi, database, ping, LibreOffice, queue, scheduler) |
 | `php artisan torang:sync-permissions` | tambahkan permission baru ke role tanpa menimpa perubahan di panel |
 | `php artisan torang:import-users` | buat akun petugas dari berkas CSV privat (kata sandi awal = NIP, wajib diganti) |
+| `php artisan monitors:sync-campus-applications --pause-samples` | daftarkan 13 aplikasi kampus dan jeda aplikasi contoh tanpa menghapus riwayat |
+
+## Daftar aplikasi kampus dan catatan tiket
+
+Untuk menerapkan pembaruan pada database yang sudah ada, jalankan:
+
+```bash
+php artisan migrate --force
+php artisan monitors:sync-campus-applications --pause-samples
+```
+
+Daftar URL dan kategori berada di `config/campus-applications.php`, termasuk SITOU pada
+**Kepegawaian & perjalanan dinas**. Perintah dapat dijalankan ulang tanpa menggandakan monitor;
+pengaturan privasi, jeda, maintenance, PIC, interval, dan riwayat yang sudah ada dipertahankan.
+Opsi `--pause-samples` hanya menjeda tujuh aplikasi contoh bawaan. Status baru tetap **Belum diperiksa**
+sampai pemeriksaan benar-benar berjalan. Untuk pemeriksaan berkala lokal, jalankan scheduler dan worker
+di terminal terpisah (atau gunakan layanan deployment di bawah):
+
+```bash
+php artisan schedule:work
+php artisan queue:work --queue=monitoring,default
+```
+
+Pada detail tiket, petugas berizin mengelola tiket dapat memilih **Tambah rencana / tindakan**.
+Catatan Rencana, Tindakan, dan Perkembangan menyimpan penulis, waktu WITA, serta status saat dicatat.
+Catatan publik tampil di `/cek-tiket` bagi pemilik nomor tiket dan di halaman pelapor; aktifkan
+**Hanya untuk tim IT** bila catatan bersifat internal. Komentar lama pada tautan privat tetap privat.
 
 ## Deployment dengan Docker
 

@@ -4,11 +4,13 @@ namespace App\Filament\Resources\Tickets;
 
 use App\Enums\TicketCategory;
 use App\Enums\TicketPriority;
+use App\Enums\TicketProgressType;
 use App\Enums\TicketStatus;
 use App\Models\Staff;
 use App\Models\Ticket;
 use App\Models\UsageLog;
 use App\Services\Helpdesk\ReporterUpdates;
+use App\Services\Helpdesk\TicketProgressService;
 use App\Services\Helpdesk\TicketService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -26,6 +28,30 @@ use Livewire\Component;
  */
 class TicketActions
 {
+    public static function addProgress(): Action
+    {
+        return Action::make('addProgress')
+            ->label('Tambah rencana / tindakan')
+            ->icon(Heroicon::OutlinedClipboardDocumentList)
+            ->visible(fn (Ticket $record): bool => auth()->user()->can('update', $record))
+            ->modalHeading('Catat penanganan tiket')
+            ->modalDescription('Catatan publik dapat dibaca pelapor, pelaksana, dan siapa pun yang memiliki nomor tiket. Jangan masukkan password atau data pribadi.')
+            ->schema([
+                Select::make('type')->label('Jenis catatan')->options(TicketProgressType::class)
+                    ->default(TicketProgressType::Action->value)->required(),
+                Textarea::make('body')->label('Rencana, tindakan, atau perkembangan')
+                    ->helperText('Tuliskan pekerjaan yang direncanakan/dilakukan, hasil pemeriksaan, atau kendala dan langkah berikutnya.')
+                    ->rows(6)->maxLength(5000)->required(),
+                Toggle::make('is_internal')->label('Hanya untuk tim IT')->default(false)
+                    ->helperText('Aktifkan untuk catatan internal. Catatan ini tidak tampil pada pengecekan nomor tiket atau tautan pelapor.'),
+            ])
+            ->action(function (Ticket $record, array $data): void {
+                app(TicketProgressService::class)->add($record, $data, auth()->user());
+                $record->unsetRelation('progressEntries');
+                Notification::make()->success()->title('Catatan penanganan tersimpan')->send();
+            });
+    }
+
     public static function followUp(): Action
     {
         return Action::make('updateTicket')
