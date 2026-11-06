@@ -730,3 +730,10 @@ fase terkait.
 - `.env` dan CSV akun tidak masuk image (`.dockerignore`). `APP_KEY` dan kata sandi database dibuat di server.
 - Worker monitoring dan default dipisah seperti Supervisor; satu worker bersama membuat antrean `default` tertahan
   karena antrean `monitoring` tidak pernah kosong.
+
+## Tambahan — Dua CBT Center (6 November 2026)
+
+- Atas permintaan pengguna, data lab hanya dua: Kampus Malalayang dan Kampus Perkamil, menggantikan tiga lab contoh pada
+  SPEC §16. Kode `LAB-1` dan `LAB-2` dipertahankan agar alamat layar TV dan relasi tidak berubah.
+- `LabSeeder` memakai `firstOrCreate` agar menjalankan ulang seeder tidak menimpa kapasitas dan jumlah perangkat
+  yang sudah diisi petugas.

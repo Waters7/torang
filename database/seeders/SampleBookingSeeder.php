@@ -35,12 +35,12 @@ class SampleBookingSeeder extends Seeder
         $samples = [
             ['LAB-1', 'Gizi', 'Ujian Akhir Semester Gizi', ActivityType::Exam, $today->subDay(), '08:00', '10:00', 36, BookingStatus::Completed],
             ['LAB-2', 'Keperawatan', 'Try Out UKOM Keperawatan', ActivityType::UkomTryout, $today, $ongoingStart->format('H:i'), $ongoingEnd->format('H:i'), 38, BookingStatus::Approved],
-            ['LAB-3', 'CBT Center', 'Pembaruan aplikasi ujian & cek PC', ActivityType::Maintenance, $today->addDay(), '08:00', '12:00', 0, BookingStatus::Approved],
+            ['LAB-2', 'CBT Center', 'Pembaruan aplikasi ujian & cek PC', ActivityType::Maintenance, $today->addDay(), '08:00', '12:00', 0, BookingStatus::Approved],
             ['LAB-1', 'Kebidanan', 'Praktikum Sistem Informasi Kebidanan', ActivityType::Practicum, $today->addDays(2), '09:00', '12:00', 32, BookingStatus::Approved],
             ['LAB-2', 'Farmasi', 'Pelatihan Aplikasi Farmasi Klinik', ActivityType::Training, $today->addDays(3), '13:00', '15:30', 25, BookingStatus::Rejected],
             ['LAB-1', 'TLM', 'Ujian Tengah Semester TLM', ActivityType::Exam, $today->addDays(4), '08:00', '10:00', 40, BookingStatus::Approved],
             ['LAB-2', 'Kesling', 'Tes Seleksi Asisten Laboratorium', ActivityType::Recruitment, $today->addDays(5), '08:00', '11:00', 30, BookingStatus::Pending],
-            ['LAB-3', 'Kesgi', 'Try Out UKOM Kesehatan Gigi', ActivityType::UkomTryout, $today->addDays(6), '13:00', '16:00', 24, BookingStatus::Pending],
+            ['LAB-1', 'Kesgi', 'Try Out UKOM Kesehatan Gigi', ActivityType::UkomTryout, $today->addDays(6), '13:00', '16:00', 24, BookingStatus::Pending],
         ];
 
         $applicants = [

@@ -90,8 +90,8 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                 className="pointer-events-none absolute top-[38%] -left-[16vh] -z-10 hidden h-[34vh] w-auto max-w-none opacity-[0.07] select-none lg:block"
             />
 
-            <header className="flex flex-wrap items-center justify-between gap-6 border-b border-white/10 bg-ink-dark/80 px-6 py-5 lg:px-12 lg:py-7">
-                <div className="flex min-w-0 flex-wrap items-center gap-x-8 gap-y-4 2xl:gap-x-12">
+            <header className="flex flex-wrap items-center justify-between gap-6 border-b border-white/10 bg-ink-dark/80 px-6 py-5 lg:flex-nowrap lg:px-12 lg:py-7">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-8 gap-y-4 lg:flex-nowrap 2xl:gap-x-12">
                     <img
                         src={POLTEKKES_LOGO.src}
                         alt={POLTEKKES_LOGO.alt}
@@ -102,15 +102,15 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                     <span className="hidden h-16 w-px bg-white/15 lg:block 2xl:h-20" aria-hidden="true" />
                     <div className="min-w-0">
                         <p className="font-mono text-xs font-semibold tracking-[0.14em] text-teal uppercase 2xl:text-base">TORANG · Layar Lab CBT</p>
-                        <h1 className="flex items-center gap-3 truncate text-3xl font-bold lg:text-5xl 2xl:text-6xl">
+                        <h1 className="flex items-center gap-3 text-2xl leading-tight font-bold [overflow-wrap:anywhere] lg:text-3xl 2xl:text-4xl">
                             <span className="size-3 shrink-0 rounded-full lg:size-4" style={{ backgroundColor: lab.color }} aria-hidden="true" />
                             {lab.name}
                         </h1>
                         {lab.location && <p className="mt-1 text-white/60 2xl:text-xl">{lab.location}</p>}
                     </div>
                 </div>
-                <div className="text-right">
-                    <p className="font-mono text-4xl font-semibold lg:text-6xl 2xl:text-7xl" aria-live="off">
+                <div className="shrink-0 text-right">
+                    <p className="font-mono text-4xl font-semibold whitespace-nowrap lg:text-6xl 2xl:text-7xl" aria-live="off">
                         {formatTime(now)} <span className="text-lg text-white/60 lg:text-2xl">WITA</span>
                     </p>
                     <p className="mt-1 text-white/60 2xl:text-xl">{board.dateLabel}</p>

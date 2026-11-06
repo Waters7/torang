@@ -37,7 +37,7 @@ class SampleDutySeeder extends Seeder
 
         $morning = Shift::query()->where('name', 'Pagi')->firstOrFail();
         $afternoon = Shift::query()->where('name', 'Siang')->firstOrFail();
-        $lab3 = Lab::query()->where('code', 'LAB-3')->first();
+        $perkamil = Lab::query()->where('code', 'LAB-2')->first();
         $monday = CarbonImmutable::today()->startOfWeek();
 
         $week = DutyWeek::updateOrCreate(['week_start' => $monday->toDateString()], [
@@ -57,9 +57,9 @@ class SampleDutySeeder extends Seeder
                 [$afternoon, null, $staff[($index + 2) % 5]],
             ];
 
-            // Lab CBT 3 punya petugas khusus pada hari Rabu.
-            if ($lab3 && $index === 2) {
-                $rows[] = [$morning, $lab3->id, $staff[3]];
+            // Kampus Perkamil punya petugas khusus pada hari Rabu.
+            if ($perkamil && $index === 2) {
+                $rows[] = [$morning, $perkamil->id, $staff[3]];
             }
 
             foreach ($rows as [$shift, $labId, $member]) {

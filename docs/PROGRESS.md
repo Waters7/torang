@@ -20,6 +20,12 @@
 
 ## Catatan
 
+### Dua CBT Center — 6 November 2026
+- [x] Lab disesuaikan dengan kondisi nyata: CBT Center Poltekkes Kemenkes Manado Kampus Malalayang (`LAB-1`) dan Kampus
+  Perkamil (`LAB-2`). Seeder dan SPEC §16 ikut diubah; `LAB-3` di produksi dinonaktifkan.
+- [x] Header layar TV lab menampung nama panjang tanpa terpotong (diukur di 1920×1080, 1366×768, dan ponsel).
+- Jumlah PC dan perangkat di produksi masih nilai awal, perlu diisi sesuai kondisi sebenarnya.
+
 ### Monitor aplikasi kampus di produksi — 6 November 2026
 - [x] 13 aplikasi kampus didaftarkan lewat `monitors:sync-campus-applications` (daftar di `config/campus-applications.php`).
 - Repository memakai `http://` karena situsnya tidak melayani HTTPS; TORANG memakai `https://`. SITOU tampil Offline

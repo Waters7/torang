@@ -37,7 +37,7 @@ it('menyemai seluruh data contoh sesuai SPEC §16', function () {
 
     expect(User::role(Role::SuperAdmin->value)->where('email', 'admin@example.test')->exists())->toBeTrue()
         ->and(Department::count())->toBe(10)
-        ->and(Lab::count())->toBe(3)
+        ->and(Lab::count())->toBe(2)
         ->and(Shift::count())->toBe(2)
         ->and(Staff::count())->toBe(5)
         ->and(DutyWeek::query()->where('status', DutyWeekStatus::Published)->whereDate('week_start', today()->startOfWeek()->toDateString())->exists())->toBeTrue()

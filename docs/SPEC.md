@@ -661,7 +661,7 @@ Setiap fase: rencana → implementasi → test + pint → `docs/PROGRESS.md` →
 - **Departemen/unit** (sesuaikan dengan struktur resmi): Direktorat, Jurusan Keperawatan,
   Jurusan Kebidanan, Jurusan Gizi, Jurusan Kesehatan Lingkungan, Jurusan Farmasi,
   Jurusan Teknologi Laboratorium Medis, Jurusan Kesehatan Gigi, Perpustakaan, CBT Center.
-- **Lab:** Lab CBT 1 (40 PC), Lab CBT 2 (40 PC), Lab CBT 3 (30 PC, 4 rusak) beserta jumlah perangkat lain.
+- **Lab:** CBT Center Poltekkes Kemenkes Manado Kampus Malalayang dan Kampus Perkamil beserta jumlah perangkat lain.
 - **Booking** minggu berjalan: campuran selesai, berlangsung (hari ini), terjadwal, maintenance, pending.
 - **Shift:** Pagi 07:30–12:00, Siang 12:00–16:00 · **Petugas:** 5 orang · jadwal minggu ini terbit.
 - **Monitor jaringan:** satu per departemen/unit di atas (gunakan IP dokumentasi `203.0.113.x`,
