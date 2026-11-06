@@ -19,6 +19,11 @@
 
 ## Catatan
 
+### Monitor aplikasi kampus di produksi — 6 November 2026
+- [x] 13 aplikasi kampus didaftarkan lewat `monitors:sync-campus-applications` (daftar di `config/campus-applications.php`).
+- Repository memakai `http://` karena situsnya tidak melayani HTTPS; TORANG memakai `https://`. SITOU tampil Offline
+  karena domainnya tidak melayani situs (HTTPS gagal, HTTP 404), bukan karena monitoring.
+
 ### Deployment Docker & produksi pertama — 6 November 2026
 - [x] `Dockerfile` bertahap, `compose.yaml`, `deploy-docker.sh`, dan contoh `.env` produksi. Rahasia tidak masuk image.
 - [x] Tayang di domain produksi lewat HTTPS: 4 akun petugas diimpor, berkas CSV dihapus dari server.

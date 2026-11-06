@@ -87,6 +87,7 @@ Sehari-hari:
 | `docker compose exec app php artisan torang:check` | periksa kesiapan server |
 | `docker compose up -d` | terapkan perubahan `.env` |
 | `docker compose logs -f app` | lihat log kontainer (log aplikasi ada di `storage/logs`) |
+| `docker compose exec -T app php artisan monitors:sync-campus-applications` | daftarkan aplikasi kampus dari `config/campus-applications.php` |
 
 Unggahan dan backup ada di volume `torang_storage`, database di `torang_db-data`. Salin backup secara berkala ke
 luar server.
