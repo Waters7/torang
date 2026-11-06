@@ -40,7 +40,7 @@ peminjaman barang — sudah ditangani unit Barang Milik Negara (BMN). TORANG han
 ## 3. Modul A — Lab CBT Center
 
 ### 3.1 Data Lab
-Nama, kode, lokasi/gedung/lantai, kapasitas, penanggung jawab (user), warna kalender (hex),
+Nama, alias (nama singkat untuk layar TV, opsional), kode, lokasi/gedung/lantai, kapasitas, penanggung jawab (user), warna kalender (hex),
 foto, status (`active` / `maintenance` / `inactive`), deskripsi.
 
 ### 3.2 Jumlah Perangkat per Lab (sederhana)
@@ -512,7 +512,7 @@ dan komponen Blade `<x-torang-mark />` (panel Filament & PDF):
 
 - **users**: name, email, password, phone, telegram_chat_id?, is_active
 - **departments**: name, short_name, type (`department`/`unit`), sort_order
-- **labs**: code, name, location, capacity, color, status, pic_user_id?, photo_path?, description?
+- **labs**: code, name, alias?, location, capacity, color, status, pic_user_id?, photo_path?, description?
 - **lab_device_counts**: lab_id, device_type, total, good, broken, notes?
 - **bookings**: code (unique), lab_id, department_id?, applicant_name, applicant_identity_number,
   applicant_email, applicant_phone, activity_name, activity_type, date, start_time, end_time,

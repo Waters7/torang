@@ -194,7 +194,7 @@ class TvBoard
 
                 return [
                     'time' => substr($booking->start_time, 0, 5).'–'.substr($booking->end_time, 0, 5),
-                    'lab' => $booking->lab->name,
+                    'lab' => $booking->lab->displayName(),
                     'color' => $booking->lab->color,
                     'activity' => $booking->activity_name,
                     'organizer' => $booking->department?->short_name,

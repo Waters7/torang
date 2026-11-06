@@ -80,6 +80,22 @@ it('tidak tersedia untuk lab nonaktif atau kode tidak dikenal', function () {
     $this->get('/tv/lab/TIDAK-ADA')->assertNotFound();
 });
 
+it('memakai alias di layar dan tab, dengan nama resmi sebagai keterangan', function () {
+    $this->lab->update(['name' => 'CBT Center Poltekkes Kemenkes Manado Kampus Malalayang', 'alias' => 'CBT Center Malalayang']);
+
+    $this->get('/tv/lab/LAB-1')->assertInertia(fn (Assert $page) => $page
+        ->where('board.lab.name', 'CBT Center Malalayang')
+        ->where('board.lab.fullName', 'CBT Center Poltekkes Kemenkes Manado Kampus Malalayang')
+        ->where('tvTabs.1.label', 'CBT Center Malalayang'));
+
+    $this->lab->update(['alias' => null]);
+
+    $this->get('/tv/lab/LAB-1')->assertInertia(fn (Assert $page) => $page
+        ->where('board.lab.name', 'CBT Center Poltekkes Kemenkes Manado Kampus Malalayang')
+        ->where('board.lab.fullName', 'CBT Center Poltekkes Kemenkes Manado Kampus Malalayang')
+        ->where('tvTabs.1.label', 'CBT Center Poltekkes Kemenkes Manado Kampus Malalayang'));
+});
+
 it('diberi rate limit', function () {
     expect(Route::getRoutes()->getByName('labs.tv')->gatherMiddleware())->toContain('throttle:60,1');
 });

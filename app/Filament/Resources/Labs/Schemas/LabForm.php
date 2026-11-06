@@ -36,6 +36,11 @@ class LabForm
                             ->placeholder('Lab CBT 1')
                             ->required()
                             ->maxLength(255),
+                        TextInput::make('alias')
+                            ->label('Alias')
+                            ->placeholder('CBT Center Malalayang')
+                            ->helperText('Nama singkat untuk layar TV. Kosongkan untuk memakai nama lengkap.')
+                            ->maxLength(60),
                         TextInput::make('location')
                             ->label('Lokasi / gedung / lantai')
                             ->maxLength(255),

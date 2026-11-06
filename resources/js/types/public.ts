@@ -233,7 +233,9 @@ export interface LabTvSession {
 export interface LabTvBoard {
     lab: {
         code: string;
+        /** Alias bila ada, selain itu nama resmi. */
         name: string;
+        fullName: string;
         location: string | null;
         color: string;
         readyPcs: number;

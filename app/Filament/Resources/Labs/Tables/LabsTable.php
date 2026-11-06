@@ -29,6 +29,10 @@ class LabsTable
                     ->fontFamily('mono')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('alias')
+                    ->label('Alias')
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('name')
                     ->label('Nama')
                     ->description(fn (Lab $record): ?string => $record->location)

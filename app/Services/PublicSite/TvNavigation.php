@@ -14,7 +14,7 @@ class TvNavigation
         $labs = Lab::query()
             ->where('status', '!=', LabStatus::Inactive)
             ->ordered()
-            ->get(['id', 'code', 'name']);
+            ->get(['id', 'code', 'name', 'alias']);
 
         return [
             ['key' => 'it', 'label' => 'IT / NOC', 'url' => '/admin/tv', 'active' => $currentLab === null],

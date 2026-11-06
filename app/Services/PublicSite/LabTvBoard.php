@@ -61,7 +61,8 @@ class LabTvBoard
         return [
             'lab' => [
                 'code' => $lab->code,
-                'name' => $lab->name,
+                'name' => $lab->displayName(),
+                'fullName' => $lab->name,
                 'location' => $lab->location,
                 'color' => $lab->color,
                 'readyPcs' => $lab->readyPcCount(),

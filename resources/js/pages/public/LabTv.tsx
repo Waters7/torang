@@ -10,20 +10,32 @@ import { Head, usePage, usePoll } from '@inertiajs/react';
 /** Warna palet Kemenkes, urutan seperti modul simbol TORANG. */
 const PALETTE = ['#1BBBCB', '#04B6A3', '#D4E022', '#42B97C'];
 
-/** Batas baris per daftar agar layar TV tidak perlu digulir. */
-const MAX_ROWS = 4;
+/** Batas baris per daftar agar layar TV tidak perlu digulir; sisanya ditulis sebagai "+N lainnya". */
+const UPCOMING_ROWS = 3;
+const COMPLETED_ROWS = 2;
+
+/** Teks utama mengikuti tinggi layar, dan nama panjang memakai huruf lebih kecil agar muat tanpa digulir. */
+function headlineSize(text: string): string {
+    return text.length > 48 ? 'lg:text-[clamp(2.25rem,5vh,3.75rem)]' : 'lg:text-[clamp(2.75rem,6.5vh,4.5rem)]';
+}
 
 function SessionRow({ session, done = false }: { session: LabTvSession; done?: boolean }) {
     return (
-        <li className={`flex items-start gap-4 rounded-2xl border border-white/10 px-4 py-3 2xl:px-6 2xl:py-4 ${done ? 'opacity-60' : 'bg-white/5'}`}>
+        <li
+            className={`flex items-start gap-4 rounded-2xl border border-white/10 px-4 py-2.5 2xl:px-6 2xl:py-4 ${done ? 'opacity-60' : 'bg-white/5'}`}
+        >
             <span className="shrink-0 font-mono text-lg font-semibold text-cyan 2xl:text-2xl">
                 {session.start}–{session.end}
             </span>
             <span className="min-w-0">
-                <span className="block truncate text-lg font-semibold 2xl:text-2xl">{session.activityName}</span>
-                <span className="block truncate text-sm text-white/60 2xl:text-lg">
-                    {[session.organizer, session.activityType].filter(Boolean).join(' · ')}
+                <span className={`text-lg leading-snug font-semibold 2xl:text-2xl ${done ? 'block truncate' : 'line-clamp-2'}`}>
+                    {session.activityName}
                 </span>
+                {!done && (
+                    <span className="block truncate text-sm text-white/60 2xl:text-lg">
+                        {[session.organizer, session.activityType].filter(Boolean).join(' · ')}
+                    </span>
+                )}
             </span>
             {done && <CheckCircleIcon className="ml-auto size-6 shrink-0 text-green 2xl:size-8" aria-label="Selesai" />}
         </li>
@@ -31,20 +43,22 @@ function SessionRow({ session, done = false }: { session: LabTvSession; done?: b
 }
 
 function SessionList({ title, sessions, empty, done = false }: { title: string; sessions: LabTvSession[]; empty: string; done?: boolean }) {
-    const shown = done ? sessions.slice(-MAX_ROWS) : sessions.slice(0, MAX_ROWS);
+    const shown = done ? sessions.slice(-COMPLETED_ROWS) : sessions.slice(0, UPCOMING_ROWS);
     const hidden = sessions.length - shown.length;
 
     return (
         <section aria-label={title}>
-            <h2 className="mb-3 font-mono text-xs font-semibold tracking-[0.14em] text-teal uppercase 2xl:text-base">{title}</h2>
+            <div className="mb-3 flex items-baseline justify-between gap-3">
+                <h2 className="font-mono text-xs font-semibold tracking-[0.14em] text-teal uppercase 2xl:text-base">{title}</h2>
+                {hidden > 0 && <span className="font-mono text-xs whitespace-nowrap text-white/60 2xl:text-base">+{hidden} lainnya</span>}
+            </div>
             {sessions.length === 0 ? (
                 <p className="rounded-2xl border border-dashed border-white/15 px-4 py-4 text-white/60 2xl:text-xl">{empty}</p>
             ) : (
-                <ul className="grid gap-3">
+                <ul className="grid grid-cols-1 gap-2 2xl:gap-3">
                     {shown.map((session) => (
                         <SessionRow key={session.startsAt} session={session} done={done} />
                     ))}
-                    {hidden > 0 && <li className="px-2 text-sm text-white/60 2xl:text-lg">+{hidden} sesi lainnya</li>}
                 </ul>
             )}
         </section>
@@ -71,6 +85,7 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
 
     const ongoing = board.state === 'ongoing' && current;
     const nextToday = board.upcoming[0] ?? null;
+    const subtitle = lab.fullName !== lab.name ? lab.fullName : lab.location;
 
     return (
         <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-ink-dark text-white">
@@ -90,7 +105,7 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                 className="pointer-events-none absolute top-[38%] -left-[16vh] -z-10 hidden h-[34vh] w-auto max-w-none opacity-[0.07] select-none lg:block"
             />
 
-            <header className="flex flex-wrap items-center justify-between gap-6 border-b border-white/10 bg-ink-dark/80 px-6 py-5 lg:flex-nowrap lg:px-12 lg:py-7">
+            <header className="flex flex-wrap items-center justify-between gap-6 border-b border-white/10 bg-ink-dark/80 px-6 py-5 lg:flex-nowrap lg:px-12 lg:py-5">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-8 gap-y-4 lg:flex-nowrap 2xl:gap-x-12">
                     <img
                         src={POLTEKKES_LOGO.src}
@@ -102,11 +117,11 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                     <span className="hidden h-16 w-px bg-white/15 lg:block 2xl:h-20" aria-hidden="true" />
                     <div className="min-w-0">
                         <p className="font-mono text-xs font-semibold tracking-[0.14em] text-teal uppercase 2xl:text-base">TORANG · Layar Lab CBT</p>
-                        <h1 className="flex items-center gap-3 text-2xl leading-tight font-bold [overflow-wrap:anywhere] lg:text-3xl 2xl:text-4xl">
+                        <h1 className="flex items-center gap-3 text-3xl leading-tight font-bold [overflow-wrap:anywhere] lg:text-5xl 2xl:text-6xl">
                             <span className="size-3 shrink-0 rounded-full lg:size-4" style={{ backgroundColor: lab.color }} aria-hidden="true" />
                             {lab.name}
                         </h1>
-                        {lab.location && <p className="mt-1 text-white/60 2xl:text-xl">{lab.location}</p>}
+                        {subtitle && <p className="mt-1 text-white/60 2xl:text-xl">{subtitle}</p>}
                     </div>
                 </div>
                 <div className="shrink-0 text-right">
@@ -121,10 +136,10 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                 <TvModeTabs tabs={tvTabs} />
             </div>
 
-            <main className="grid flex-1 gap-6 px-6 py-6 lg:grid-cols-[1.6fr_1fr] lg:gap-10 lg:px-12 lg:py-10">
+            <main className="grid flex-1 gap-6 px-6 py-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-8 lg:px-12">
                 <section
                     aria-label="Kondisi lab saat ini"
-                    className={`flex flex-col rounded-3xl bg-white/5 p-6 lg:p-10 ${ongoing ? 'border-2 border-teal' : 'border border-white/10'}`}
+                    className={`flex flex-col rounded-3xl bg-white/5 p-6 lg:p-8 ${ongoing ? 'border-2 border-teal' : 'border border-white/10'}`}
                 >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <h2 className="font-mono text-xs font-semibold tracking-[0.14em] text-teal uppercase 2xl:text-base">Sedang berlangsung</h2>
@@ -134,13 +149,15 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                     </div>
 
                     {ongoing && (
-                        <div className="mt-6 flex flex-1 flex-col">
-                            <p className="text-4xl leading-tight font-bold lg:text-6xl 2xl:text-7xl">{current.activityName}</p>
-                            <p className="mt-3 text-lg text-white/70 lg:text-2xl 2xl:text-3xl">
+                        <div className="mt-4 flex flex-1 flex-col 2xl:mt-6">
+                            <p className={`text-4xl leading-tight font-bold lg:line-clamp-3 ${headlineSize(current.activityName)}`}>
+                                {current.activityName}
+                            </p>
+                            <p className="mt-2 text-lg text-white/70 lg:text-2xl 2xl:mt-3 2xl:text-3xl">
                                 {[current.organizer, current.activityType].filter(Boolean).join(' · ')}
                             </p>
 
-                            <div className="mt-auto pt-10">
+                            <div className="mt-auto pt-6 2xl:pt-10">
                                 <div
                                     className="h-4 overflow-hidden rounded-full bg-white/10 2xl:h-6"
                                     role="progressbar"
@@ -151,14 +168,14 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                                 >
                                     <div className="h-full rounded-full bg-teal transition-all" style={{ width: `${progress * 100}%` }} />
                                 </div>
-                                <div className="mt-3 flex items-center justify-between font-mono text-xl lg:text-3xl 2xl:text-4xl">
+                                <div className="mt-3 flex items-center justify-between gap-4 font-mono text-xl whitespace-nowrap lg:text-3xl 2xl:text-4xl">
                                     <span>{current.start}</span>
                                     <span className="font-semibold text-lime">{remaining > 0 ? `sisa ${remaining} menit` : 'selesai'}</span>
                                     <span>{current.end}</span>
                                 </div>
                             </div>
 
-                            <dl className="mt-8 grid gap-4 text-lg text-white/80 sm:grid-cols-2 lg:text-xl 2xl:text-2xl">
+                            <dl className="mt-4 grid gap-4 text-lg text-white/80 sm:grid-cols-2 lg:text-xl 2xl:mt-8 2xl:text-2xl">
                                 <div className="flex items-center gap-3">
                                     <ComputerDesktopIcon className="size-7 shrink-0 text-cyan" aria-hidden="true" />
                                     <dt className="sr-only">Peserta</dt>
@@ -194,7 +211,9 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                     {board.state === 'maintenance' && (
                         <div className="mt-6 flex flex-1 flex-col justify-center">
                             <WrenchScrewdriverIcon className="size-14 text-slow 2xl:size-20" aria-hidden="true" />
-                            <p className="mt-4 text-4xl font-bold lg:text-6xl 2xl:text-7xl">{board.maintenanceNote}</p>
+                            <p className={`mt-4 text-4xl leading-tight font-bold lg:line-clamp-3 ${headlineSize(board.maintenanceNote ?? '')}`}>
+                                {board.maintenanceNote}
+                            </p>
                             {current && (
                                 <p className="mt-4 font-mono text-xl text-white/70 lg:text-3xl">
                                     {current.start}–{current.end} WITA
@@ -204,7 +223,7 @@ export default function LabTv({ board, tvTabs }: { board: LabTvBoard; tvTabs: Tv
                     )}
                 </section>
 
-                <div className="grid content-start gap-8">
+                <div className="grid min-w-0 grid-cols-1 content-start gap-6 2xl:gap-8">
                     <SessionList title="Sesi berikutnya" sessions={board.upcoming} empty="Tidak ada sesi lagi hari ini." />
                     {board.upcoming.length === 0 && board.nextDay && (
                         <p className="-mt-4 rounded-2xl bg-white/5 px-4 py-3 text-white/70 2xl:text-xl">

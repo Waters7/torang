@@ -13,7 +13,7 @@ class TvLabResource extends JsonResource
     {
         return [
             'key' => 'lab-'.$this->code,
-            'label' => $this->name,
+            'label' => $this->displayName(),
             'url' => route('labs.tv', ['lab' => $this->code], absolute: false),
         ];
     }

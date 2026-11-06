@@ -737,3 +737,11 @@ fase terkait.
   SPEC §16. Kode `LAB-1` dan `LAB-2` dipertahankan agar alamat layar TV dan relasi tidak berubah.
 - `LabSeeder` memakai `firstOrCreate` agar menjalankan ulang seeder tidak menimpa kapasitas dan jumlah perangkat
   yang sudah diisi petugas.
+
+## Tambahan — Alias lab dan layar TV (6 November 2026)
+
+- Nama resmi lab terlalu panjang untuk judul layar TV dan tab. Atas permintaan pengguna, `labs.alias` (opsional, maks. 60
+  karakter) dipakai di layar TV lab, tab TV, dan `/admin/tv`; nama resmi tetap dipakai di pengajuan, laporan, dan panel.
+  Tanpa alias, `Lab::displayName()` memakai nama resmi. Layar TV menampilkan nama resmi sebagai keterangan di bawah alias.
+- Layar TV lab dirancang muat tanpa digulir pada 1920×1080 dan 1366×768: ukuran nama kegiatan mengikuti tinggi layar dan
+  dibatasi 3 baris, daftar menampilkan 3 sesi berikutnya dan 2 sesi selesai, sisanya ditulis "+N lainnya" di judul daftar.

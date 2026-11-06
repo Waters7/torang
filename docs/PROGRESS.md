@@ -342,3 +342,9 @@
   pada viewport 360 px. Ekspor Excel berhasil dibuka; PDF CBT/SLA diperiksa visual.
 - Backup MySQL sungguhan berhasil: ZIP privat berisi dump SQL, verifikasi arsip aktif. Akun uji sementara
   dibersihkan sebelum backup; data pegawai dan arsip backup tetap di lokal, tidak masuk repo.
+
+## Tambahan — Alias lab dan layar TV (6 November 2026)
+
+- Kolom alias lab di form dan tabel Lab; alias tampil di layar TV lab, tab TV, dan `/admin/tv`, dengan nama resmi sebagai
+  keterangan. Seeder mengisi `CBT Center Malalayang` dan `CBT Center Perkamil`.
+- Layar TV lab muat tanpa scrollbar pada 1920×1080 dan 1366×768, termasuk hari penuh dengan nama kegiatan panjang.

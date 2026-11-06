@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['code', 'name', 'location', 'capacity', 'color', 'status', 'pic_user_id', 'photo_path', 'description'])]
+#[Fillable(['code', 'name', 'alias', 'location', 'capacity', 'color', 'status', 'pic_user_id', 'photo_path', 'description'])]
 class Lab extends Model
 {
     /** @use HasFactory<LabFactory> */
@@ -69,6 +69,14 @@ class Lab extends Model
     public function readyPcCount(): int
     {
         return (int) $this->deviceCounts->firstWhere('device_type', DeviceType::PcClient)?->good;
+    }
+
+    /**
+     * Nama singkat untuk layar TV dan tab; tanpa alias memakai nama resmi.
+     */
+    public function displayName(): string
+    {
+        return $this->alias ?: $this->name;
     }
 
     public function isBookable(): bool

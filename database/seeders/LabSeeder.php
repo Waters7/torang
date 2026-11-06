@@ -15,13 +15,14 @@ class LabSeeder extends Seeder
     public function run(): void
     {
         $labs = [
-            ['LAB-1', 'CBT Center Poltekkes Kemenkes Manado Kampus Malalayang', 'Kampus Malalayang', '#04B6A3', 40, 0],
-            ['LAB-2', 'CBT Center Poltekkes Kemenkes Manado Kampus Perkamil', 'Kampus Perkamil', '#1BBBCB', 40, 0],
+            ['LAB-1', 'CBT Center Poltekkes Kemenkes Manado Kampus Malalayang', 'CBT Center Malalayang', 'Kampus Malalayang', '#04B6A3', 40, 0],
+            ['LAB-2', 'CBT Center Poltekkes Kemenkes Manado Kampus Perkamil', 'CBT Center Perkamil', 'Kampus Perkamil', '#1BBBCB', 40, 0],
         ];
 
-        foreach ($labs as [$code, $name, $location, $color, $goodPcs, $brokenPcs]) {
+        foreach ($labs as [$code, $name, $alias, $location, $color, $goodPcs, $brokenPcs]) {
             $lab = Lab::firstOrCreate(['code' => $code], [
                 'name' => $name,
+                'alias' => $alias,
                 'location' => $location,
                 'capacity' => $goodPcs + $brokenPcs,
                 'color' => $color,
